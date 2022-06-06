@@ -1,0 +1,18 @@
+{
+  "name": "smart-employee-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-smartcity.jakarta.go.id/smart-employee/backend.git"
+  },
+  "author": "Bagas Hadi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
