@@ -6,7 +6,7 @@ const error = require("../../util/errors");
 
 const Op = Sequelize.Op;
 
-const { User, Zone, Role, UserRole } = require("../../models/model");
+const { User } = require("../../models/model");
 const { use } = require("../../router/router");
 
 module.exports = {
@@ -16,43 +16,19 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const email = req.body.email;
-    const name = req.body.name;
+    const username = req.body.username;
     const password = req.body.password;
     try {
-      if(req.body.role == "public-user"){
-        const mZone = await Zone.findOne({where: {code: "31.00.00.0000"}});
-        const mRole = await Role.findOne({where: {slug: req.body.role}});
-        req.body.activeRole = mRole.id;
-        req.body.activeZone = mZone.id;
-
-        const hashedPw = await bcrypt.hash(password, 12);
-        const newUser = new User({
-          email: email,
-          password: hashedPw,
-          name: name,
-          activeRole: mRole.id,
-          activeZone: mZone.id
-        });
-        await newUser.save();
-
-        await new UserRole({
-          userId: newUser.id,
-          zoneId: mZone.id,
-          roles: [req.body.role]
-        }).save();
-
-        res.json({ message: "User created!", id: newUser.id });
-      }else{
-        const hashedPw = await bcrypt.hash(password, 12);
-        const newUser = new User({
-          email: email,
-          password: hashedPw,
-          name: name,
-        });
-        await newUser.save();
-        res.json({ message: "User created!", id: newUser.id });
-      }
+      const hashedPw = await bcrypt.hash(password, 12);
+      const newUser = new User({
+        username_user: username,
+        password_user: hashedPw,
+      });
+      await newUser.save();
+      res.json({ 
+        status: "sucess",
+        message: "User created!", id: newUser.id_user 
+      });
 
     } catch (err) {
       next(err);
@@ -64,17 +40,14 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const email = req.body.email;
+    const username = req.body.username;
     const password = req.body.password;
     let loadedUser;
-    let activeRole;
-    let activeZone;
-    let to;
 
     const user = await User.findOne({
       where: {
-        email: {
-          [Op.iLike]: email,
+        username_user: {
+          [Op.iLike]: username,
         },
       },
     });
@@ -82,157 +55,43 @@ module.exports = {
     if (!user) {
       return error(res).authenticationError(["Invalid username or password."]);
     }
-    activeRole = user.activeRole;
-    activeZone = user.activeZone;
 
     loadedUser = user;
 
-    const isEqual = await bcrypt.compare(password, user.password);
+    const isEqual = await bcrypt.compare(password, user.password_user);
     if (!isEqual) {
       return error(res).authenticationError(["Invalid username or password."]);
     }
 
-    const userRole = await UserRole.findOne({ where: { userId: user.id } });
-    if (!userRole) {
-      return error(res).authenticationError(["You don't have privileges."]);
-    }
-
-    // if(userRole.roles.includes("public-user")){
-    //   return error(res).authenticationError(["You don't have privileges"]);
-    // }
-
-    if (!user.activeRole || !user.activeZone) {
-      // Set Default Role & Zone
-      if (!user.activeZone) {
-        const mZone = await Zone.findByPk(userRole.zoneId);
-        if (mZone) {
-          await User.update(
-            { activeZone: mZone.id },
-            { where: { id: user.id } }
-          );
-          activeZone = mZone.id;
-        } else {
-          return error(res).authenticationError(["You don't have privileges."]);
-        }
-      }
-
-      if (!user.activeRole) {
-        if (userRole.roles && userRole.roles.length > 0) {
-          const mRole = await Role.findOne({
-            where: {
-              slug: userRole.roles[0],
-            },
-          });
-
-          if (mRole) {
-            await User.update(
-              { activeRole: mRole.id },
-              { where: { id: user.id } }
-            );
-            activeRole = mRole.id;
-            to = mRole.defaultRoute;
-          } else {
-            return error(res).authenticationError([
-              "You don't have privileges.",
-            ]);
-          }
-        } else {
-          return error(res).authenticationError(["You don't have privileges."]);
-        }
-      }
-    } else {
-      // Validate Zone & Role
-
-      const mUserRole = await UserRole.findOne({
-        attributes: ["id", "roles"],
-        where: {
-          userId: user.id,
-          zoneId: user.activeZone,
-        },
-      });
-
-      if (mUserRole) {
-        const mRole = await Role.findByPk(user.activeRole);
-        to = mRole.defaultRoute;
-        if (mRole) {
-          // Zone is Exists, check is role exists?
-          if (mUserRole.roles && mUserRole.roles.length > 0) {
-            if (mUserRole.roles.indexOf(mRole.slug) == -1) {
-              const mDefaultRole = await Role.findOne({
-                where: {
-                  slug: mUserRole.roles[0],
-                },
-              });
-              // Set Default Role
-              if (mDefaultRole) {
-                await User.update(
-                  { activeRole: mDefaultRole.id },
-                  { where: { id: user.id } }
-                );
-                activeRole = mDefaultRole.id;
-                to = mDefaultRole.defaultRoute;
-              } else {
-                return error(res).authenticationError(["Unknown Role."]);
-              }
-            }
-          } else {
-            return error(res).authenticationError([
-              "You don't have role privileges.",
-            ]);
-          }
-        } else {
-          return error(res).authenticationError(["Unknown Role."]);
-        }
-      } else {
-        if (userRole.roles && userRole.roles.length > 0) {
-          const mRole = await Role.findOne({
-            where: {
-              slug: userRole.roles[0],
-            },
-          });
-          if (mRole) {
-            // Set To Default Zone
-            await User.update(
-              { activeZone: userRole.zoneId, activeRole: mRole.id },
-              { where: { id: user.id } }
-            );
-            activeZone = userRole.zoneId;
-            activeRole = mRole.id;
-            to = mRole.defaultRoute;
-          } else {
-            return error(res).authenticationError(["Unknown Role."]);
-          }
-        } else {
-          return error(res).authenticationError([
-            "You don't have role privileges.",
-          ]);
-        }
-      }
-    }
-
     const accesToken = new Token("password").generate({
-      userId: loadedUser.id.toString(),
+      userId: loadedUser.id_user.toString(),
       scope: req.body.scope,
       grantType: "password",
     });
     const refreshToken = new Token("refresh").generate({
-      userId: loadedUser.id.toString(),
+      userId: loadedUser.id_user.toString(),
       scope: req.body.scope,
       grantType: "password",
     });
-    // console.log(to);
+    
+    await User.update({ 
+      token_user: accesToken,
+      lastlogin_user: new Date()
+    }, 
+    {
+      where: {
+        username_user: username,
+      }
+    });
+
     res.json({
       token_type: "bearer",
       access_token: accesToken,
       refresh_token: refreshToken,
       user: {
-        id: loadedUser.id,
-        email: loadedUser.email,
-        name: loadedUser.name,
-        activeZone: activeZone,
-        activeRole: activeRole,
+        id: loadedUser.id_user,
+        username: loadedUser.username_user,
       },
-      to: to,
       expires_in: process.env.JWT_EXPIRES_IN,
     });
   },
@@ -297,10 +156,9 @@ module.exports = {
       case "loginWithPassword":
         {
           return [
-            body("email")
+            body("username")
               .notEmpty()
-              .isEmail()
-              .withMessage("Please enter a valid email."),
+              .withMessage("Please enter a valid username."),
             body("password")
               .notEmpty()
               .trim()
@@ -311,26 +169,24 @@ module.exports = {
       case "register":
         {
           return [
-            body("email")
+            body("username")
               .customSanitizer((value) => {
                 return value ? value.toLowerCase() : null;
               })
               .notEmpty()
-              .isEmail()
               .custom((value, { req }) => {
                 return User.findOne({
                   where: {
-                    email: {
+                    username_user: {
                       [Op.iLike]: value,
                     },
                   },
                 }).then((userDoc) => {
                   if (userDoc) {
-                    return Promise.reject("E-Mail address already exists!");
+                    return Promise.reject("Username already exists!");
                   }
                 });
-              })
-              .withMessage("Please enter a valid email."),
+              }),
             body("password")
               .notEmpty()
               .trim()
@@ -341,7 +197,6 @@ module.exports = {
               .withMessage(
                 "Password should have minimum six characters, at least one letter, one number and one special character"
               ),
-            body("name").trim().notEmpty().withMessage("Name is required!"),
           ];
         }
         break;

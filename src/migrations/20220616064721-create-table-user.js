@@ -26,7 +26,7 @@ module.exports = {
       lastlogin_user: {
         type: Sequelize.DATE
       },
-      onesignalid_user: {
+      onesignal_user: {
         type: Sequelize.STRING(30),
         unique: true
       },

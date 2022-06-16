@@ -1,9 +1,16 @@
-const express = require('express')
+const express = require("express");
+const authMiddleware = require("../middleware/authMiddleware");
+const authRoute = require("./authRoute");
+const apiRoute = require("./apiRoute");
+
 const router = express.Router();
 
-// respond with "hello world" when a GET request is made to the homepage
-router.get('/', (req, res) => {
-  res.send('smart employee backend')
-})
+router.use("/auth", authRoute);
+router.use("/api", apiRoute);
+
+
+router.get("/", function (_, res) {
+  res.send("Server OK");
+});
 
 module.exports = router;
