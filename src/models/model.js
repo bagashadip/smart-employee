@@ -4,10 +4,12 @@ const sequelize = require("../util/database");
 
 const mUser = require("./user");
 const mJabatan = require("./jabatan");
+const mLog = require("./log");
 const mRole = require("./role");
 
 const User = mUser(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
+const Log = mLog(sequelize, Sequelize);
 
 async function authenticate() {
     try {
@@ -21,5 +23,6 @@ async function authenticate() {
   
   module.exports = {
     User,
-    Jabatan
+    Jabatan,
+    Log
   };

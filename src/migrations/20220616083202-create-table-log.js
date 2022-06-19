@@ -8,7 +8,7 @@ module.exports = {
         type: Sequelize.INTEGER(11),
         autoIncrement: true
       },
-      aktivitasi_log: {
+      aktivitas_log: {
         type: Sequelize.TEXT
       },
       ipaddress_log: {
@@ -24,6 +24,9 @@ module.exports = {
         onDelete: "SET NULL",
       },
       createdAt: {
+        type: Sequelize.DATE,
+      },
+      updatedAt: {
         type: Sequelize.DATE,
       },
     });

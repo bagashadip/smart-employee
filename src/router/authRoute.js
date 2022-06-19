@@ -10,9 +10,15 @@ router.post(
 );
 
 router.post(
-  "/login-with-password",
-  authController.validate("loginWithPassword"),
-  authController.loginWithPassword
+    "/check-user",
+    authController.validate("checkUser"),
+    authController.checkUser
+)
+
+router.post(
+  "/login",
+  authController.validate("login"),
+  authController.login
 );
 
 router.post("/verify", authController.refreshToken);

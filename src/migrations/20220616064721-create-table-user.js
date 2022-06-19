@@ -21,7 +21,8 @@ module.exports = {
         type: Sequelize.STRING(20)
       },
       attempt_user: {
-        type: Sequelize.INTEGER(1)
+        type: Sequelize.INTEGER(1),
+        defaultValue: 0
       },
       lastlogin_user: {
         type: Sequelize.DATE
