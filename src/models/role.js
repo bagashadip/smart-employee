@@ -12,7 +12,9 @@ module.exports = (sequelize, DataTypes) => {
       kode_role: DataTypes.STRING,
       keterangan_role: DataTypes.STRING
     },
-    {}
+    {
+      freezeTableName: true
+    }
   );
   return role;
 };

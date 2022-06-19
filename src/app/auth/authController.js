@@ -61,7 +61,7 @@ module.exports = {
 
     loadedUser = user;
 
-    if(loadedUser.status_user !== "aktif"){
+    if(loadedUser.status_user !== "Aktif"){
       return res.status(401).json({
         statusCode: 401,
         message: "Status User Tidak Aktif. Silahkan hubungi Admin."
@@ -69,11 +69,9 @@ module.exports = {
     }
 
     res.status(200).json({
-      user: {
-        statusCode: 200,
-        username: loadedUser.username_user,
-        status_user: loadedUser.status_user
-      }
+      statusCode: 200,
+      username: loadedUser.username_user,
+      status_user: loadedUser.status_user
     });
   },
   login: async (req, res, _) => {

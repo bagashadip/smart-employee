@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   user.addScope("withoutPassword", {
-    attributes: { exclude: ["password"] },
+    attributes: { exclude: ["password_user"] },
   });
 
   // Protect Password

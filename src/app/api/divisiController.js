@@ -4,17 +4,17 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Jabatan } = require("../../models/model");
+const { Divisi, UnitKerja } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
 module.exports = {
   // List
   list: async (req, res) => {
-    const mJabatan = await Jabatan.findAll({
-      attributes: ["id_jabatan", "kode_jabatan", "nama_jabatan"],
+    const mDivisi = await Divisi.findAll({
+      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja"],
     });
-    res.json(mJabatan);
+    res.json(mDivisi);
   },
   // Datatable
   data: async (req, res) => {
@@ -23,8 +23,27 @@ module.exports = {
     // }
 
     var dataTableObj = await datatable(req.body);
-    var count = await Jabatan.count();
-    var modules = await Jabatan.findAndCountAll(dataTableObj);
+    var count = await Divisi.count();
+    var modules = await Divisi.findAndCountAll({
+        ...dataTableObj,
+        include: [
+            {
+                model: UnitKerja,
+                as: "unitkerja",
+                attributes: [
+                  "kode_unitkerja",
+                  "nama_unitkerja",
+                  "logo_unitkerja",
+                  "longitude_unitkerja",
+                  "latitude_unitkerja",
+                  "radiuslokasi_unitkerja",
+                  "alamat_unitkerja",
+                  "notelp_unitkerja",
+                  "kode_organisasi"
+                ],
+            },
+        ]
+    });
 
     res.json({
       recordsFiltered: modules.count,
@@ -43,8 +62,8 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mJabatan = await Jabatan.findByPk(req.query.id);
-    res.json(mJabatan);
+    const mDivisi = await Divisi.findByPk(req.query.id);
+    res.json(mDivisi);
   },
   // Create
   create: async (req, res) => {
@@ -57,14 +76,14 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const jabatan = await new Jabatan({
+    const divisi = await new Divisi({
       ...req.body,
     }).save();
 
     res.json({ 
       status: true,
       statusCode: 200, 
-      message: "Jabatan " + jabatan.kode_jabatan + " berhasil ditambah."
+      message: "Divisi " + divisi.kode_divisi + " berhasil ditambah."
     });
   },
   // Update
@@ -78,15 +97,15 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Jabatan.update(
+    await Divisi.update(
       { ...req.body},
-      { where: { kode_jabatan: req.query.kode_jabatan } }
+      { where: { kode_divisi: req.query.kode_divisi } }
     );
 
     res.json({ 
       status: true ,
       statusCode: 200,
-      message: "Jabatan " + req.query.kode_jabatan + " berhasil diubah."
+      message: "Divisi " + req.query.kode_divisi + " berhasil diubah."
     });
   },
   // Delete
@@ -100,73 +119,73 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Jabatan.destroy({
+    await Divisi.destroy({
       where: {
-        kode_jabatan: req.query.kode_jabatan,
+        kode_divisi: req.query.kode_divisi,
       },
     });
-    res.send({ status: true, message: req.query.kode_jabatan + 'has been deleted.' });
+    res.send({ status: true, message: req.query.kode_divisi + 'berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {
-    let mJabatan = null;
-    const ruleKodeJabatan = query("kode_jabatan")
+    let mDivisi = null;
+    const ruleKodeDivisi = query("kode_divisi")
       .trim()
       .notEmpty()
       .custom(async (value) => {
-        mJabatan = await Jabatan.findOne({
+        mDivisi = await Divisi.findOne({
             where: {
-                kode_jabatan: {
+                kode_divisi: {
                     [Op.iLike]: value
                 }
             }
         });
-        if (!mJabatan) {
-          return Promise.reject("Data not found!");
+        if (!mDivisi) {
+          return Promise.reject("Data tidak ditemukan!");
         }
       });
-    const ruleCreateKodeJabatan = body("kode_jabatan")
+    const ruleCreateKodeDivisi = body("kode_divisi")
       .trim()
       .notEmpty()
       .custom(async (value) => {
-        mJabatan = await Jabatan.findOne({
+        mDivisi = await Divisi.findOne({
             where: {
-                kode_jabatan: {
+                kode_divisi: {
                     [Op.iLike]: value,
                 },
             },
         });
-        if (mJabatan) {
-          return Promise.reject("Data already exist!");
+        if (mDivisi) {
+          return Promise.reject("Data sudah ada!");
         }
     });
-    const ruleNamaJabatan = body("nama_jabatan").trim().notEmpty();
+    const ruleNamaDivisi = body("nama_divisi").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
             return [
-                ruleCreateKodeJabatan,
-                ruleNamaJabatan,
+                ruleCreateKodeDivisi,
+                ruleNamaDivisi,
             ];
         }
         break;
       case "update":
         {
             return [
-              ruleKodeJabatan,
-              ruleNamaJabatan.optional()
+              ruleKodeDivisi,
+              ruleNamaDivisi.optional()
             ];
         }
         break;
       case "get":
         {
-          return [ruleKodeJabatan];
+          return [ruleKodeDivisi];
         }
         break;
       case "delete":
         {
-          return [ruleKodeJabatan];
+          return [ruleKodeDivisi];
         }
         break;
     }

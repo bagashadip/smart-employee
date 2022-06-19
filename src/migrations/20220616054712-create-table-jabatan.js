@@ -15,8 +15,7 @@ module.exports = {
       },
       nama_jabatan: {
         allowNull: false,
-        unique: true,
-        type: Sequelize.STRING(30)
+        type: Sequelize.STRING(255)
       },
       createdAt: {
         type: Sequelize.DATE,
