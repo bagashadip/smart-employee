@@ -5,6 +5,7 @@ const router = express.Router();
 const jabatanController = require("../app/api/jabatanController");
 const divisiController = require("../app/api/divisiController");
 const ptkpController = require("../app/api/ptkpController");
+const roleController = require("../app/api/roleController");
 
 router.use(authMiddleware);
 
@@ -73,6 +74,28 @@ ptkpRoute.delete(
 router.post("/ptkp/data", ptkpController.data);
 router.get("/ptkp/list", ptkpController.list);
 /* Ptkp Route */
+
+/* Role Route */
+const roleRoute = router.route("/role");
+roleRoute.get(
+  roleController.validate("get"),
+  roleController.get
+);
+roleRoute.post(
+  roleController.validate("create"),
+  roleController.create
+);
+roleRoute.patch(
+  roleController.validate("update"),
+  roleController.update
+);
+roleRoute.delete(
+  roleController.validate("delete"),
+  roleController.delete
+);
+router.post("/role/data", roleController.data);
+router.get("/role/list", roleController.list);
+/* Role Route */
 
 
 module.exports = router;
