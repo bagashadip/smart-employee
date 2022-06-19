@@ -9,6 +9,7 @@ const mPegawai = require("./pegawai");
 const mRole = require("./role");
 const mDivisi = require("./divisi");
 const mUnitKerja = require("./unitkerja");
+const mPtkp = require("./ptkp");
 
 const User = mUser(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
@@ -17,6 +18,7 @@ const Pegawai = mPegawai(sequelize, Sequelize);
 const Role = mRole(sequelize, Sequelize);
 const Divisi = mDivisi(sequelize, Sequelize);
 const UnitKerja = mUnitKerja(sequelize, Sequelize);
+const Ptkp = mPtkp(sequelize, Sequelize);
 
 User.belongsTo(Pegawai, {
   as: "pegawai",
@@ -53,5 +55,6 @@ async function authenticate() {
     Pegawai,
     Divisi,
     UnitKerja,
-    Role
+    Role,
+    Ptkp
   };
