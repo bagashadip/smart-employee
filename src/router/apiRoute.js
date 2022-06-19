@@ -6,6 +6,7 @@ const jabatanController = require("../app/api/jabatanController");
 const divisiController = require("../app/api/divisiController");
 const ptkpController = require("../app/api/ptkpController");
 const roleController = require("../app/api/roleController");
+const hakAksesController = require("../app/api/hakaksesController");
 
 router.use(authMiddleware);
 
@@ -96,6 +97,28 @@ roleRoute.delete(
 router.post("/role/data", roleController.data);
 router.get("/role/list", roleController.list);
 /* Role Route */
+
+/* Hak Akses Route */
+const hakAksesRoute = router.route("/hak-akses");
+hakAksesRoute.get(
+  hakAksesController.validate("get"),
+  hakAksesController.get
+);
+hakAksesRoute.post(
+  hakAksesController.validate("create"),
+  hakAksesController.create
+);
+hakAksesRoute.patch(
+  hakAksesController.validate("update"),
+  hakAksesController.update
+);
+hakAksesRoute.delete(
+  hakAksesController.validate("delete"),
+  hakAksesController.delete
+);
+router.post("/hak-akses/data", hakAksesController.data);
+router.get("/hak-akses/list", hakAksesController.list);
+/* Hak Akses Route */
 
 
 module.exports = router;
