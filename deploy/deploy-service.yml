@@ -33,7 +33,7 @@
         publish:
           - mode: ingress
             published_port: "{{ lookup('env', 'SWARM_PORT') | mandatory }}"
-            target_port: "3000"
+            target_port: "80"
         replicas: "{{ lookup('env', 'SWARM_REPLICAS') | default(1, true) }}"
         limits:
           cpus: "{{ lookup('env', 'SWARM_LIMIT_CPUS') | default(0.5, true) }}"
