@@ -6,7 +6,7 @@ const apiRoute = require("./apiRoute");
 const router = express.Router();
 
 router.use("/auth", authRoute);
-router.use("/api", apiRoute);
+router.use("/api/v1", apiRoute);
 
 
 router.get("/", function (_, res) {
