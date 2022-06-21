@@ -1,0 +1,116 @@
+image: $CI_REGISTRY/infrastructure/docker/docker:$DOCKER_VERSION
+
+# see https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4566#note_199261985
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  # See https://github.com/docker-library/docker/pull/166
+  DOCKER_TLS_CERTDIR: ""
+
+  ANSIBLE_IMAGE: "$CI_REGISTRY/infrastructure/docker-ansible:2.9.9.0-alpine"
+  APP_IMAGE: $CI_REGISTRY_IMAGE
+
+# see https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4566#note_199261985
+services:
+  - name: $CI_REGISTRY/infrastructure/docker/docker:$DOCKER_VERSION-dind
+    alias: docker
+    entrypoint: ["env", "-u", "DOCKER_HOST"]
+    command: ["dockerd-entrypoint.sh"]
+
+stages:
+  - build
+  - migrate
+  - deploy
+
+build:development:
+  stage: build
+  tags:
+    - docker
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+  script:
+    - docker build --rm --tag $APP_IMAGE:$CI_BUILD_REF_NAME .
+    - docker push $APP_IMAGE:$CI_BUILD_REF_NAME
+
+migrate:development:
+  stage: migrate
+  tags:
+    - docker
+  when: manual
+  environment:
+    name: development
+    url: "$DEV_URL"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker pull $ANSIBLE_IMAGE
+    - (echo "$DEV_INVENTORY") > inventory
+    - (echo "$DEV_ENV") > app_env
+    - (echo "$DEV_SWARM_ENV") > swarm_env
+    - (echo "$DOCKER_ENV") > docker_env
+  script:
+    - docker run --rm -i
+        -v `pwd`:/app
+        --env-file app_env
+        --env-file swarm_env
+        --env-file docker_env
+        --env ANSIBLE_HOST_KEY_CHECKING=False
+        $APP_IMAGE:$CI_BUILD_REF_NAME
+          npx sequelize-cli db:migrate 
+
+deploy:development:
+  stage: deploy
+  tags:
+    - docker
+  when: manual
+  environment:
+    name: development
+    url: "$DEV_URL"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker pull $ANSIBLE_IMAGE
+    - (echo "$DEV_INVENTORY") > inventory
+    - (echo "$DEV_ENV") > app_env
+    - (echo "$DEV_SWARM_ENV") > swarm_env
+    - (echo "$DOCKER_ENV") > docker_env
+  script:
+    - docker run --rm -i
+        -v `pwd`:/app
+        --env-file app_env
+        --env-file swarm_env
+        --env-file docker_env
+        --env ANSIBLE_HOST_KEY_CHECKING=False
+        $ANSIBLE_IMAGE
+          ansible-playbook -v -i inventory
+            -e service_image="$APP_IMAGE:$CI_BUILD_REF_NAME"
+            deploy/deploy-service.yml
+
+deploy:production:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - master
+    - tags
+  when: manual
+  environment:
+    name: production
+    url: "$PROD_URL"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker pull $ANSIBLE_IMAGE
+    - (echo "$PROD_INVENTORY") > deploy/inventory
+    - (echo "$PROD_ENV") > deploy/app_env
+    - (echo "$PROD_SWARM_ENV") > deploy/swarm_env
+    - (echo "$DOCKER_ENV") > deploy/docker_env
+  script:
+    - cd deploy
+    - docker run --rm -i
+        -v `pwd`:/app
+        --env-file app_env
+        --env-file swarm_env
+        --env-file docker_env
+        --env ANSIBLE_HOST_KEY_CHECKING=False
+        $ANSIBLE_IMAGE
+          ansible-playbook -v -i inventory
+            -e service_image="$APP_IMAGE:$CI_BUILD_REF_NAME"
+            deploy-service.yml
