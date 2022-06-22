@@ -33,7 +33,7 @@
         publish:
           - mode: ingress
             published_port: "{{ lookup('env', 'SWARM_PORT') | mandatory }}"
-            target_port: "80"
+            target_port: "{{ lookup('env', 'PORT') | mandatory }}"
         replicas: "{{ lookup('env', 'SWARM_REPLICAS') | default(1, true) }}"
         limits:
           cpus: "{{ lookup('env', 'SWARM_LIMIT_CPUS') | default(0.5, true) }}"
@@ -44,7 +44,7 @@
         labels:
           traefik.enable: "true"
           traefik.docker.network: traefik
-          traefik.http.services.web.loadbalancer.server.port: '80'
+          traefik.http.services.web.loadbalancer.server.port: "{{ lookup('env', 'PORT') | mandatory }}"
           traefik.http.routers.web.rule: "{{ lookup('env', 'SWARM_TRAEFIK_RULE') | mandatory }}"
         env:
           NODE_ENV: "{{ lookup('env', 'NODE_ENV') | mandatory }}"
