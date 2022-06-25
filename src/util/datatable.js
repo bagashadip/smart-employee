@@ -23,11 +23,18 @@ module.exports = async (params, options) => {
       if (idx != -1) {
         const onColumnOpt = onColumn[idx];
 
-        return {
-          model: onColumnOpt.model,
-          field: onColumnOpt.field ? onColumnOpt.field : onColumnOpt.column,
-          alias: onColumnOpt.column,
-        };
+        if (onColumnOpt.raw) {
+          return {
+            raw: onColumnOpt.raw,
+            column: onColumnOpt.column,
+          };
+        } else {
+          return {
+            model: onColumnOpt.model,
+            field: onColumnOpt.field ? onColumnOpt.field : onColumnOpt.column,
+            alias: onColumnOpt.column,
+          };
+        }
       }
     }
 
@@ -44,10 +51,14 @@ module.exports = async (params, options) => {
     if (!columnAssoc) {
       return data;
     } else {
-      return [
-        Sequelize.col(columnAssoc.model + "." + columnAssoc.field),
-        columnAssoc.alias,
-      ];
+      if (columnAssoc.raw) {
+        return [Sequelize.literal(columnAssoc.raw), columnAssoc.column];
+      } else {
+        return [
+          Sequelize.col(columnAssoc.model + "." + columnAssoc.field),
+          columnAssoc.alias,
+        ];
+      }
     }
   });
 
@@ -79,11 +90,19 @@ module.exports = async (params, options) => {
             },
           };
         } else {
-          return {
-            ["$" + columnAssoc.model + "." + columnAssoc.field + "$"]: {
-              [Op.iLike]: "%" + search + "%",
-            },
-          };
+          if (columnAssoc.raw) {
+            return {
+              [Sequelize.literal('"' + columnAssoc.column + '"')]: {
+                [Op.iLike]: "%" + search + "%",
+              },
+            };
+          } else {
+            return {
+              ["$" + columnAssoc.model + "." + columnAssoc.field + "$"]: {
+                [Op.iLike]: "%" + search + "%",
+              },
+            };
+          }
         }
       }
     });
@@ -92,15 +111,31 @@ module.exports = async (params, options) => {
 
   // Build Query Order
   if (params.order && params.order.dir != null) {
+    let orderColumn = "";
     if (params.order.dir == "asc" || params.order.dir == "desc") {
       const columnAssoc = getColumnAssoc(params.order.column);
       if (!columnAssoc) {
         query.order = [[params.order.column, params.order.dir]];
+        orderColumn = params.order.column;
       } else {
-        query.order = [
-          [columnAssoc.model, columnAssoc.field, params.order.dir],
-        ];
+        if (columnAssoc.raw) {
+          query.order = [
+            [
+              Sequelize.literal('"' + columnAssoc.column + '"'),
+              params.order.dir,
+            ],
+          ];
+          orderColumn = columnAssoc.column;
+        } else {
+          query.order = [
+            [columnAssoc.model, columnAssoc.field, params.order.dir],
+          ];
+          orderColumn = columnAssoc.field;
+        }
       }
+    }
+    if (orderColumn != "" && orderColumn != "createdAt") {
+      query.order.push(["createdAt", "DESC"]);
     }
   } else {
     query.order = [["createdAt", "DESC"]];
@@ -114,9 +149,14 @@ module.exports = async (params, options) => {
       const columnAssoc = getColumnAssoc(fl.column);
       fl.operator = fl.operator || "eq";
 
-      let fcol = columnAssoc
-        ? "$" + columnAssoc.model + "." + columnAssoc.field + "$"
-        : fl.column;
+      let fcol = fl.column;
+      if (columnAssoc) {
+        if (columnAssoc.raw) {
+          fcol = Sequelize.literal('"' + columnAssoc.column + '"');
+        } else {
+          fcol = "$" + columnAssoc.model + "." + columnAssoc.field + "$";
+        }
+      }
 
       let fval = fl.value;
       if (fl.isDate) {
@@ -154,6 +194,8 @@ module.exports = async (params, options) => {
     };
   }
 
+  // const symbolKey = Reflect.ownKeys(query.where)
+  // .find(key => key.toString() === 'Symbol(and)')
   return query;
 };
 

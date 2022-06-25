@@ -12,6 +12,8 @@ const mUnitKerja = require("./unitkerja");
 const mPtkp = require("./ptkp");
 const mHakAkses = require("./hakakses");
 const mKategoriCuti = require("./kategoricuti");
+const mFileCategory = require("./fileCategory");
+const mFile = require("./file");
 
 const User = mUser(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
@@ -23,6 +25,8 @@ const UnitKerja = mUnitKerja(sequelize, Sequelize);
 const Ptkp = mPtkp(sequelize, Sequelize);
 const HakAkses = mHakAkses(sequelize, Sequelize);
 const KategoriCuti = mKategoriCuti(sequelize, Sequelize);
+const FileCategory = mFileCategory(sequelize, Sequelize);
+const File = mFile(sequelize, Sequelize);
 
 User.belongsTo(Pegawai, {
   as: "pegawai",
@@ -41,6 +45,9 @@ Divisi.belongsTo(UnitKerja, {
   foreignKey: "kode_unitkerja",
   targetKey: "kode_unitkerja",
 });
+
+FileCategory.hasMany(File);
+File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
 
 async function authenticate() {
     try {
@@ -62,5 +69,7 @@ async function authenticate() {
     Role,
     Ptkp,
     HakAkses,
-    KategoriCuti
+    KategoriCuti,
+    FileCategory,
+    File
   };

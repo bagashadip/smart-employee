@@ -25,7 +25,7 @@ module.exports = {
     var dataTableObj = await datatable(req.body);
     var count = await Jabatan.count();
     var modules = await Jabatan.findAndCountAll(dataTableObj);
-
+    
     res.json({
       recordsFiltered: modules.count,
       recordsTotal: count,
