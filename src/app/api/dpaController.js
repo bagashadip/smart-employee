@@ -4,17 +4,17 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Ptkp } = require("../../models/model");
+const { Dpa } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
 module.exports = {
   // List
   list: async (req, res) => {
-    const mPtkp = await Ptkp.findAll({
-      attributes: ["id_ptkp", "kode_ptkp", "keterangan_ptkp"],
+    const mDpa = await Dpa.findAll({
+      attributes: ["id_dpa", "kode_dpa", "nama_dpa"],
     });
-    res.json(mPtkp);
+    res.json(mDpa);
   },
   // Datatable
   data: async (req, res) => {
@@ -23,11 +23,9 @@ module.exports = {
     // }
 
     var dataTableObj = await datatable(req.body);
-    var count = await Ptkp.count();
-    var modules = await Ptkp.findAndCountAll({
-        ...dataTableObj
-    });
-
+    var count = await Dpa.count();
+    var modules = await Dpa.findAndCountAll(dataTableObj);
+    
     res.json({
       recordsFiltered: modules.count,
       recordsTotal: count,
@@ -45,12 +43,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mPtkp = await Ptkp.findOne({
+    const mDpa = await Dpa.findOne({
         where: {
-            kode_ptkp: req.query.kode_ptkp
+            kode_dpa: req.query.kode_dpa
         }
     });
-    res.json(mPtkp);
+    res.json(mDpa);
   },
   // Create
   create: async (req, res) => {
@@ -63,14 +61,14 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const ptkp = await new Ptkp({
+    const dpa = await new Dpa({
       ...req.body,
     }).save();
 
     res.json({ 
       status: true,
       statusCode: 200, 
-      message: "PTKP " + ptkp.kode_ptkp + " berhasil ditambah."
+      message: "DPA " + dpa.kode_dpa + " berhasil ditambah."
     });
   },
   // Update
@@ -84,15 +82,15 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Ptkp.update(
+    await Dpa.update(
       { ...req.body},
-      { where: { kode_ptkp: req.query.kode_ptkp } }
+      { where: { kode_dpa: req.query.kode_dpa } }
     );
 
     res.json({ 
       status: true ,
       statusCode: 200,
-      message: "PTKP " + req.query.kode_ptkp + " berhasil diubah."
+      message: "DPA " + req.query.kode_dpa + " berhasil diubah."
     });
   },
   // Delete
@@ -106,73 +104,76 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Ptkp.destroy({
+    await Dpa.destroy({
       where: {
-        kode_ptkp: req.query.kode_ptkp,
+        kode_dpa: req.query.kode_dpa,
       },
     });
-    res.send({ status: true, message: req.query.kode_ptkp + ' berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_dpa + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {
-    let mPtkp = null;
-    const ruleKodePtkp = query("kode_ptkp")
+    let mDpa = null;
+    const ruleKodeDpa = query("kode_dpa")
       .trim()
       .notEmpty()
       .custom(async (value) => {
-        mPtkp = await Ptkp.findOne({
+        mDpa = await Dpa.findOne({
             where: {
-                kode_ptkp: {
+                kode_dpa: {
                     [Op.iLike]: value
                 }
             }
         });
-        if (!mPtkp) {
-          return Promise.reject("Data tidak ditemukan!");
+        if (!mDpa) {
+          return Promise.reject("Data not found!");
         }
       });
-    const ruleCreateKodePtkp = body("kode_ptkp")
+    const ruleCreateKodeDpa = body("kode_dpa")
       .trim()
       .notEmpty()
       .custom(async (value) => {
-        mPtkp = await Ptkp.findOne({
+        mDpa = await Dpa.findOne({
             where: {
-                kode_ptkp: {
+                kode_dpa: {
                     [Op.iLike]: value,
                 },
             },
         });
-        if (mPtkp) {
-          return Promise.reject("Data sudah ada!");
+        if (mDpa) {
+          return Promise.reject("Data already exist!");
         }
     });
-    const ruleKeteranganPtkp = body("keterangan_ptkp").trim().notEmpty();
+    const ruleNamaDpa = body("nama_dpa").trim().notEmpty();
+    const ruleGradeDpa = body("grade_dpa").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
             return [
-                ruleCreateKodePtkp,
-                ruleKeteranganPtkp,
+                ruleCreateKodeDpa,
+                ruleNamaDpa,
+                ruleGradeDpa
             ];
         }
         break;
       case "update":
         {
             return [
-              ruleKodePtkp,
-              ruleKeteranganPtkp.optional()
+              ruleKodeDpa,
+              ruleNamaDpa.optional(),
+              ruleGradeDpa.optional()
             ];
         }
         break;
       case "get":
         {
-          return [ruleKodePtkp];
+          return [ruleKodeDpa];
         }
         break;
       case "delete":
         {
-          return [ruleKodePtkp];
+          return [ruleKodeDpa];
         }
         break;
     }

@@ -62,7 +62,11 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mDivisi = await Divisi.findByPk(req.query.id);
+    const mDivisi = await Divisi.findOne({
+      where: {
+        kode_divisi: req.query.kode_divisi
+      }
+    });
     res.json(mDivisi);
   },
   // Create
@@ -124,7 +128,7 @@ module.exports = {
         kode_divisi: req.query.kode_divisi,
       },
     });
-    res.send({ status: true, message: req.query.kode_divisi + 'berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_divisi + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

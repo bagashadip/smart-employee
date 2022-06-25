@@ -1,7 +1,8 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../util/database");
 
-
+const mFileCategory = require("./fileCategory");
+const mFile = require("./file");
 const mUser = require("./user");
 const mJabatan = require("./jabatan");
 const mLog = require("./log");
@@ -13,9 +14,10 @@ const mPtkp = require("./ptkp");
 const mHakAkses = require("./hakakses");
 const mKategoriCuti = require("./kategoricuti");
 const mPermission = require("./permission");
-const mFileCategory = require("./fileCategory");
-const mFile = require("./file");
+const mDpa = require("./dpa");
 
+const FileCategory = mFileCategory(sequelize, Sequelize);
+const File = mFile(sequelize, Sequelize);
 const User = mUser(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
 const Log = mLog(sequelize, Sequelize);
@@ -27,8 +29,7 @@ const Ptkp = mPtkp(sequelize, Sequelize);
 const HakAkses = mHakAkses(sequelize, Sequelize);
 const KategoriCuti = mKategoriCuti(sequelize, Sequelize);
 const Permission = mPermission(sequelize, Sequelize);
-const FileCategory = mFileCategory(sequelize, Sequelize);
-const File = mFile(sequelize, Sequelize);
+const Dpa = mDpa(sequelize, Sequelize);
 
 User.belongsTo(Pegawai, {
   as: "pegawai",
@@ -86,5 +87,6 @@ async function authenticate() {
     KategoriCuti,
     Permission,
     FileCategory,
-    File
+    File,
+    Dpa
   };

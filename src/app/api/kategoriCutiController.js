@@ -111,7 +111,7 @@ module.exports = {
         kode_kategoricuti: req.query.kode_kategoricuti,
       },
     });
-    res.send({ status: true, message: req.query.kode_kategoricuti + 'berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_kategoricuti + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

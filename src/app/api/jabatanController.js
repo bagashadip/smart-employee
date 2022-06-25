@@ -43,7 +43,11 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mJabatan = await Jabatan.findByPk(req.query.id);
+    const mJabatan = await Jabatan.findOne({
+      where: {
+        kode_jabatan: req.quer.kode_jabatan
+      }
+    });
     res.json(mJabatan);
   },
   // Create
@@ -105,7 +109,7 @@ module.exports = {
         kode_jabatan: req.query.kode_jabatan,
       },
     });
-    res.send({ status: true, message: req.query.kode_jabatan + 'has been deleted.' });
+    res.send({ status: true, message: req.query.kode_jabatan + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

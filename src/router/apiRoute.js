@@ -9,6 +9,7 @@ const roleController = require("../app/api/roleController");
 const hakAksesController = require("../app/api/hakaksesController");
 const kategoriCutiController = require("../app/api/kategoriCutiController");
 const permissionController = require("../app/api/permissionController");
+const dpaController = require("../app/api/dpaController");
 
 router.use(authMiddleware);
 
@@ -165,6 +166,28 @@ permissionRoute.delete(
 router.post("/permission/data", permissionController.data);
 router.get("/permission/list", permissionController.list);
 /* Permission Route */
+
+/* DPA Route */
+const dpaRoute = router.route("/dpa");
+dpaRoute.get(
+  dpaController.validate("get"),
+  dpaController.get
+);
+dpaRoute.post(
+  dpaController.validate("create"),
+  dpaController.create
+);
+dpaRoute.patch(
+  dpaController.validate("update"),
+  dpaController.update
+);
+dpaRoute.delete(
+  dpaController.validate("delete"),
+  dpaController.delete
+);
+router.post("/dpa/data", dpaController.data);
+router.get("/dpa/list", dpaController.list);
+/* DPA Route */
 
 
 module.exports = router;

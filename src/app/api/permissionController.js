@@ -105,7 +105,7 @@ module.exports = {
         id_permission: req.query.id_permission,
       },
     });
-    res.send({ status: true, message: 'permission berhasil dihapus.' });
+    res.send({ status: true, message: ' permission berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

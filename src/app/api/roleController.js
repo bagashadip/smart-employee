@@ -111,7 +111,7 @@ module.exports = {
         kode_role: req.query.kode_role,
       },
     });
-    res.send({ status: true, message: req.query.kode_role + 'berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_role + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {
