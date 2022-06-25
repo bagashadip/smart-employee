@@ -10,6 +10,7 @@ const hakAksesController = require("../app/api/hakaksesController");
 const kategoriCutiController = require("../app/api/kategoriCutiController");
 const permissionController = require("../app/api/permissionController");
 const dpaController = require("../app/api/dpaController");
+const careerPathController = require("../app/api/careerpathController");
 
 router.use(authMiddleware);
 
@@ -188,6 +189,28 @@ dpaRoute.delete(
 router.post("/dpa/data", dpaController.data);
 router.get("/dpa/list", dpaController.list);
 /* DPA Route */
+
+/* Career Path Route */
+const careerPathRoute = router.route("/career-path");
+careerPathRoute.get(
+  careerPathController.validate("get"),
+  careerPathController.get
+);
+careerPathRoute.post(
+  careerPathController.validate("create"),
+  careerPathController.create
+);
+careerPathRoute.patch(
+  careerPathController.validate("update"),
+  careerPathController.update
+);
+careerPathRoute.delete(
+  careerPathController.validate("delete"),
+  careerPathController.delete
+);
+router.post("/career-path/data", careerPathController.data);
+router.get("/career-path/list", careerPathController.list);
+/* Career Path Route */
 
 
 module.exports = router;

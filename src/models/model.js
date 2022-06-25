@@ -15,6 +15,7 @@ const mHakAkses = require("./hakakses");
 const mKategoriCuti = require("./kategoricuti");
 const mPermission = require("./permission");
 const mDpa = require("./dpa");
+const mCareerPath = require("./careerpath");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -30,6 +31,10 @@ const HakAkses = mHakAkses(sequelize, Sequelize);
 const KategoriCuti = mKategoriCuti(sequelize, Sequelize);
 const Permission = mPermission(sequelize, Sequelize);
 const Dpa = mDpa(sequelize, Sequelize);
+const CareerPath = mCareerPath(sequelize, Sequelize);
+
+FileCategory.hasMany(File);
+File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
 
 User.belongsTo(Pegawai, {
   as: "pegawai",
@@ -61,8 +66,11 @@ Permission.belongsTo(Role, {
   targetKey: "kode_role"
 });
 
-FileCategory.hasMany(File);
-File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
+CareerPath.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi"
+})
 
 async function authenticate() {
     try {
@@ -75,6 +83,8 @@ async function authenticate() {
   authenticate();
   
   module.exports = {
+    FileCategory,
+    File,
     User,
     Jabatan,
     Log,
@@ -86,7 +96,6 @@ async function authenticate() {
     HakAkses,
     KategoriCuti,
     Permission,
-    FileCategory,
-    File,
-    Dpa
+    Dpa,
+    CareerPath
   };
