@@ -10,16 +10,41 @@ const hakAksesController = require("../app/api/hakaksesController");
 const kategoriCutiController = require("../app/api/kategoriCutiController");
 const permissionController = require("../app/api/permissionController");
 const dpaController = require("../app/api/dpaController");
-const careerPathController = require("../app/api/careerpathController");
+const organisasiController = require("../app/api/organisasiController");
+const fileCategoryController = require("../app/file/fileCategoryController");
+const fileController = require("../app/file/fileController");
 
 router.use(authMiddleware);
 
+/* File Category Route */
+const fileCategoryRoute = router.route("/file-category");
+fileCategoryRoute.get(
+  fileCategoryController.validate("get"),
+  fileCategoryController.get
+);
+fileCategoryRoute.post(
+  fileCategoryController.validate("create"),
+  fileCategoryController.create
+);
+fileCategoryRoute.patch(
+  fileCategoryController.validate("update"),
+  fileCategoryController.update
+);
+fileCategoryRoute.delete(
+  fileCategoryController.validate("delete"),
+  fileCategoryController.delete
+);
+router.post("/file-category/data", fileCategoryController.data);
+router.get("/file-category/list", fileCategoryController.list);
+
+/* File Route */
+const fileRoute = router.route("/file");
+fileRoute.get(fileController.validate("get"), fileController.get);
+router.post("/file/data", fileController.data);
+
 /* Jabatan Route */
 const jabatanRoute = router.route("/jabatan");
-jabatanRoute.get(
-  jabatanController.validate("get"),
-  jabatanController.get
-);
+jabatanRoute.get(jabatanController.validate("get"), jabatanController.get);
 jabatanRoute.post(
   jabatanController.validate("create"),
   jabatanController.create
@@ -38,18 +63,9 @@ router.get("/jabatan/list", jabatanController.list);
 
 /* Divisi Route */
 const divisiRoute = router.route("/divisi");
-divisiRoute.get(
-  divisiController.validate("get"),
-  divisiController.get
-);
-divisiRoute.post(
-  divisiController.validate("create"),
-  divisiController.create
-);
-divisiRoute.patch(
-  divisiController.validate("update"),
-  divisiController.update
-);
+divisiRoute.get(divisiController.validate("get"), divisiController.get);
+divisiRoute.post(divisiController.validate("create"), divisiController.create);
+divisiRoute.patch(divisiController.validate("update"), divisiController.update);
 divisiRoute.delete(
   divisiController.validate("delete"),
   divisiController.delete
@@ -60,54 +76,27 @@ router.get("/divisi/list", divisiController.list);
 
 /* Ptkp Route */
 const ptkpRoute = router.route("/ptkp");
-ptkpRoute.get(
-  ptkpController.validate("get"),
-  ptkpController.get
-);
-ptkpRoute.post(
-  ptkpController.validate("create"),
-  ptkpController.create
-);
-ptkpRoute.patch(
-  ptkpController.validate("update"),
-  ptkpController.update
-);
-ptkpRoute.delete(
-  ptkpController.validate("delete"),
-  ptkpController.delete
-);
+ptkpRoute.get(ptkpController.validate("get"), ptkpController.get);
+ptkpRoute.post(ptkpController.validate("create"), ptkpController.create);
+ptkpRoute.patch(ptkpController.validate("update"), ptkpController.update);
+ptkpRoute.delete(ptkpController.validate("delete"), ptkpController.delete);
 router.post("/ptkp/data", ptkpController.data);
 router.get("/ptkp/list", ptkpController.list);
 /* Ptkp Route */
 
 /* Role Route */
 const roleRoute = router.route("/role");
-roleRoute.get(
-  roleController.validate("get"),
-  roleController.get
-);
-roleRoute.post(
-  roleController.validate("create"),
-  roleController.create
-);
-roleRoute.patch(
-  roleController.validate("update"),
-  roleController.update
-);
-roleRoute.delete(
-  roleController.validate("delete"),
-  roleController.delete
-);
+roleRoute.get(roleController.validate("get"), roleController.get);
+roleRoute.post(roleController.validate("create"), roleController.create);
+roleRoute.patch(roleController.validate("update"), roleController.update);
+roleRoute.delete(roleController.validate("delete"), roleController.delete);
 router.post("/role/data", roleController.data);
 router.get("/role/list", roleController.list);
 /* Role Route */
 
 /* Hak Akses Route */
 const hakAksesRoute = router.route("/hak-akses");
-hakAksesRoute.get(
-  hakAksesController.validate("get"),
-  hakAksesController.get
-);
+hakAksesRoute.get(hakAksesController.validate("get"), hakAksesController.get);
 hakAksesRoute.post(
   hakAksesController.validate("create"),
   hakAksesController.create
@@ -170,47 +159,34 @@ router.get("/permission/list", permissionController.list);
 
 /* DPA Route */
 const dpaRoute = router.route("/dpa");
-dpaRoute.get(
-  dpaController.validate("get"),
-  dpaController.get
-);
-dpaRoute.post(
-  dpaController.validate("create"),
-  dpaController.create
-);
-dpaRoute.patch(
-  dpaController.validate("update"),
-  dpaController.update
-);
-dpaRoute.delete(
-  dpaController.validate("delete"),
-  dpaController.delete
-);
+dpaRoute.get(dpaController.validate("get"), dpaController.get);
+dpaRoute.post(dpaController.validate("create"), dpaController.create);
+dpaRoute.patch(dpaController.validate("update"), dpaController.update);
+dpaRoute.delete(dpaController.validate("delete"), dpaController.delete);
 router.post("/dpa/data", dpaController.data);
 router.get("/dpa/list", dpaController.list);
 /* DPA Route */
 
-/* Career Path Route */
-const careerPathRoute = router.route("/career-path");
-careerPathRoute.get(
-  careerPathController.validate("get"),
-  careerPathController.get
+/* Organisasi Route */
+const organisasiRoute = router.route("/organisasi");
+organisasiRoute.get(
+  organisasiController.validate("get"),
+  organisasiController.get
 );
-careerPathRoute.post(
-  careerPathController.validate("create"),
-  careerPathController.create
+organisasiRoute.post(
+  organisasiController.validate("create"),
+  organisasiController.create
 );
-careerPathRoute.patch(
-  careerPathController.validate("update"),
-  careerPathController.update
+organisasiRoute.patch(
+  organisasiController.validate("update"),
+  organisasiController.update
 );
-careerPathRoute.delete(
-  careerPathController.validate("delete"),
-  careerPathController.delete
+organisasiRoute.delete(
+  organisasiController.validate("delete"),
+  organisasiController.delete
 );
-router.post("/career-path/data", careerPathController.data);
-router.get("/career-path/list", careerPathController.list);
-/* Career Path Route */
-
+router.post("/organisasi/data", organisasiController.data);
+router.get("/organisasi/list", organisasiController.list);
+/* Organisasi Route */
 
 module.exports = router;

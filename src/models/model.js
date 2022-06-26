@@ -15,7 +15,7 @@ const mHakAkses = require("./hakakses");
 const mKategoriCuti = require("./kategoricuti");
 const mPermission = require("./permission");
 const mDpa = require("./dpa");
-const mCareerPath = require("./careerpath");
+const mOrganisasi = require("./organisasi");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -31,7 +31,7 @@ const HakAkses = mHakAkses(sequelize, Sequelize);
 const KategoriCuti = mKategoriCuti(sequelize, Sequelize);
 const Permission = mPermission(sequelize, Sequelize);
 const Dpa = mDpa(sequelize, Sequelize);
-const CareerPath = mCareerPath(sequelize, Sequelize);
+const Organisasi = mOrganisasi(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -56,46 +56,40 @@ Divisi.belongsTo(UnitKerja, {
 
 Permission.belongsTo(HakAkses, {
   as: "hakakses",
-  foreignKey: "kode_hakakses" ,
-  targetKey: "kode_hakakses"
+  foreignKey: "kode_hakakses",
+  targetKey: "kode_hakakses",
 });
 
 Permission.belongsTo(Role, {
   as: "role",
   foreignKey: "kode_role",
-  targetKey: "kode_role"
+  targetKey: "kode_role",
 });
 
-CareerPath.belongsTo(Divisi, {
-  as: "divisi",
-  foreignKey: "kode_divisi",
-  targetKey: "kode_divisi"
-})
-
 async function authenticate() {
-    try {
-      await sequelize.authenticate();
-      console.log("Connection has been established successfully.");
-    } catch (error) {
-      console.error("Unable to connect to the database:", error);
-    }
+  try {
+    await sequelize.authenticate();
+    console.log("Connection has been established successfully.");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
   }
-  authenticate();
-  
-  module.exports = {
-    FileCategory,
-    File,
-    User,
-    Jabatan,
-    Log,
-    Pegawai,
-    Divisi,
-    UnitKerja,
-    Role,
-    Ptkp,
-    HakAkses,
-    KategoriCuti,
-    Permission,
-    Dpa,
-    CareerPath
-  };
+}
+authenticate();
+
+module.exports = {
+  FileCategory,
+  File,
+  User,
+  Jabatan,
+  Log,
+  Pegawai,
+  Divisi,
+  UnitKerja,
+  Role,
+  Ptkp,
+  HakAkses,
+  KategoriCuti,
+  Permission,
+  Dpa,
+  Organisasi,
+};

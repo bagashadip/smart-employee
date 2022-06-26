@@ -1,20 +1,18 @@
-// const _module = "banner-category";
+const _module = "file-category";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Jabatan } = require("../../models/model");
-
-const Op = Sequelize.Op;
+const { FileCategory } = require("../../models/model");
 
 module.exports = {
   // List
   list: async (req, res) => {
-    const mJabatan = await Jabatan.findAll({
-      attributes: ["id_jabatan", "kode_jabatan", "nama_jabatan"],
+    const mFileCategory = await FileCategory.findAll({
+      attributes: ["id", "slug", "name"],
     });
-    res.json(mJabatan);
+    res.json(mFileCategory);
   },
   // Datatable
   data: async (req, res) => {
@@ -23,13 +21,13 @@ module.exports = {
     // }
 
     var dataTableObj = await datatable(req.body);
-    var count = await Jabatan.count();
-    var modules = await Jabatan.findAndCountAll(dataTableObj);
-    
+    var count = await FileCategory.count();
+    var fileCategories = await FileCategory.findAndCountAll(dataTableObj);
+
     res.json({
-      recordsFiltered: modules.count,
+      recordsFiltered: fileCategories.count,
       recordsTotal: count,
-      items: modules.rows,
+      items: fileCategories.rows,
     });
   },
   // Get One Row require ID
@@ -43,12 +41,8 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mJabatan = await Jabatan.findOne({
-      where: {
-        kode_jabatan: req.query.kode_jabatan
-      }
-    });
-    res.json(mJabatan);
+    const mFileCategory = await FileCategory.findByPk(req.query.id);
+    res.json(mFileCategory);
   },
   // Create
   create: async (req, res) => {
@@ -61,15 +55,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const jabatan = await new Jabatan({
+    const fileCategory = await new FileCategory({
       ...req.body,
+      createdBy: req.user.id,
     }).save();
 
-    res.json({ 
-      status: true,
-      statusCode: 200, 
-      message: "Jabatan " + jabatan.kode_jabatan + " berhasil ditambah."
-    });
+    res.json({ status: true, id: fileCategory.id });
   },
   // Update
   update: async (req, res) => {
@@ -82,16 +73,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Jabatan.update(
-      { ...req.body},
-      { where: { kode_jabatan: req.query.kode_jabatan } }
+    await FileCategory.update(
+      { ...req.body, updatedBy: req.user.id },
+      { where: { id: req.query.id } }
     );
 
-    res.json({ 
-      status: true ,
-      statusCode: 200,
-      message: "Jabatan " + req.query.kode_jabatan + " berhasil diubah."
-    });
+    res.send({ status: true });
   },
   // Delete
   delete: async (req, res) => {
@@ -104,73 +91,81 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Jabatan.destroy({
+    await FileCategory.destroy({
       where: {
-        kode_jabatan: req.query.kode_jabatan,
+        id: req.query.id,
       },
     });
-    res.send({ status: true, message: req.query.kode_jabatan + ' berhasil dihapus.' });
+    res.send({ status: true });
   },
   // Validation
   validate: (type) => {
-    let mJabatan = null;
-    const ruleKodeJabatan = query("kode_jabatan")
+    let mFileCategory = null;
+    const ruleId = query("id")
       .trim()
       .notEmpty()
+      .isUUID()
       .custom(async (value) => {
-        mJabatan = await Jabatan.findOne({
-            where: {
-                kode_jabatan: {
-                    [Op.iLike]: value
-                }
-            }
-        });
-        if (!mJabatan) {
+        mFileCategory = await FileCategory.findByPk(value);
+        if (!mFileCategory) {
           return Promise.reject("Data not found!");
         }
       });
-    const ruleCreateKodeJabatan = body("kode_jabatan")
-      .trim()
-      .notEmpty()
-      .custom(async (value) => {
-        mJabatan = await Jabatan.findOne({
-            where: {
-                kode_jabatan: {
-                    [Op.iLike]: value,
-                },
-            },
-        });
-        if (mJabatan) {
-          return Promise.reject("Data already exist!");
-        }
-    });
-    const ruleNamaJabatan = body("nama_jabatan").trim().notEmpty();
+    const ruleName = body("name").trim().notEmpty();
+    const ruleSlug = body("slug").trim().notEmpty().isSlug();
 
     switch (type) {
       case "create":
         {
-            return [
-                ruleCreateKodeJabatan,
-                ruleNamaJabatan,
-            ];
+          return [
+            ruleSlug.custom((value) => {
+              return FileCategory.findOne({
+                where: {
+                  slug: {
+                    [Sequelize.Op.iLike]: value,
+                  },
+                },
+              }).then((res) => {
+                if (res) {
+                  return Promise.reject("Slug already exists!");
+                }
+              });
+            }),
+            ruleName,
+          ];
         }
         break;
       case "update":
         {
-            return [
-              ruleKodeJabatan,
-              ruleNamaJabatan.optional()
-            ];
+          return [
+            ruleId,
+            ruleSlug.optional().custom(async (value) => {
+              const slugExists = await FileCategory.findOne({
+                where: {
+                  slug: {
+                    [Sequelize.Op.iLike]: value,
+                  },
+                  id: {
+                    [Sequelize.Op.ne]: mFileCategory.id,
+                  },
+                },
+              });
+              if (slugExists) {
+                return Promise.reject("Slug already exists!");
+              }
+            }),
+            ruleName.optional(),
+          ];
         }
         break;
       case "get":
         {
-          return [ruleKodeJabatan];
+          return [ruleId];
         }
         break;
       case "delete":
         {
-          return [ruleKodeJabatan];
+          return [ruleId];
         }
         break;
     }
