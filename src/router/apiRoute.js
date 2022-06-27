@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
+const uploadController = require("../app/upload/uploadController");
 const jabatanController = require("../app/api/jabatanController");
 const divisiController = require("../app/api/divisiController");
 const ptkpController = require("../app/api/ptkpController");
@@ -13,6 +14,14 @@ const dpaController = require("../app/api/dpaController");
 const organisasiController = require("../app/api/organisasiController");
 const fileCategoryController = require("../app/file/fileCategoryController");
 const fileController = require("../app/file/fileController");
+
+// upload route
+router.post("/file/upload/:fileCategory?", uploadController.upload);
+router.post("/file/load", uploadController.load);
+router.delete("/file/delete", uploadController.delete);
+router.get("/file/category", uploadController.category);
+router.get("/file/mime-type", uploadController.mime);
+router.get("/file/default", uploadController.default);
 
 router.use(authMiddleware);
 
