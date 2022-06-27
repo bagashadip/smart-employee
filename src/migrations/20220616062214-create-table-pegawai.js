@@ -6,12 +6,12 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       kode_pegawai: {
         type: Sequelize.STRING(30),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       namalengkap_pegawai: {
         type: Sequelize.STRING(100),
@@ -39,13 +39,13 @@ module.exports = {
       },
       emailpribadi_pegawai: {
         type: Sequelize.STRING(100),
-        unique: true
+        unique: true,
       },
       emailjsc_pegawai: {
         type: Sequelize.STRING(100),
       },
       foto_pegawai: {
-        type: Sequelize.TEXT,
+        type: Sequelize.UUID,
       },
       alamatktp_pegawai: {
         type: Sequelize.TEXT,
