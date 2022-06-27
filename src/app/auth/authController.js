@@ -6,7 +6,7 @@ const error = require("../../util/errors");
 
 const Op = Sequelize.Op;
 
-const { User, Log } = require("../../models/model");
+const { User, Log, Pegawai, File } = require("../../models/model");
 const { use } = require("../../router/router");
 
 module.exports = {
@@ -25,11 +25,11 @@ module.exports = {
         password_user: hashedPw,
       });
       await newUser.save();
-      res.json({ 
+      res.json({
         status: "sucess",
-        message: "User created!", id: newUser.id_user 
+        message: "User created!",
+        id: newUser.id_user,
       });
-
     } catch (err) {
       next(err);
     }
@@ -45,6 +45,18 @@ module.exports = {
     let loadedUser;
 
     const user = await User.findOne({
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          include: [
+            {
+              model: File,
+              as: "foto"
+            }
+          ]
+        },
+      ],
       where: {
         username_user: {
           [Op.iLike]: username,
@@ -55,24 +67,35 @@ module.exports = {
     if (!user) {
       return res.status(404).json({
         statusCode: 404,
-        message: "Username tidak ditemukan!"
+        message: "Username tidak ditemukan!",
       });
     }
 
     loadedUser = user;
-
-    if(loadedUser.status_user !== "Aktif"){
+    
+    if (loadedUser.status_user !== "Aktif") {
       return res.status(401).json({
         statusCode: 401,
-        message: "Status User Tidak Aktif. Silahkan hubungi Admin."
+        message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
       });
     }
 
-    res.status(200).json({
+    resData = {
       statusCode: 200,
       username: loadedUser.username_user,
-      status_user: loadedUser.status_user
-    });
+      emailpribadi_pegawai: "",
+      namalengkap_pegawai: "",
+      foto_pegawai: "",
+      status_user: loadedUser.status_user,
+    };
+
+    if (loadedUser.pegawai) {
+      resData.emailpribadi_pegawai = loadedUser.pegawai.emailpribadi_pegawai;
+      resData.namalengkap_pegawai = loadedUser.pegawai.namalengkap_pegawai;
+      resData.foto_pegawai = loadedUser.pegawai.foto.path;
+    }
+
+    res.status(200).send(resData);
   },
   login: async (req, res, _) => {
     const validation = validationResult(req);
@@ -95,64 +118,71 @@ module.exports = {
     if (!user) {
       return res.status(404).json({
         statusCode: 404,
-        message: "Username tidak ditemukan!"
+        message: "Username tidak ditemukan!",
       });
     }
 
     loadedUser = user;
 
-    if(loadedUser.status_user !== "Aktif"){
+    if (loadedUser.status_user !== "Aktif") {
       return res.status(401).json({
         statusCode: 401,
-        message: "Status User Tidak Aktif. Silahkan hubungi Admin."
+        message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
       });
     }
 
-    if(loadedUser.attempt_user > 2){
+    if (loadedUser.attempt_user > 2) {
       return res.status(401).json({
         statusCode: 401,
-        message: "Input password salah 3 kali. User dinonaktifkan."
+        message: "Input password salah 3 kali. User dinonaktifkan.",
       });
     }
 
     const isEqual = await bcrypt.compare(password, user.password_user);
     if (!isEqual) {
-      await User.update({ 
-        attempt_user: user.attempt_user + 1,
-      }, 
-      {
-        where: {
-          username_user: username,
-        }
-      });
-
-      if(user.attempt_user + 1 > 2){
-        await User.update({ 
-          status_user: "Non Aktif"
-        }, 
+      await User.update(
+        {
+          attempt_user: user.attempt_user + 1,
+        },
         {
           where: {
             username_user: username,
+          },
+        }
+      );
+
+      if (user.attempt_user + 1 > 2) {
+        await User.update(
+          {
+            status_user: "Non Aktif",
+          },
+          {
+            where: {
+              username_user: username,
+            },
           }
-        });
+        );
 
         return res.status(401).json({
           statusCode: 401,
-          message: "Input password salah 3 kali. User dinonaktifkan."
+          message: "Input password salah 3 kali. User dinonaktifkan.",
         });
       }
 
       const addLog = new Log({
         aktivitas_log: "Password anda salah!",
         ipaddress_log: req.socket.remoteAddress,
-        username_user: loadedUser.username_user
+        username_user: loadedUser.username_user,
       });
 
       await addLog.save();
 
       return res.status(401).json({
         statusCode: 401,
-        message: "Password anda salah! Silahkan ulangi. Attempt " + (loadedUser.attempt_user + 1) + " of 3"
+        message:
+          "Password anda salah! Silahkan ulangi. Attempt " +
+          (loadedUser.attempt_user + 1) +
+          " of 3",
       });
     }
 
@@ -166,17 +196,19 @@ module.exports = {
       scope: req.body.scope,
       grantType: "password",
     });
-    
-    await User.update({ 
-      token_user: accesToken,
-      lastlogin_user: new Date(),
-      attempt_user: 0
-    }, 
-    {
-      where: {
-        username_user: username,
+
+    await User.update(
+      {
+        token_user: accesToken,
+        lastlogin_user: new Date(),
+        attempt_user: 0,
+      },
+      {
+        where: {
+          username_user: username,
+        },
       }
-    });
+    );
 
     res.json({
       token_type: "bearer",
@@ -251,9 +283,9 @@ module.exports = {
         {
           return [
             body("username")
-            .notEmpty()
-            .withMessage("Mohon masukkan username anda dengan benar.")
-          ]
+              .notEmpty()
+              .withMessage("Mohon masukkan username anda dengan benar."),
+          ];
         }
         break;
       case "login":

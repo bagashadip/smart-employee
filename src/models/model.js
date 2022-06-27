@@ -48,6 +48,12 @@ User.belongsTo(Role, {
   targetKey: "kode_role",
 });
 
+Pegawai.belongsTo(File, {
+  as: "foto",
+  foreignKey: "foto_pegawai",
+  targetKey: "id"
+})
+
 Divisi.belongsTo(UnitKerja, {
   as: "unitkerja",
   foreignKey: "kode_unitkerja",
