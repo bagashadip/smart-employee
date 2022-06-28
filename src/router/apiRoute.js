@@ -17,6 +17,7 @@ const fileController = require("../app/file/fileController");
 const unitKerjaController = require("../app/api/unitkerjaController");
 const posisiController = require("../app/api/posisiController");
 const pegawaiController = require("../app/api/pegawaiController");
+const userController = require("../app/api/userController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -254,5 +255,15 @@ pegawaiRoute.delete(
 router.post("/pegawai/data", pegawaiController.data);
 router.get("/pegawai/list", pegawaiController.list);
 /* Pegawai Route */
+
+/* User Route */
+const userRoute = router.route("/user");
+userRoute.get(userController.validate("get"), userController.get);
+userRoute.post(userController.validate("create"), userController.create);
+userRoute.patch(userController.validate("update"), userController.update);
+userRoute.delete(userController.validate("delete"), userController.delete);
+router.post("/user/data", userController.data);
+router.get("/user/list", userController.list);
+/* User Route */
 
 module.exports = router;

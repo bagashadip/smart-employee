@@ -44,6 +44,12 @@ User.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
+User.belongsTo(Role, {
+  as: "role",
+  foreignKey: "kode_role",
+  targetKey: "kode_role",
+});
+
 Pegawai.belongsTo(File, {
   as: "foto",
   foreignKey: "foto_pegawai",
@@ -72,12 +78,6 @@ Pegawai.belongsTo(Dpa, {
   as: "dpa",
   foreignKey: "kode_dpa",
   targetKey: "kode_dpa",
-});
-
-User.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
 });
 
 Divisi.belongsTo(UnitKerja, {
