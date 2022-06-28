@@ -16,6 +16,7 @@ const mKategoriCuti = require("./kategoricuti");
 const mPermission = require("./permission");
 const mDpa = require("./dpa");
 const mOrganisasi = require("./organisasi");
+const mPosisi = require("./posisi");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -32,6 +33,7 @@ const KategoriCuti = mKategoriCuti(sequelize, Sequelize);
 const Permission = mPermission(sequelize, Sequelize);
 const Dpa = mDpa(sequelize, Sequelize);
 const Organisasi = mOrganisasi(sequelize, Sequelize);
+const Posisi = mPosisi(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -42,16 +44,40 @@ User.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
-User.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
-});
-
 Pegawai.belongsTo(File, {
   as: "foto",
   foreignKey: "foto_pegawai",
   targetKey: "id",
+});
+
+Pegawai.belongsTo(Ptkp, {
+  as: "ptkp",
+  foreignKey: "ptkp_pegawai",
+  targetKey: "kode_ptkp",
+});
+
+Pegawai.belongsTo(Posisi, {
+  as: "posisi",
+  foreignKey: "kode_posisi",
+  targetKey: "kode_posisi",
+});
+
+Pegawai.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi",
+});
+
+Pegawai.belongsTo(Dpa, {
+  as: "dpa",
+  foreignKey: "kode_dpa",
+  targetKey: "kode_dpa",
+});
+
+User.belongsTo(Role, {
+  as: "role",
+  foreignKey: "kode_role",
+  targetKey: "kode_role",
 });
 
 Divisi.belongsTo(UnitKerja, {
@@ -116,4 +142,5 @@ module.exports = {
   Permission,
   Dpa,
   Organisasi,
+  Posisi,
 };

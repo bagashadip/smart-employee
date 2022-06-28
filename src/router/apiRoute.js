@@ -15,6 +15,8 @@ const organisasiController = require("../app/api/organisasiController");
 const fileCategoryController = require("../app/file/fileCategoryController");
 const fileController = require("../app/file/fileController");
 const unitKerjaController = require("../app/api/unitkerjaController");
+const posisiController = require("../app/api/posisiController");
+const pegawaiController = require("../app/api/pegawaiController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -220,5 +222,37 @@ unitKerjaRoute.delete(
 router.post("/unit-kerja/data", unitKerjaController.data);
 router.get("/unit-kerja/list", unitKerjaController.list);
 /* Unit Kerja Route */
+
+/* Posisi Route */
+const posisiRoute = router.route("/posisi");
+posisiRoute.get(posisiController.validate("get"), posisiController.get);
+posisiRoute.post(posisiController.validate("create"), posisiController.create);
+posisiRoute.patch(posisiController.validate("update"), posisiController.update);
+posisiRoute.delete(
+  posisiController.validate("delete"),
+  posisiController.delete
+);
+router.post("/posisi/data", posisiController.data);
+router.get("/posisi/list", posisiController.list);
+/* Posisi Route */
+
+/* Pegawai Route */
+const pegawaiRoute = router.route("/pegawai");
+pegawaiRoute.get(pegawaiController.validate("get"), pegawaiController.get);
+pegawaiRoute.post(
+  pegawaiController.validate("create"),
+  pegawaiController.create
+);
+pegawaiRoute.patch(
+  pegawaiController.validate("update"),
+  pegawaiController.update
+);
+pegawaiRoute.delete(
+  pegawaiController.validate("delete"),
+  pegawaiController.delete
+);
+router.post("/pegawai/data", pegawaiController.data);
+router.get("/pegawai/list", pegawaiController.list);
+/* Pegawai Route */
 
 module.exports = router;

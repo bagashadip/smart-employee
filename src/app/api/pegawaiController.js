@@ -1,0 +1,431 @@
+// const _module = "banner-category";
+const _ = require("lodash");
+const { body, query, validationResult } = require("express-validator");
+const Sequelize = require("sequelize");
+const error = require("../../util/errors");
+const datatable = require("../../util/datatable");
+const {
+  Pegawai,
+  Ptkp,
+  Divisi,
+  Posisi,
+  Dpa,
+  File,
+} = require("../../models/model");
+
+const Op = Sequelize.Op;
+
+module.exports = {
+  // List
+  list: async (req, res) => {
+    const mPegawai = await Pegawai.findAll({
+      include: [
+        {
+          model: Ptkp,
+          as: "ptkp",
+          attributes: ["kode_ptkp", "keterangan_ptkp"],
+        },
+        {
+          model: Divisi,
+          as: "divisi",
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+        },
+        {
+          model: Posisi,
+          as: "posisi",
+          attributes: ["kode_posisi", "nama_posisi"],
+        },
+        {
+          model: Dpa,
+          as: "dpa",
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+        },
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ],
+    });
+    res.json(mPegawai);
+  },
+  // Datatable
+  data: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "view"))) {
+    //   return error(res).permissionError();
+    // }
+
+    var dataTableObj = await datatable(req.body);
+    var count = await Pegawai.count();
+    var modules = await Pegawai.findAndCountAll({
+      ...dataTableObj,
+      include: [
+        {
+          model: Ptkp,
+          as: "ptkp",
+          attributes: ["kode_ptkp", "keterangan_ptkp"],
+        },
+        {
+          model: Divisi,
+          as: "divisi",
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+        },
+        {
+          model: Posisi,
+          as: "posisi",
+          attributes: ["kode_posisi", "nama_posisi"],
+        },
+        {
+          model: Dpa,
+          as: "dpa",
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+        },
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ],
+    });
+
+    res.json({
+      recordsFiltered: modules.count,
+      recordsTotal: count,
+      items: modules.rows,
+    });
+  },
+  // Get One Row require ID
+  get: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "view"))) {
+    //   return error(res).permissionError();
+    // }
+
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        kode_pegawai: req.query.kode_pegawai,
+      },
+      include: [
+        {
+          model: Ptkp,
+          as: "ptkp",
+          attributes: ["kode_ptkp", "keterangan_ptkp"],
+        },
+        {
+          model: Divisi,
+          as: "divisi",
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+        },
+        {
+          model: Posisi,
+          as: "posisi",
+          attributes: ["kode_posisi", "nama_posisi"],
+        },
+        {
+          model: Dpa,
+          as: "dpa",
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+        },
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ],
+    });
+    res.json(mPegawai);
+  },
+  // Create
+  create: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "create"))) {
+    //   return error(res).permissionError();
+    // }
+
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const pegawai = await new Pegawai({
+      ...req.body,
+    }).save();
+
+    res.json({
+      status: true,
+      statusCode: 200,
+      message: "Pegawai " + pegawai.kode_pegawai + " berhasil ditambah.",
+    });
+  },
+  // Update
+  update: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "update"))) {
+    //   return error(res).permissionError();
+    // }
+
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    await Pegawai.update(
+      { ...req.body },
+      { where: { kode_pegawai: req.query.kode_pegawai } }
+    );
+
+    res.json({
+      status: true,
+      statusCode: 200,
+      message: "Pegawai " + req.query.kode_pegawai + " berhasil diubah.",
+    });
+  },
+  // Delete
+  delete: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "delete"))) {
+    //   return error(res).permissionError();
+    // }
+
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    await Pegawai.destroy({
+      where: {
+        kode_pegawai: req.query.kode_pegawai,
+      },
+    });
+    res.send({
+      status: true,
+      message: "Pegawai " + req.query.kode_pegawai + " berhasil dihapus.",
+    });
+  },
+  // Validation
+  validate: (type) => {
+    let mPegawai = null;
+    const ruleKodePegawai = query("kode_pegawai")
+      .trim()
+      .notEmpty()
+      .custom(async (value) => {
+        mPegawai = await Pegawai.findOne({
+          where: {
+            kode_pegawai: {
+              [Op.iLike]: value,
+            },
+          },
+        });
+        if (!mPegawai) {
+          return Promise.reject("Data not found!");
+        }
+      });
+    const ruleCreateKodePegawai = body("kode_pegawai")
+      .trim()
+      .notEmpty()
+      .custom(async (value) => {
+        mPegawai = await Pegawai.findOne({
+          where: {
+            kode_pegawai: {
+              [Op.iLike]: value,
+            },
+          },
+        });
+        if (mPegawai) {
+          return Promise.reject("Data already exist!");
+        }
+      });
+    const ruleNamaPegawai = body("namalengkap_pegawai").trim().notEmpty();
+    const ruleNoKtp = body("noktp_pegawai").trim().notEmpty();
+    const ruleJenisKelamin = body("jeniskelamin_pegawai").trim().notEmpty();
+    const ruleTanggalLahir = body("tanggallahir_pegawai").isDate().notEmpty();
+    const ruleGolDarah = body("goldarah_pegawai").trim();
+    const ruleStatusPernikahan = body("statuspernikahan_pegawai")
+      .trim()
+      .notEmpty();
+    const ruleAgama = body("agama_pegawai").trim();
+    const ruleNoTelp = body("notelp_pegawai").trim();
+    const ruleEmailPribadi = body("emailpribadi_pegawai")
+      .trim()
+      .isEmail()
+      .custom(async (value) => {
+        mPegawai = await Pegawai.findOne({
+          where: {
+            emailpribadi_pegawai: {
+              [Op.iLike]: value,
+            },
+          },
+        });
+        if (mPegawai) {
+          return Promise.reject("Email already exist!");
+        }
+      });
+    const ruleEmailJsc = body("emailjsc_pegawai").trim().isEmail().optional();
+    const ruleFoto = body("foto_pegawai")
+      .optional()
+      .custom(async (value) => {
+        if (value) {
+          mFile = await File.findByPk(value);
+          if (!mFile) {
+            return Promise.reject("File foto tidak ditemukan!");
+          }
+        }
+      });
+    const ruleAlamatKtp = body("alamatktp_pegawai").trim();
+    const ruleAlamatDomisili = body("domisili_pegawai").trim();
+    const ruleNamaKontakDarurat = body("namakontakdarurat_pegawai").trim();
+    const ruleNoTelpDarurat = body("notelpdarurat_pegawai").trim();
+    const ruleNoRek = body("norek_pegawai").trim();
+    const ruleBankRek = body("bankrek_pegawai").trim();
+    const ruleNpwp = body("npwp_pegawai").trim();
+    const ruleNoBpjsKes = body("nobpjskesehatan_pegawai").trim();
+    const ruleNoBpjsKet = body("nobpjsketenagakerjaan_pegawai").trim();
+    const ruleTanggalBergabung = body("tanggalbergabung_pegawai")
+      .isDate()
+      .optional();
+    const ruleTanggalLulus = body("tanggallulus_pegawai").isDate().optional();
+    const ruleStatus = body("status_pegawai").trim();
+    const rulePtkp = body("ptkp_pegawai")
+      .trim()
+      .optional()
+      .custom(async (value) => {
+        if (value) {
+          mPtkp = await Ptkp.findOne({
+            where: {
+              kode_ptkp: value,
+            },
+          });
+          if (!mPtkp) {
+            return Promise.reject("PTKP tidak ditemukan!");
+          }
+        }
+      });
+    const ruleDivisi = body("kode_divisi")
+      .trim()
+      .optional()
+      .custom(async (value) => {
+        if (value) {
+          mDivisi = await Divisi.findOne({
+            where: {
+              kode_divisi: value,
+            },
+          });
+          if (!mDivisi) {
+            return Promise.reject("Divisi tidak ditemukan!");
+          }
+        }
+      });
+    const rulePosisi = body("kode_posisi")
+      .trim()
+      .optional()
+      .custom(async (value) => {
+        if (value) {
+          mPosisi = await Posisi.findOne({
+            where: {
+              kode_posisi: value,
+            },
+          });
+          if (!mPosisi) {
+            return Promise.reject("Posisi tidak ditemukan!");
+          }
+        }
+      });
+    const ruleDpa = body("kode_dpa")
+      .trim()
+      .optional()
+      .custom(async (value) => {
+        if (value) {
+          mDpa = await Dpa.findOne({
+            where: {
+              kode_dpa: value,
+            },
+          });
+          if (!mDpa) {
+            return Promise.reject("DPA tidak ditemukan!");
+          }
+        }
+      });
+
+    switch (type) {
+      case "create":
+        {
+          return [
+            ruleCreateKodePegawai,
+            ruleNamaPegawai,
+            ruleNoKtp,
+            ruleJenisKelamin,
+            ruleTanggalLahir,
+            ruleGolDarah,
+            ruleStatusPernikahan,
+            ruleAgama,
+            ruleNoTelp,
+            ruleEmailPribadi,
+            ruleEmailJsc,
+            ruleFoto,
+            ruleAlamatKtp,
+            ruleAlamatDomisili,
+            ruleNamaKontakDarurat,
+            ruleNoTelpDarurat,
+            ruleNoRek,
+            ruleBankRek,
+            ruleNpwp,
+            ruleNoBpjsKes,
+            ruleNoBpjsKet,
+            ruleTanggalBergabung,
+            ruleTanggalLulus,
+            ruleStatus,
+            rulePtkp,
+            ruleDivisi,
+            rulePosisi,
+            ruleDpa,
+          ];
+        }
+        break;
+      case "update":
+        {
+          return [
+            ruleKodePegawai,
+            ruleNamaPegawai.optional(),
+            ruleNoKtp.optional(),
+            ruleJenisKelamin.optional(),
+            ruleTanggalLahir.optional(),
+            ruleGolDarah.optional(),
+            ruleStatusPernikahan.optional(),
+            ruleAgama.optional(),
+            ruleNoTelp.optional(),
+            ruleEmailPribadi.optional(),
+            ruleEmailJsc.optional(),
+            ruleFoto.optional(),
+            ruleAlamatKtp.optional(),
+            ruleAlamatDomisili.optional(),
+            ruleNamaKontakDarurat.optional(),
+            ruleNoTelpDarurat.optional(),
+            ruleNoRek.optional(),
+            ruleBankRek.optional(),
+            ruleNpwp.optional(),
+            ruleNoBpjsKes.optional(),
+            ruleNoBpjsKet.optional(),
+            ruleTanggalBergabung.optional(),
+            ruleTanggalLulus.optional(),
+            ruleStatus.optional(),
+            rulePtkp.optional(),
+            ruleDivisi.optional(),
+            rulePosisi.optional(),
+            ruleDpa.optional(),
+          ];
+        }
+        break;
+      case "get":
+        {
+          return [ruleKodePegawai];
+        }
+        break;
+      case "delete":
+        {
+          return [ruleKodePegawai];
+        }
+        break;
+    }
+  },
+};
