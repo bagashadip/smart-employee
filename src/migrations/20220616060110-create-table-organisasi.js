@@ -6,33 +6,33 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       kode_organisasi: {
         allowNull: false,
         unique: true,
-        type: Sequelize.STRING(30)
+        type: Sequelize.STRING(30),
       },
       nama_organisasi: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       logo_organisasi: {
-        type: Sequelize.TEXT
+        type: Sequelize.UUID,
       },
       longitude_organisasi: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       latitude_organisasi: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       radiuslokasi_organisasi: {
-        type: Sequelize.INTEGER(6)
+        type: Sequelize.INTEGER(6),
       },
       alamat_organisasi: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       notelp_organisasi: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       createdAt: {
         type: Sequelize.DATE,

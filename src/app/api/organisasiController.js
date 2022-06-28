@@ -11,7 +11,13 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
-    const mOrganisasi = await Organisasi.findAll();
+    const mOrganisasi = await Organisasi.findAll({
+      include: {
+        model: File,
+        as: "logo",
+        attributes: ["name", "path", "extension", "size"],
+      },
+    });
     res.json(mOrganisasi);
   },
   // Datatable
@@ -22,7 +28,14 @@ module.exports = {
 
     var dataTableObj = await datatable(req.body);
     var count = await Organisasi.count();
-    var modules = await Organisasi.findAndCountAll(dataTableObj);
+    var modules = await Organisasi.findAndCountAll({
+      ...dataTableObj,
+      include: {
+        model: File,
+        as: "logo",
+        attributes: ["name", "path", "extension", "size"],
+      },
+    });
 
     res.json({
       recordsFiltered: modules.count,

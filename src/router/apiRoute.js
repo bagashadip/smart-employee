@@ -14,6 +14,7 @@ const dpaController = require("../app/api/dpaController");
 const organisasiController = require("../app/api/organisasiController");
 const fileCategoryController = require("../app/file/fileCategoryController");
 const fileController = require("../app/file/fileController");
+const unitKerjaController = require("../app/api/unitkerjaController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -197,5 +198,27 @@ organisasiRoute.delete(
 router.post("/organisasi/data", organisasiController.data);
 router.get("/organisasi/list", organisasiController.list);
 /* Organisasi Route */
+
+/* Unit Kerja Route */
+const unitKerjaRoute = router.route("/unit-kerja");
+unitKerjaRoute.get(
+  unitKerjaController.validate("get"),
+  unitKerjaController.get
+);
+unitKerjaRoute.post(
+  unitKerjaController.validate("create"),
+  unitKerjaController.create
+);
+unitKerjaRoute.patch(
+  unitKerjaController.validate("update"),
+  unitKerjaController.update
+);
+unitKerjaRoute.delete(
+  unitKerjaController.validate("delete"),
+  unitKerjaController.delete
+);
+router.post("/unit-kerja/data", unitKerjaController.data);
+router.get("/unit-kerja/list", unitKerjaController.list);
+/* Unit Kerja Route */
 
 module.exports = router;

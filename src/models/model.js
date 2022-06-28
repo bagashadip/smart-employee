@@ -51,8 +51,8 @@ User.belongsTo(Role, {
 Pegawai.belongsTo(File, {
   as: "foto",
   foreignKey: "foto_pegawai",
-  targetKey: "id"
-})
+  targetKey: "id",
+});
 
 Divisi.belongsTo(UnitKerja, {
   as: "unitkerja",
@@ -70,6 +70,24 @@ Permission.belongsTo(Role, {
   as: "role",
   foreignKey: "kode_role",
   targetKey: "kode_role",
+});
+
+Organisasi.belongsTo(File, {
+  as: "logo",
+  foreignKey: "logo_organisasi",
+  targetKey: "id",
+});
+
+UnitKerja.belongsTo(Organisasi, {
+  as: "organisasi",
+  foreignKey: "kode_organisasi",
+  targetKey: "kode_organisasi",
+});
+
+UnitKerja.belongsTo(File, {
+  as: "logo",
+  foreignKey: "logo_unitkerja",
+  targetKey: "id",
 });
 
 async function authenticate() {

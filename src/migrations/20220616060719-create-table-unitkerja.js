@@ -6,33 +6,33 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       kode_unitkerja: {
         allowNull: false,
         unique: true,
-        type: Sequelize.STRING(30)
+        type: Sequelize.STRING(30),
       },
       nama_unitkerja: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.UUID,
       },
       logo_unitkerja: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       longitude_unitkerja: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       latitude_unitkerja: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       radiuslokasi_unitkerja: {
-        type: Sequelize.INTEGER(6)
+        type: Sequelize.INTEGER(6),
       },
       alamat_unitkerja: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       notelp_unitkerja: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       kode_organisasi: {
         type: Sequelize.STRING(100),

@@ -4,11 +4,11 @@ module.exports = (sequelize, DataTypes) => {
   const pegawai = sequelize.define(
     "tbl_pegawai",
     {
-        id_pegawai: {
+      id_pegawai: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
-    },
+        autoIncrement: true,
+      },
       kode_pegawai: DataTypes.STRING,
       namalengkap_pegawai: DataTypes.STRING,
       noktp_pegawai: DataTypes.STRING,
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       notelp_pegawai: DataTypes.STRING,
       emailpribadi_pegawai: DataTypes.STRING,
       emailjsc_pegawai: DataTypes.STRING,
-      foto_pegawai: DataTypes.TEXT,
+      foto_pegawai: DataTypes.UUID,
       alamatktp_pegawai: DataTypes.TEXT,
       alamatdomisili_pegawai: DataTypes.TEXT,
       namakontakdarurat_pegawai: DataTypes.STRING,
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       kode_posisi: DataTypes.STRING,
     },
     {
-      freezeTableName: true
+      freezeTableName: true,
     }
   );
   return pegawai;
