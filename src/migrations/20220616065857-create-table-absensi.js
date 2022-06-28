@@ -6,28 +6,28 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       foto_absensi: {
-        type: Sequelize.TEXT
+        type: Sequelize.UUID,
       },
       longitude_absensi: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       latitude_absensi: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       label_absensi: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       catatan_absensi: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       tipe_absensi: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       timestamp_absensi: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       kode_pegawai: {
         type: Sequelize.STRING(30),

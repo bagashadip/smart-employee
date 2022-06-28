@@ -17,6 +17,7 @@ const mPermission = require("./permission");
 const mDpa = require("./dpa");
 const mOrganisasi = require("./organisasi");
 const mPosisi = require("./posisi");
+const mAbsensi = require("./absensi");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -34,6 +35,7 @@ const Permission = mPermission(sequelize, Sequelize);
 const Dpa = mDpa(sequelize, Sequelize);
 const Organisasi = mOrganisasi(sequelize, Sequelize);
 const Posisi = mPosisi(sequelize, Sequelize);
+const Absensi = mAbsensi(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -116,6 +118,18 @@ UnitKerja.belongsTo(File, {
   targetKey: "id",
 });
 
+Absensi.belongsTo(File, {
+  as: "foto",
+  foreignKey: "foto_absensi",
+  targetKey: "id",
+});
+
+Absensi.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
@@ -143,4 +157,5 @@ module.exports = {
   Dpa,
   Organisasi,
   Posisi,
+  Absensi,
 };
