@@ -95,7 +95,6 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    req.body.timestamp_absensi = new Date();
     const absensi = await new Absensi({
       ...req.body,
     }).save();
@@ -153,6 +152,7 @@ module.exports = {
           }
         }
       });
+    const ruleTimeStamp = body("timestamp_absensi").trim().notEmpty();
 
     switch (type) {
       case "create":
@@ -165,6 +165,7 @@ module.exports = {
             ruleCatatan,
             ruleTipe,
             ruleKodePegawai,
+            ruleTimeStamp,
           ];
         }
         break;
