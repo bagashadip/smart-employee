@@ -20,6 +20,7 @@ const pegawaiController = require("../app/api/pegawaiController");
 const userController = require("../app/api/userController");
 const absensiController = require("../app/api/absensiController");
 const kalkulasiJarakController = require("../app/api/kalkulasiJarakController");
+const historiPresensiController = require("../app/api/historiPresensiController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -286,5 +287,13 @@ kalkulasiRoute.post(
   kalkulasiJarakController.create
 );
 /* Kalkulasi Jarak Route */
+
+/* Historu Presensi Route */
+const historiPresensiRoute = router.route("/histori-presensi");
+historiPresensiRoute.get(
+  historiPresensiController.validate("get"),
+  historiPresensiController.get
+);
+/* Historu Presensi Route */
 
 module.exports = router;
