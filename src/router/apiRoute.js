@@ -21,6 +21,7 @@ const userController = require("../app/api/userController");
 const absensiController = require("../app/api/absensiController");
 const kalkulasiJarakController = require("../app/api/kalkulasiJarakController");
 const historiPresensiController = require("../app/api/historiPresensiController");
+const kontakListController = require("../app/api/kontaklistController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -288,12 +289,20 @@ kalkulasiRoute.post(
 );
 /* Kalkulasi Jarak Route */
 
-/* Historu Presensi Route */
+/* Histori Presensi Route */
 const historiPresensiRoute = router.route("/histori-presensi");
 historiPresensiRoute.get(
   historiPresensiController.validate("get"),
   historiPresensiController.get
 );
-/* Historu Presensi Route */
+/* Histori Presensi Route */
+
+/* Kontak List Route */
+const kontakListRoute = router.route("/kontak-list");
+kontakListRoute.get(
+  kontakListController.validate("get"),
+  kontakListController.get
+);
+/* Kontak List Route */
 
 module.exports = router;

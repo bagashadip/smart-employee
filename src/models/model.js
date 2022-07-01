@@ -18,6 +18,7 @@ const mDpa = require("./dpa");
 const mOrganisasi = require("./organisasi");
 const mPosisi = require("./posisi");
 const mAbsensi = require("./absensi");
+const mAsn = require("./asn");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -36,6 +37,7 @@ const Dpa = mDpa(sequelize, Sequelize);
 const Organisasi = mOrganisasi(sequelize, Sequelize);
 const Posisi = mPosisi(sequelize, Sequelize);
 const Absensi = mAbsensi(sequelize, Sequelize);
+const Asn = mAsn(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -80,6 +82,24 @@ Pegawai.belongsTo(Dpa, {
   as: "dpa",
   foreignKey: "kode_dpa",
   targetKey: "kode_dpa",
+});
+
+Asn.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi",
+});
+
+Asn.belongsTo(Jabatan, {
+  as: "jabatan",
+  foreignKey: "kode_jabatan",
+  targetKey: "kode_jabatan",
+});
+
+Asn.belongsTo(File, {
+  as: "foto",
+  foreignKey: "foto_asn",
+  targetKey: "id",
 });
 
 Divisi.belongsTo(UnitKerja, {
@@ -158,4 +178,5 @@ module.exports = {
   Organisasi,
   Posisi,
   Absensi,
+  Asn,
 };

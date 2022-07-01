@@ -1,0 +1,124 @@
+// const _module = "banner-category";
+const _ = require("lodash");
+const { query, validationResult } = require("express-validator");
+const error = require("../../util/errors");
+const { Pegawai, Asn, Posisi } = require("../../models/model");
+const date = require("date-and-time");
+const posisi = require("../../models/posisi");
+
+module.exports = {
+  // Create
+  get: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "create"))) {
+    //   return error(res).permissionError();
+    // }
+
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+    const kategori = req.query.kategori;
+    let resData = null;
+    let qWhere = {
+      where: {
+        statusaktif_asn: "Aktif",
+      },
+      attributes: [
+        "nama_asn",
+        "jabatan_asn",
+        "notelp_asn",
+        "email_asn",
+        "foto_asn",
+      ],
+      order: [["nama_asn", "ASC"]],
+    };
+    let qWherePegawai = {
+      where: {
+        statusaktif_pegawai: "Aktif",
+      },
+      include: [
+        {
+          model: Posisi,
+          as: "posisi",
+          attributes: ["nama_posisi"],
+        },
+      ],
+      attributes: [
+        "namalengkap_pegawai",
+        "kode_posisi",
+        "notelp_pegawai",
+        "emailpribadi_pegawai",
+        "foto_pegawai",
+      ],
+      order: [["namalengkap_pegawai", "ASC"]],
+    };
+
+    if (kategori === "ALL") {
+      qWhere = qWhere;
+      qWherePegawai = qWherePegawai;
+    } else if (kategori === "ASN") {
+      qWhere.where.status_asn = "ASN";
+    } else if (kategori === "CASN") {
+      qWhere.where.status_asn = "CASN";
+    } else if (kategori === "TA") {
+      qWherePegawai = qWherePegawai;
+    }
+
+    let mRes = null;
+    let tempRes = null;
+    if (kategori === "TA") {
+      mRes = await Pegawai.findAll(qWherePegawai);
+    } else if (kategori === "ALL") {
+      let mAsn = await Asn.findAll(qWhere);
+      let mPegawai = await Pegawai.findAll(qWherePegawai);
+
+      let arrAsn = JSON.parse(JSON.stringify(mAsn));
+      let arrPegawai = JSON.parse(JSON.stringify(mPegawai));
+
+      mRes = arrAsn.concat(arrPegawai);
+      mRes.sort(function (a, b) {
+        var keyA = "nama_asn" in a ? a.nama_asn : a.namalengkap_pegawai,
+          keyB = "nama_asn" in b ? b.nama_asn : b.namalengkap_pegawai;
+        // Compare the 2 dates
+        if (keyA < keyB) return -1;
+        if (keyA > keyB) return 1;
+        return 0;
+      });
+      //   mRes.sort();
+    } else {
+      mRes = await Asn.findAll(qWhere);
+    }
+
+    tempRes = JSON.parse(JSON.stringify(mRes));
+    resData = tempRes.map((v) => ({
+      nama: "nama_asn" in v ? v.nama_asn : v.namalengkap_pegawai,
+      jabatan: "jabatan_asn" in v ? v.jabatan_asn : v.posisi.nama_posisi,
+      no_hp: "notelp_asn" in v ? v.notelp_asn : v.notelp_pegawai,
+      email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
+      foto: "foto_asn" in v ? v.foto_asn : v.foto_pegawai,
+      kategori: kategori,
+    }));
+
+    res.send(resData);
+  },
+  // Validation
+  validate: (type) => {
+    const ruleKategori = query("kategori")
+      .notEmpty()
+      .custom(async (value) => {
+        const listKategori = ["ALL", "ASN", "CASN", "TA"];
+        let isKategori = listKategori.includes(value);
+        if (!isKategori) {
+          return Promise.reject("Kategori tidak terdaftar!");
+        }
+      });
+
+    switch (type) {
+      case "get":
+        {
+          return [ruleKategori];
+        }
+        break;
+    }
+  },
+};
