@@ -2,8 +2,11 @@
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
+const Sequelize = require("sequelize");
 const { Absensi } = require("../../models/model");
 const date = require("date-and-time");
+const Op = Sequelize.Op;
+const moment = require("moment");
 
 module.exports = {
   // Create
@@ -20,6 +23,12 @@ module.exports = {
     const mAbsensi = await Absensi.findAll({
       where: {
         kode_pegawai: req.query.kode_pegawai,
+        timestamp_absensi: {
+          [Op.between]: [
+            moment(new Date(), "YYYY-MM-DD").subtract(1, "days"),
+            moment(new Date(), "YYYY-MM-DD"),
+          ],
+        },
       },
     });
 
