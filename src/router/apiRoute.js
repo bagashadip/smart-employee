@@ -303,6 +303,11 @@ kontakListRoute.get(
   kontakListController.validate("get"),
   kontakListController.get
 );
+const jumlahKontakRoute = router.route("/jumlah-kontak");
+jumlahKontakRoute.get(
+  kontakListController.validate("jumlahKontak"),
+  kontakListController.jumlahKontak
+);
 /* Kontak List Route */
 
 module.exports = router;

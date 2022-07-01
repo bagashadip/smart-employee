@@ -101,6 +101,60 @@ module.exports = {
 
     res.send(resData);
   },
+  jumlahKontak: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    let mAsn = await Asn.count({
+      where: {
+        statusaktif_asn: "Aktif",
+        status_asn: "ASN",
+      },
+    });
+
+    let mCasn = await Asn.count({
+      where: {
+        statusaktif_asn: "Aktif",
+        status_asn: "CASN",
+      },
+    });
+
+    let mTa = await Pegawai.count({
+      where: {
+        statusaktif_pegawai: "Aktif",
+      },
+    });
+
+    const kategori = req.query.kategori;
+    let resTotal = null;
+    if (kategori === "ALL") {
+      resTotal = {
+        jumlah_asn: mAsn,
+        jumlah_casn: mCasn,
+        jumlah_ta: mTa,
+        total: mAsn + mCasn + mTa,
+      };
+    } else if (kategori === "ASN") {
+      resTotal = {
+        jumlah_asn: mAsn,
+        total: mAsn,
+      };
+    } else if (kategori === "CASN") {
+      resTotal = {
+        jumlah_casn: mCasn,
+        total: mCasn,
+      };
+    } else if (kategori === "TA") {
+      resTotal = {
+        jumlah_ta: mTa,
+        total: mTa,
+      };
+    }
+
+    res.send(resTotal);
+  },
   // Validation
   validate: (type) => {
     const ruleKategori = query("kategori")
@@ -115,6 +169,11 @@ module.exports = {
 
     switch (type) {
       case "get":
+        {
+          return [ruleKategori];
+        }
+        break;
+      case "jumlahKontak":
         {
           return [ruleKategori];
         }
