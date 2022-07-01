@@ -25,7 +25,7 @@ stages:
 build:development:
   stage: build
   tags:
-    - docker
+    - employee
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
   script:
@@ -35,7 +35,7 @@ build:development:
 migrate:development:
   stage: migrate
   tags:
-    - docker
+    - employee
   when: manual
   environment:
     name: development
@@ -60,7 +60,7 @@ migrate:development:
 deploy:development:
   stage: deploy
   tags:
-    - docker
+    - employee
   when: manual
   environment:
     name: development
@@ -87,7 +87,7 @@ deploy:development:
 deploy:production:
   stage: deploy
   tags:
-    - docker
+    - employee
   only:
     - master
     - tags
