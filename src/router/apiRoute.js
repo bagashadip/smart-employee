@@ -22,6 +22,7 @@ const absensiController = require("../app/api/absensiController");
 const kalkulasiJarakController = require("../app/api/kalkulasiJarakController");
 const historiPresensiController = require("../app/api/historiPresensiController");
 const kontakListController = require("../app/api/kontaklistController");
+const profileController = require("../app/api/profileController");
 
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -309,5 +310,10 @@ jumlahKontakRoute.get(
   kontakListController.jumlahKontak
 );
 /* Kontak List Route */
+
+/* Profile Route */
+const profileRoute = router.route("/profile");
+profileRoute.get(profileController.validate("get"), profileController.get);
+/* Profile Route */
 
 module.exports = router;
