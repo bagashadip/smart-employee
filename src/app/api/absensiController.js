@@ -95,15 +95,36 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const absensi = await new Absensi({
-      ...req.body,
-    }).save();
-
-    res.json({
-      status: true,
-      statusCode: 200,
-      message: "Sukses melakukan absensi.",
+    const absensiValidate = await Absensi.count({
+      where: {
+        tipe_absensi: req.body.tipe_absensi,
+        kode_pegawai: req.body.kode_pegawai,
+        [Op.and]: [
+          Sequelize.where(
+            Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+            "=",
+            moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
+          ),
+        ],
+      },
     });
+    if (absensiValidate > 0) {
+      res.json({
+        status: false,
+        statusCode: 422,
+        msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
+      });
+    } else {
+      const absensi = await new Absensi({
+        ...req.body,
+      }).save();
+
+      res.json({
+        status: true,
+        statusCode: 200,
+        message: "Sukses melakukan absensi.",
+      });
+    }
   },
   // Validation
   validate: (type) => {
@@ -135,26 +156,7 @@ module.exports = {
     const ruleLatitude = body("latitude_organisasi").isFloat().optional();
     const ruleLabel = body("label_absensi").trim().notEmpty();
     const ruleCatatan = body("logo_organisasi").trim().optional();
-    const ruleTipe = body("tipe_absensi")
-      .trim()
-      .notEmpty()
-      .custom(async (value) => {
-        absensiValidate = await Absensi.count({
-          where: {
-            tipe_absensi: value,
-            [Op.and]: [
-              Sequelize.where(
-                Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
-                "=",
-                moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
-              ),
-            ],
-          },
-        });
-        if (absensiValidate > 0) {
-          return Promise.reject("Sudah melakukan absen " + value + "!");
-        }
-      });
+    const ruleTipe = body("tipe_absensi").trim().notEmpty();
     const ruleKodePegawai = body("kode_pegawai")
       .trim()
       .optional()
