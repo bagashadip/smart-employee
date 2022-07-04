@@ -52,9 +52,9 @@ module.exports = {
           include: [
             {
               model: File,
-              as: "foto"
-            }
-          ]
+              as: "foto",
+            },
+          ],
         },
       ],
       where: {
@@ -72,7 +72,7 @@ module.exports = {
     }
 
     loadedUser = user;
-    
+
     if (loadedUser.status_user !== "Aktif") {
       return res.status(401).json({
         statusCode: 401,
@@ -221,6 +221,56 @@ module.exports = {
       expires_in: process.env.JWT_EXPIRES_IN,
     });
   },
+  changePassword: async (req, res, _) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const username = req.body.username;
+    const oldPassword = req.body.old_password;
+    const newPassword = req.body.new_password;
+
+    const mUser = await User.findOne({
+      where: {
+        username_user: req.body.username,
+      },
+    });
+
+    if (mUser) {
+      const isEqual = await bcrypt.compare(oldPassword, mUser.password_user);
+      if (!isEqual) {
+        res.json({
+          statusCode: 404,
+          message: "Password lama tidak sesuai!",
+        });
+      } else {
+        const hashedPw = await bcrypt.hash(newPassword, 12);
+        if (oldPassword === newPassword) {
+          res.json({
+            statusCode: 422,
+            message: "Password tidak boleh sama!",
+          });
+        } else {
+          await User.update(
+            {
+              password_user: hashedPw,
+            },
+            {
+              where: {
+                username_user: username,
+              },
+            }
+          );
+
+          res.json({
+            statusCode: 200,
+            message: "Password berhasil diubah.",
+          });
+        }
+      }
+    }
+  },
   refreshToken: async (req, res, _) => {
     const token = req.body.token;
     const verify = new Token("refresh").verify(token);
@@ -278,6 +328,29 @@ module.exports = {
     }
   },
   validate: (type) => {
+    const ruleUsername = body("username")
+      .notEmpty()
+      .trim()
+      .custom(async (value) => {
+        const mUser = await User.findOne({
+          where: {
+            username_user: value,
+          },
+        });
+        if (!mUser) {
+          return Promise.reject("Username tidak ditemukan!");
+        }
+      });
+    const ruleNewPass = body("new_password")
+      .notEmpty()
+      .trim()
+      .isLength({ min: 6 })
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$.!%*#?&])[A-Za-z\d@$.!%*#?&]{8,}$/
+      )
+      .withMessage(
+        "Password should have minimum six characters, at least one letter, one number and one special character"
+      );
     switch (type) {
       case "checkUser":
         {
@@ -333,6 +406,11 @@ module.exports = {
                 "Password should have minimum six characters, at least one letter, one number and one special character"
               ),
           ];
+        }
+        break;
+      case "changePassword":
+        {
+          return [ruleUsername, ruleNewPass];
         }
         break;
     }
