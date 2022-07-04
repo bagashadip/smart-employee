@@ -23,12 +23,13 @@ module.exports = {
     const mAbsensi = await Absensi.findAll({
       where: {
         kode_pegawai: req.query.kode_pegawai,
-        timestamp_absensi: {
-          [Op.between]: [
-            moment(new Date(), "YYYY-MM-DD").subtract(1, "days"),
-            moment(new Date(), "YYYY-MM-DD"),
-          ],
-        },
+        [Op.and]: [
+          Sequelize.where(
+            Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+            "=",
+            moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
+          ),
+        ],
       },
     });
 

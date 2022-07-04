@@ -4,8 +4,8 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
+const moment = require("moment");
 const { Absensi, File, Pegawai } = require("../../models/model");
-
 const Op = Sequelize.Op;
 
 module.exports = {
@@ -110,6 +110,7 @@ module.exports = {
     let mAbsensi = null;
     let mFile = null;
     let mPegawai = null;
+    let absensiValidate = null;
     const ruleId = query("id_absensi")
       .trim()
       .notEmpty()
@@ -134,7 +135,26 @@ module.exports = {
     const ruleLatitude = body("latitude_organisasi").isFloat().optional();
     const ruleLabel = body("label_absensi").trim().notEmpty();
     const ruleCatatan = body("logo_organisasi").trim().optional();
-    const ruleTipe = body("tipe_absensi").trim().notEmpty();
+    const ruleTipe = body("tipe_absensi")
+      .trim()
+      .notEmpty()
+      .custom(async (value) => {
+        absensiValidate = await Absensi.count({
+          where: {
+            tipe_absensi: value,
+            [Op.and]: [
+              Sequelize.where(
+                Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+                "=",
+                moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
+              ),
+            ],
+          },
+        });
+        if (absensiValidate > 0) {
+          return Promise.reject("Sudah melakukan absen " + value + "!");
+        }
+      });
     const ruleKodePegawai = body("kode_pegawai")
       .trim()
       .optional()
