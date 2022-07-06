@@ -84,6 +84,34 @@ deploy:development:
             -e service_image="$APP_IMAGE:$CI_BUILD_REF_NAME"
             deploy/deploy-service.yml
 
+migrate:production:
+  stage: migrate
+  tags:
+    - employee
+  only:
+    - master
+    - tags
+  when: manual
+  environment:
+    name: production
+    url: "$PROD_URL"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - docker pull $ANSIBLE_IMAGE
+    - (echo "$PROD_INVENTORY") > deploy/inventory
+    - (echo "$PROD_ENV") > deploy/app_env
+    - (echo "$PROD_SWARM_ENV") > deploy/swarm_env
+    - (echo "$DOCKER_ENV") > deploy/docker_env
+  script:
+    - docker run --rm -i
+        -v `pwd`:/app
+        --env-file app_env
+        --env-file swarm_env
+        --env-file docker_env
+        --env ANSIBLE_HOST_KEY_CHECKING=False
+        $APP_IMAGE:$CI_BUILD_REF_NAME
+          npx sequelize-cli db:migrate 
+
 deploy:production:
   stage: deploy
   tags:

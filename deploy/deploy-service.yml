@@ -63,3 +63,8 @@
           JWT_REFRESH: "{{ lookup('env', 'JWT_REFRESH') | mandatory }}"
           JWT_EXPIRES_IN: "{{ lookup('env', 'JWT_EXPIRES_IN') | mandatory }}"
           JWT_REFRESH_EXPIRES_IN: "{{ lookup('env', 'JWT_REFRESH_EXPIRES_IN') | mandatory }}"
+
+          MAILER_EMAIL: "{{ lookup('env', 'MAILER_EMAIL') | mandatory }}"
+          MAILER_PASSWORD: "{{ lookup('env', 'MAILER_PASSWORD') | mandatory }}"
+          MAILER_HOST: "{{ lookup('env', 'MAILER_HOST') | mandatory }}"
+          MAILER_PORT: "{{ lookup('env', 'MAILER_PORT') | mandatory }}"
