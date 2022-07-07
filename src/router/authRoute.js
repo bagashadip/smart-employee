@@ -23,6 +23,12 @@ router.post(
   authController.changePassword
 );
 
+router.post(
+  "/forgot-username",
+  authController.validate("forgotUsername"),
+  authController.forgotUsername
+);
+
 router.post("/verify", authController.refreshToken);
 
 module.exports = router;

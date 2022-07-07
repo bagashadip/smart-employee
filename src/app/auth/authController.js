@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const Sequelize = require("sequelize");
 const Token = require("./token");
 const error = require("../../util/errors");
+const mailer = require("../../util/mailer");
 
 const Op = Sequelize.Op;
 
@@ -271,6 +272,35 @@ module.exports = {
       }
     }
   },
+  forgotUsername: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const email = req.body.email;
+
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        emailpribadi_pegawai: email,
+      },
+      include: [
+        {
+          as: "user",
+          model: User,
+          attributes: ["username_user"],
+        },
+      ],
+    });
+
+    let data = {
+      email: email,
+      username: mPegawai.user.username_user,
+    };
+
+    const sendMail = await mailer(data, "forgot-username");
+    res.send(sendMail);
+  },
   refreshToken: async (req, res, _) => {
     const token = req.body.token;
     const verify = new Token("refresh").verify(token);
@@ -351,6 +381,20 @@ module.exports = {
       .withMessage(
         "Password should have minimum six characters, at least one letter, one number and one special character"
       );
+    const ruleEmail = body("email")
+      .notEmpty()
+      .trim()
+      .isEmail()
+      .custom(async (value) => {
+        const mPegawai = await Pegawai.findOne({
+          where: {
+            emailpribadi_pegawai: value,
+          },
+        });
+        if (!mPegawai) {
+          return Promise.reject("Email pegawai tidak ditemukan!");
+        }
+      });
     switch (type) {
       case "checkUser":
         {
@@ -413,6 +457,9 @@ module.exports = {
           return [ruleUsername, ruleNewPass];
         }
         break;
+      case "forgotUsername": {
+        return [ruleEmail];
+      }
     }
   },
 };

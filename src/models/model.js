@@ -84,6 +84,12 @@ Pegawai.belongsTo(Dpa, {
   targetKey: "kode_dpa",
 });
 
+Pegawai.belongsTo(User, {
+  as: "user",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
 Asn.belongsTo(Divisi, {
   as: "divisi",
   foreignKey: "kode_divisi",
