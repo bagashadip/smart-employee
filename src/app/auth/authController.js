@@ -358,60 +358,58 @@ module.exports = {
     }
   },
   refreshToken: async (req, res, _) => {
-    const token = req.body.token;
-    const verify = new Token("refresh").verify(token);
-
-    if (verify) {
-      const user = await User.findByPk(verify.userId);
-      if (!user) {
-        return error(res).authenticationError(["User not found."]);
-      }
-      // Validate Role & Zone
-      const mUserRole = await UserRole.findOne({
-        attributes: ["id", "roles"],
-        where: {
-          userId: user.id,
-          zoneId: user.activeZone,
-        },
-      });
-      const mRole = await Role.findByPk(user.activeRole);
-      if (!mRole) {
-        return error(res).authenticationError(["Invalid Role."]);
-      }
-      if (mUserRole) {
-        if (mUserRole.roles.indexOf(mRole.slug) == -1) {
-          return error(res).authenticationError(["Invalid Role."]);
-        }
-      } else {
-        return error(res).authenticationError(["Invalid Zone."]);
-      }
-
-      const accesToken = new Token("password").generate({
-        userId: verify.userId,
-        scope: verify.scope,
-        grantType: "password",
-      });
-      const refreshToken = new Token("refresh").generate({
-        userId: verify.userId,
-        scope: verify.scope,
-        grantType: "password",
-      });
-      res.json({
-        token_type: "bearer",
-        access_token: accesToken,
-        refresh_token: refreshToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          activeZone: user.activeZone,
-          activeRole: user.activeRole,
-        },
-        expires_in: process.env.JWT_EXPIRES_IN,
-      });
-    } else {
-      return error(res).authenticationError(["Invalid token."]);
-    }
+    // const token = req.body.token;
+    // const verify = new Token("refresh").verify(token);
+    // if (verify) {
+    //   const user = await User.findByPk(verify.userId);
+    //   if (!user) {
+    //     return error(res).authenticationError(["User not found."]);
+    //   }
+    //   // Validate Role & Zone
+    //   const mUserRole = await UserRole.findOne({
+    //     attributes: ["id", "roles"],
+    //     where: {
+    //       userId: user.id,
+    //       zoneId: user.activeZone,
+    //     },
+    //   });
+    //   const mRole = await Role.findByPk(user.activeRole);
+    //   if (!mRole) {
+    //     return error(res).authenticationError(["Invalid Role."]);
+    //   }
+    //   if (mUserRole) {
+    //     if (mUserRole.roles.indexOf(mRole.slug) == -1) {
+    //       return error(res).authenticationError(["Invalid Role."]);
+    //     }
+    //   } else {
+    //     return error(res).authenticationError(["Invalid Zone."]);
+    //   }
+    //   const accesToken = new Token("password").generate({
+    //     userId: verify.userId,
+    //     scope: verify.scope,
+    //     grantType: "password",
+    //   });
+    //   const refreshToken = new Token("refresh").generate({
+    //     userId: verify.userId,
+    //     scope: verify.scope,
+    //     grantType: "password",
+    //   });
+    //   res.json({
+    //     token_type: "bearer",
+    //     access_token: accesToken,
+    //     refresh_token: refreshToken,
+    //     user: {
+    //       id: user.id,
+    //       email: user.email,
+    //       name: user.name,
+    //       activeZone: user.activeZone,
+    //       activeRole: user.activeRole,
+    //     },
+    //     expires_in: process.env.JWT_EXPIRES_IN,
+    //   });
+    // } else {
+    //   return error(res).authenticationError(["Invalid token."]);
+    // }
   },
   validate: (type) => {
     const ruleUsername = body("username")
