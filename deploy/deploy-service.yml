@@ -50,6 +50,7 @@
           NODE_ENV: "{{ lookup('env', 'NODE_ENV') | mandatory }}"
           TIME_ZONE: "{{ lookup('env', 'TIME_ZONE') | mandatory }}"
 
+          BASE_URL: "{{ lookup('env', 'BASE_URL') | mandatory }}"
           WHITELIST_URL: "{{ lookup('env', 'WHITELIST_URL') | mandatory }}"
           PORT: "{{ lookup('env', 'PORT') | mandatory }}"
 
