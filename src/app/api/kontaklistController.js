@@ -2,7 +2,7 @@
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
-const { Pegawai, Asn, Posisi } = require("../../models/model");
+const { Pegawai, Asn, Posisi, File } = require("../../models/model");
 const date = require("date-and-time");
 const posisi = require("../../models/posisi");
 
@@ -23,6 +23,13 @@ module.exports = {
       where: {
         statusaktif_asn: "Aktif",
       },
+      include: [
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ],
       attributes: [
         "nama_asn",
         "jabatan_asn",
@@ -41,6 +48,11 @@ module.exports = {
           model: Posisi,
           as: "posisi",
           attributes: ["nama_posisi"],
+        },
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
         },
       ],
       attributes: [
@@ -90,12 +102,13 @@ module.exports = {
     }
 
     tempRes = JSON.parse(JSON.stringify(mRes));
+    console.log("tempRes", tempRes);
     resData = tempRes.map((v) => ({
       nama: "nama_asn" in v ? v.nama_asn : v.namalengkap_pegawai,
       jabatan: "jabatan_asn" in v ? v.jabatan_asn : v.posisi.nama_posisi,
       no_hp: "notelp_asn" in v ? v.notelp_asn : v.notelp_pegawai,
       email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
-      foto: "foto_asn" in v ? v.foto_asn : v.foto_pegawai,
+      foto: v.foto.path,
       kategori: kategori,
     }));
 
