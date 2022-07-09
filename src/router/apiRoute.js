@@ -32,7 +32,7 @@ router.get("/file/category", uploadController.category);
 router.get("/file/mime-type", uploadController.mime);
 router.get("/file/default", uploadController.default);
 
-router.use(authMiddleware);
+router.use(authMiddleware); // dont move it to another line
 
 /* File Category Route */
 const fileCategoryRoute = router.route("/file-category");
@@ -269,6 +269,11 @@ userRoute.patch(userController.validate("update"), userController.update);
 userRoute.delete(userController.validate("delete"), userController.delete);
 router.post("/user/data", userController.data);
 router.get("/user/list", userController.list);
+router.post(
+  "/change-password",
+  userController.validate("changePassword"),
+  userController.changePassword
+);
 /* User Route */
 
 /* Absensi Route */

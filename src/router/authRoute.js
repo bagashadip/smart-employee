@@ -29,6 +29,8 @@ router.post(
   authController.forgotUsername
 );
 
+router.get("/reset-attempt", authController.resetAttempt);
+
 router.post("/verify", authController.refreshToken);
 
 module.exports = router;

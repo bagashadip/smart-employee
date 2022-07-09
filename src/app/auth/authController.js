@@ -4,6 +4,7 @@ const Sequelize = require("sequelize");
 const Token = require("./token");
 const error = require("../../util/errors");
 const mailer = require("../../util/mailer");
+const jwt = require("jsonwebtoken");
 
 const Op = Sequelize.Op;
 
@@ -114,6 +115,13 @@ module.exports = {
           [Op.iLike]: username,
         },
       },
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["emailpribadi_pegawai"],
+        },
+      ],
     });
 
     if (!user) {
@@ -153,6 +161,13 @@ module.exports = {
       );
 
       if (user.attempt_user + 1 > 2) {
+        const token = jwt.sign(
+          {
+            id_user: loadedUser.id_user,
+          },
+          process.env.JWT_SECRET
+        );
+
         await User.update(
           {
             status_user: "Non Aktif",
@@ -164,10 +179,23 @@ module.exports = {
           }
         );
 
-        return res.status(401).json({
-          statusCode: 401,
-          message: "Input password salah 3 kali. User dinonaktifkan.",
-        });
+        let data = {
+          email: loadedUser.pegawai.emailpribadi_pegawai,
+          message:
+            "<a href=" +
+            process.env.BASE_URL +
+            "/auth/reset-attempt?verify=" +
+            token +
+            ">Click to reset attempt login</a>",
+        };
+
+        const sendMail = await mailer(data);
+        if (sendMail) {
+          return res.status(401).json({
+            statusCode: 401,
+            message: "Input password salah 3 kali. User dinonaktifkan.",
+          });
+        }
       }
 
       const addLog = new Log({
@@ -296,10 +324,38 @@ module.exports = {
     let data = {
       email: email,
       username: mPegawai.user.username_user,
+      message:
+        "<p>Username anda: <b>" +
+        mPegawai.user.username_user +
+        "</b></p><br><br>",
     };
 
-    const sendMail = await mailer(data, "forgot-username");
+    const sendMail = await mailer(data);
     res.send(sendMail);
+  },
+  resetAttempt: async (req, res) => {
+    const token = req.query.verify;
+    const verify = jwt.verify(token, process.env.JWT_SECRET);
+    if (verify) {
+      const update = await User.update(
+        {
+          status_user: "Aktif",
+          attempt_user: 0,
+        },
+        {
+          where: {
+            id_user: verify.id_user,
+          },
+        }
+      );
+      if (update) {
+        res.send("Attempt user has been reset.");
+      } else {
+        response.status(400).send(new Error(update));
+      }
+    } else {
+      res.send("Token was invalid");
+    }
   },
   refreshToken: async (req, res, _) => {
     const token = req.body.token;

@@ -115,6 +115,56 @@ module.exports = {
       message: req.query.username_user + " berhasil dihapus.",
     });
   },
+  changePassword: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const username = req.body.username;
+    const oldPassword = req.body.old_password;
+    const newPassword = req.body.new_password;
+
+    const mUser = await User.findOne({
+      where: {
+        username_user: username,
+      },
+    });
+
+    if (mUser) {
+      const isEqual = await bcrypt.compare(oldPassword, mUser.password_user);
+      if (!isEqual) {
+        res.json({
+          statusCode: 404,
+          message: "Password lama tidak sesuai!",
+        });
+      } else {
+        const hashedPw = await bcrypt.hash(newPassword, 12);
+        if (oldPassword === newPassword) {
+          res.json({
+            statusCode: 422,
+            message: "Password tidak boleh sama!",
+          });
+        } else {
+          await User.update(
+            {
+              password_user: hashedPw,
+            },
+            {
+              where: {
+                username_user: username,
+              },
+            }
+          );
+
+          res.json({
+            statusCode: 200,
+            message: "Password berhasil diubah.",
+          });
+        }
+      }
+    }
+  },
   // Validation
   validate: (type) => {
     let mUser = null;
@@ -190,6 +240,31 @@ module.exports = {
           }
         }
       });
+    const ruleUsernameChangePass = body("username")
+      .trim()
+      .notEmpty()
+      .custom(async (value) => {
+        mUser = await User.findOne({
+          where: {
+            username_user: {
+              [Op.iLike]: value,
+            },
+          },
+        });
+        if (!mUser) {
+          return Promise.reject("User tidak ditemukan!");
+        }
+      });
+    const ruleNewPass = body("new_password")
+      .notEmpty()
+      .trim()
+      .isLength({ min: 6 })
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$.!%*#?&])[A-Za-z\d@$.!%*#?&]{8,}$/
+      )
+      .withMessage(
+        "Password should have minimum six characters, at least one letter, one number and one special character"
+      );
 
     switch (type) {
       case "create":
@@ -224,6 +299,11 @@ module.exports = {
       case "delete":
         {
           return [ruleUsername];
+        }
+        break;
+      case "changePassword":
+        {
+          return [ruleUsernameChangePass, ruleNewPass];
         }
         break;
     }

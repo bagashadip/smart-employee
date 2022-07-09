@@ -2,7 +2,7 @@ const _ = require("lodash");
 const nodemailer = require("nodemailer");
 var fs = require("fs");
 
-module.exports = async (data, type) => {
+module.exports = async (data) => {
   // Create a SMTP transport object
   return new Promise((resolve, reject) => {
     let transport = nodemailer.createTransport(
@@ -17,11 +17,6 @@ module.exports = async (data, type) => {
     );
 
     console.log("MAILER -> SMTP Configured");
-
-    let msg = null;
-    if (type === "forgot-username") {
-      msg = "<p>Username anda: <b>" + data.username + "</b></p><br><br>";
-    }
 
     // Message object
     var message = {
@@ -38,7 +33,7 @@ module.exports = async (data, type) => {
       // text: "Hello to myself!",
 
       // HTML body
-      html: msg,
+      html: data.message,
     };
 
     console.log("MAILER -> Sending Mail");
