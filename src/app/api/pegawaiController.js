@@ -11,6 +11,8 @@ const {
   Posisi,
   Dpa,
   File,
+  UnitKerja,
+  Organisasi,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -119,6 +121,20 @@ module.exports = {
           model: Divisi,
           as: "divisi",
           attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+          include: [
+            {
+              model: UnitKerja,
+              as: "unitkerja",
+              attributes: ["kode_unitkerja", "nama_unitkerja"],
+              include: [
+                {
+                  model: Organisasi,
+                  as: "organisasi",
+                  attributes: ["kode_organisasi", "nama_organisasi"],
+                },
+              ],
+            },
+          ],
         },
         {
           model: Posisi,
