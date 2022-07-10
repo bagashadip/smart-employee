@@ -106,8 +106,8 @@ module.exports = {
     resData = tempRes.map((v) => ({
       nama: "nama_asn" in v ? v.nama_asn : v.namalengkap_pegawai,
       jabatan: "jabatan_asn" in v ? v.jabatan_asn : v.posisi.nama_posisi,
-      no_hp: "notelp_asn" in v ? v.notelp_asn : v.notelp_pegawai,
-      email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
+      // no_hp: "notelp_asn" in v ? v.notelp_asn : v.notelp_pegawai,
+      // email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
       foto: v.foto.path,
       kategori: kategori,
     }));
