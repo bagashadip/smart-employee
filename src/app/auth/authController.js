@@ -408,7 +408,10 @@ module.exports = {
 
     let data = {
       email: email,
-      message: "<p>Your OTP: </p><h3>" + otp + "</h3>",
+      message:
+        "<p>Berikut adalah kode OTP anda: </p><h3>" +
+        otp +
+        "</h3><br><br><i>Jangan beritahukan kepada pihak manapun karena ini bersifat rahasia dan hanya berlaku selama 10 Menit.</i>",
     };
 
     const sendMail = await mailer(data);
