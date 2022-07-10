@@ -5,6 +5,7 @@ const Token = require("./token");
 const error = require("../../util/errors");
 const mailer = require("../../util/mailer");
 const jwt = require("jsonwebtoken");
+const speakeasy = require("speakeasy");
 
 const Op = Sequelize.Op;
 
@@ -357,6 +358,152 @@ module.exports = {
       res.send("Token was invalid");
     }
   },
+  forgotPassword: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const email = req.body.email;
+    var secret = speakeasy.generateSecret();
+    var otp = speakeasy.totp({
+      secret: secret.base32,
+      encoding: "base32",
+      digits: 4,
+      step: 60,
+      window: 10,
+    });
+
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        emailpribadi_pegawai: email,
+      },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["username_user"],
+        },
+      ],
+    });
+
+    if (mPegawai) {
+      await User.update(
+        {
+          otp_secret: secret.base32,
+        },
+        {
+          where: {
+            username_user: mPegawai.user.username_user,
+          },
+        }
+      );
+    } else {
+      res.status(404).json({
+        status: false,
+        statusCode: 404,
+        message: "User tidak ditemukan!",
+      });
+    }
+
+    let data = {
+      email: email,
+      message: "<p>Your OTP: </p><h3>" + otp + "</h3>",
+    };
+
+    const sendMail = await mailer(data);
+    if (sendMail) {
+      return res.status(200).json({
+        status: true,
+        statusCode: 200,
+        message: "Kode OTP telah dikirim ke email anda.",
+      });
+    }
+  },
+  verifyOtp: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const email = req.body.email;
+    const otp = req.body.otp;
+
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        emailpribadi_pegawai: email,
+      },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["otp_secret"],
+        },
+      ],
+    });
+
+    if (mPegawai) {
+      var verifyToken = speakeasy.totp.verify({
+        secret: mPegawai.user.otp_secret,
+        encoding: "base32",
+        token: otp,
+        digits: 4,
+        step: 60,
+        window: 10,
+      });
+
+      if (!verifyToken) {
+        res.status(400).json({
+          status: false,
+          statusCode: 400,
+          message: "Invalid OTP",
+        });
+      } else {
+        res.status(200).json({
+          status: true,
+          statusCode: 200,
+          otp_secret: mPegawai.user.otp_secret,
+          message: "OTP has been verfied.",
+        });
+      }
+    }
+  },
+  resetPassword: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const otpSecret = req.body.otp_secret;
+    const newPassword = req.body.new_password;
+
+    const mUser = await User.findOne({
+      where: {
+        otp_secret: otpSecret,
+      },
+    });
+
+    if (mUser) {
+      const hashedPw = await bcrypt.hash(newPassword, 12);
+      await User.update(
+        {
+          otp_secret: null,
+          password_user: hashedPw,
+        },
+        {
+          where: {
+            otp_secret: otpSecret,
+          },
+        }
+      );
+
+      res.json({
+        status: true,
+        statusCode: 200,
+        message: "Password berhasil diubah.",
+      });
+    }
+  },
   refreshToken: async (req, res, _) => {
     // const token = req.body.token;
     // const verify = new Token("refresh").verify(token);
@@ -446,9 +593,23 @@ module.exports = {
           },
         });
         if (!mPegawai) {
-          return Promise.reject("Email pegawai tidak ditemukan!");
+          return Promise.reject("Email user tidak ditemukan!");
         }
       });
+    const ruleOtp = body("otp").notEmpty().isNumeric();
+    const ruleOtpSecret = body("otp_secret")
+      .notEmpty()
+      .custom(async (value) => {
+        const mUser = await User.findOne({
+          where: {
+            otp_secret: value,
+          },
+        });
+        if (!mUser) {
+          return Promise.reject("Invalid otp secret!");
+        }
+      });
+    const ruleNewPassword = body("new_password").notEmpty();
     switch (type) {
       case "checkUser":
         {
@@ -511,9 +672,26 @@ module.exports = {
           return [ruleUsername, ruleNewPass];
         }
         break;
-      case "forgotUsername": {
-        return [ruleEmail];
-      }
+      case "forgotUsername":
+        {
+          return [ruleEmail];
+        }
+        break;
+      case "forgotPassword":
+        {
+          return [ruleEmail];
+        }
+        break;
+      case "verifyOtp":
+        {
+          return [ruleEmail, ruleOtp];
+        }
+        break;
+      case "resetPassword":
+        {
+          return [ruleOtpSecret, ruleNewPassword];
+        }
+        break;
     }
   },
 };
