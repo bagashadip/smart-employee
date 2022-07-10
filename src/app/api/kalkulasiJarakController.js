@@ -2,6 +2,8 @@
 const _ = require("lodash");
 const { body, validationResult } = require("express-validator");
 const error = require("../../util/errors");
+const Sequelize = require("sequelize");
+const { Pegawai, Divisi, UnitKerja } = require("../../models/model");
 
 module.exports = {
   // Create
@@ -19,11 +21,37 @@ module.exports = {
       return (value * Math.PI) / 180;
     };
 
+    const kodePegawai = req.body.kode_pegawai;
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        kode_pegawai: kodePegawai,
+      },
+      attributes: ["kode_pegawai"],
+      include: [
+        {
+          model: Divisi,
+          as: "divisi",
+          attributes: ["kode_divisi"],
+          include: [
+            {
+              model: UnitKerja,
+              as: "unitkerja",
+              attributes: [
+                "latitude_unitkerja",
+                "longitude_unitkerja",
+                "radiuslokasi_unitkerja",
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
     var latAbs = req.body.latitude_absensi;
     var lonAbs = req.body.longitude_absensi;
-    var latUk = req.body.latitude_unitkerja;
-    var lonUk = req.body.longitude_unitkerja;
-    var rad = req.body.rad_unitkerja;
+    var latUk = mPegawai.divisi.unitkerja.latitude_unitkerja;
+    var lonUk = mPegawai.divisi.unitkerja.longitude_unitkerja;
+    var rad = mPegawai.divisi.unitkerja.radiuslokasi_unitkerja;
     var status = null;
 
     var R = 6371;
@@ -47,31 +75,30 @@ module.exports = {
     res.json({
       statusCode: 200,
       status: status,
-      distanse: Number(d.toFixed(2)),
+      distance: Number(d.toFixed(2)),
     });
   },
   // Validation
   validate: (type) => {
     const ruleLongitudeAbsensi = body("longitude_absensi").isFloat().notEmpty();
     const ruleLatitudeAbsensi = body("latitude_absensi").isFloat().notEmpty();
-    const ruleLongitudeUnitkerja = body("latitude_unitkerja")
-      .isFloat()
-      .notEmpty();
-    const ruleLatitudeUnitKerja = body("latitude_unitkerja")
-      .isFloat()
-      .notEmpty();
-    const ruleLatitudeRadius = body("rad_unitkerja").isFloat().notEmpty();
+    const ruleKodePegawai = body("kode_pegawai")
+      .notEmpty()
+      .custom(async (value) => {
+        const mPegawai = await Pegawai.findOne({
+          where: {
+            kode_pegawai: value,
+          },
+        });
+        if (!mPegawai) {
+          return Promise.reject("Kode pegawai tidak ditemukan!");
+        }
+      });
 
     switch (type) {
       case "create":
         {
-          return [
-            ruleLongitudeAbsensi,
-            ruleLatitudeAbsensi,
-            ruleLongitudeUnitkerja,
-            ruleLatitudeUnitKerja,
-            ruleLatitudeRadius,
-          ];
+          return [ruleLongitudeAbsensi, ruleLatitudeAbsensi, ruleKodePegawai];
         }
         break;
     }
