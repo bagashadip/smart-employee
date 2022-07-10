@@ -183,11 +183,11 @@ module.exports = {
         let data = {
           email: loadedUser.pegawai.emailpribadi_pegawai,
           message:
-            "<a href=" +
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. Jika anda merasa percobaan tersebut Bukan Anda, silahkan klik link berikut. </p><br><a href=" +
             process.env.BASE_URL +
             "/auth/reset-attempt?verify=" +
             token +
-            ">Click to reset attempt login</a>",
+            ">Klik untuk reset percobaan login</a>",
         };
 
         const sendMail = await mailer(data);
