@@ -253,18 +253,17 @@ module.exports = {
         }
       });
     const ruleNamaPegawai = body("namalengkap_pegawai").trim().notEmpty();
-    const ruleNoKtp = body("noktp_pegawai").trim().notEmpty();
-    const ruleJenisKelamin = body("jeniskelamin_pegawai").trim().notEmpty();
-    const ruleTanggalLahir = body("tanggallahir_pegawai").isDate().notEmpty();
+    const ruleNoKtp = body("noktp_pegawai").trim();
+    const ruleJenisKelamin = body("jeniskelamin_pegawai").trim();
+    const ruleTanggalLahir = body("tanggallahir_pegawai").isDate();
     const ruleGolDarah = body("goldarah_pegawai").trim();
-    const ruleStatusPernikahan = body("statuspernikahan_pegawai")
-      .trim()
-      .notEmpty();
+    const ruleStatusPernikahan = body("statuspernikahan_pegawai").trim();
     const ruleAgama = body("agama_pegawai").trim();
     const ruleNoTelp = body("notelp_pegawai").trim();
     const ruleEmailPribadi = body("emailpribadi_pegawai")
       .trim()
       .isEmail()
+      .notEmpty()
       .custom(async (value) => {
         mPegawai = await Pegawai.findOne({
           where: {
@@ -279,7 +278,7 @@ module.exports = {
       });
     const ruleEmailJsc = body("emailjsc_pegawai").trim().isEmail().optional();
     const ruleFoto = body("foto_pegawai")
-      .optional()
+      .notEmpty()
       .custom(async (value) => {
         if (value) {
           mFile = await File.findByPk(value);
@@ -299,9 +298,10 @@ module.exports = {
     const ruleNoBpjsKet = body("nobpjsketenagakerjaan_pegawai").trim();
     const ruleTanggalBergabung = body("tanggalbergabung_pegawai")
       .isDate()
-      .optional();
+      .notEmpty();
     const ruleTanggalLulus = body("tanggallulus_pegawai").isDate().optional();
     const ruleStatus = body("status_pegawai").trim();
+    const ruleStatusAktif = body("statusaktif_pegawai").trim().notEmpty();
     const rulePtkp = body("ptkp_pegawai")
       .trim()
       .optional()
@@ -319,7 +319,7 @@ module.exports = {
       });
     const ruleDivisi = body("kode_divisi")
       .trim()
-      .optional()
+      .notEmpty()
       .custom(async (value) => {
         if (value) {
           mDivisi = await Divisi.findOne({
@@ -334,7 +334,7 @@ module.exports = {
       });
     const rulePosisi = body("kode_posisi")
       .trim()
-      .optional()
+      .notEmpty()
       .custom(async (value) => {
         if (value) {
           mPosisi = await Posisi.findOne({
@@ -349,7 +349,7 @@ module.exports = {
       });
     const ruleDpa = body("kode_dpa")
       .trim()
-      .optional()
+      .notEmpty()
       .custom(async (value) => {
         if (value) {
           mDpa = await Dpa.findOne({
@@ -391,6 +391,7 @@ module.exports = {
             ruleTanggalBergabung,
             ruleTanggalLulus,
             ruleStatus,
+            ruleStatusAktif,
             rulePtkp,
             ruleDivisi,
             rulePosisi,
