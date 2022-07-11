@@ -23,6 +23,7 @@ const kalkulasiJarakController = require("../app/api/kalkulasiJarakController");
 const historiPresensiController = require("../app/api/historiPresensiController");
 const kontakListController = require("../app/api/kontaklistController");
 const profileController = require("../app/api/profileController");
+const asnController = require("../app/api/asnController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -319,5 +320,15 @@ jumlahKontakRoute.get(
 const profileRoute = router.route("/profile");
 profileRoute.get(profileController.validate("get"), profileController.get);
 /* Profile Route */
+
+/* ASN Route */
+const asnRoute = router.route("/asn");
+asnRoute.get(asnController.validate("get"), asnController.get);
+asnRoute.post(asnController.validate("create"), asnController.create);
+asnRoute.patch(asnController.validate("update"), asnController.update);
+asnRoute.delete(asnController.validate("delete"), asnController.delete);
+router.get("/asn/list", asnController.list);
+router.post("/asn/data", asnController.data);
+/* ASN Route */
 
 module.exports = router;
