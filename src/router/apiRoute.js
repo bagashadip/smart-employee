@@ -24,6 +24,7 @@ const historiPresensiController = require("../app/api/historiPresensiController"
 const kontakListController = require("../app/api/kontaklistController");
 const profileController = require("../app/api/profileController");
 
+router.use(authMiddleware); // dont move it to another line
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
 router.post("/file/load", uploadController.load);
@@ -31,8 +32,6 @@ router.delete("/file/delete", uploadController.delete);
 router.get("/file/category", uploadController.category);
 router.get("/file/mime-type", uploadController.mime);
 router.get("/file/default", uploadController.default);
-
-router.use(authMiddleware); // dont move it to another line
 
 /* File Category Route */
 const fileCategoryRoute = router.route("/file-category");
