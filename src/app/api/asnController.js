@@ -196,7 +196,11 @@ module.exports = {
         break;
       case "update":
         {
-          return [ruleCreateNipAsn.optional(), ruleNamaAsn.optional()];
+          return [
+            ruleNipAsn,
+            ruleCreateNipAsn.optional(),
+            ruleNamaAsn.optional(),
+          ];
         }
         break;
       case "get":

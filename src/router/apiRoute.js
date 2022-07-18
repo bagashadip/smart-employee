@@ -274,6 +274,11 @@ router.post(
   userController.validate("changePassword"),
   userController.changePassword
 );
+router.get(
+  "/user/permission",
+  userController.validate("permission"),
+  userController.permission
+);
 /* User Route */
 
 /* Absensi Route */

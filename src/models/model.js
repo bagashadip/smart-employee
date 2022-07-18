@@ -114,6 +114,12 @@ Divisi.belongsTo(UnitKerja, {
   targetKey: "kode_unitkerja",
 });
 
+Role.belongsTo(Permission, {
+  as: "permission",
+  foreignKey: "kode_role",
+  targetKey: "kode_role",
+});
+
 Permission.belongsTo(HakAkses, {
   as: "hakakses",
   foreignKey: "kode_hakakses",

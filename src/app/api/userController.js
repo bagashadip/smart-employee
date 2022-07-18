@@ -4,7 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { User, Pegawai, Role } = require("../../models/model");
+const { User, Pegawai, Role, Permission } = require("../../models/model");
 const bcrypt = require("bcryptjs");
 
 const Op = Sequelize.Op;
@@ -165,6 +165,37 @@ module.exports = {
       }
     }
   },
+  permission: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const mUser = await User.findOne({
+      where: {
+        username_user: req.query.username_user,
+      },
+      attributes: ["kode_role"],
+    });
+
+    if (!mUser) {
+      return Promise.reject("User belum memiliki role!");
+    }
+
+    let mPermission = await Permission.findAll({
+      where: {
+        kode_role: mUser.kode_role,
+      },
+      attributes: ["kode_hakakses"],
+    });
+
+    let tempPermission = JSON.parse(JSON.stringify(mPermission));
+    let arrPermission = tempPermission.map((obj) => {
+      return obj.kode_hakakses;
+    });
+
+    res.send(arrPermission);
+  },
   // Validation
   validate: (type) => {
     let mUser = null;
@@ -304,6 +335,11 @@ module.exports = {
       case "changePassword":
         {
           return [ruleUsernameChangePass, ruleNewPass];
+        }
+        break;
+      case "permission":
+        {
+          return [ruleUsername];
         }
         break;
     }
