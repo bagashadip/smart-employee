@@ -42,7 +42,7 @@ module.exports = {
     if (!req.user.first_login) {
       res.status(422).json({
         status: "failed",
-        message: "Sudah melakukan login.",
+        message: "Sudah melakukan reset password.",
       });
     }
 
