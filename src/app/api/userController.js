@@ -178,10 +178,6 @@ module.exports = {
       attributes: ["kode_role"],
     });
 
-    if (!mUser) {
-      return Promise.reject("User belum memiliki role!");
-    }
-
     let mPermission = await Permission.findAll({
       where: {
         kode_role: mUser.kode_role,

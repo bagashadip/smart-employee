@@ -125,7 +125,7 @@ module.exports = {
             {
               model: UnitKerja,
               as: "unitkerja",
-              attributes: ["kode_unitkerja", "nama_unitkerja"],
+              attributes: ["kode_unitkerja", "nama_unitkerja", "latitude_unitkerja", "longitude_unitkerja", "radiuslokasi_unitkerja"],
               include: [
                 {
                   model: Organisasi,
