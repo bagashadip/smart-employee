@@ -24,6 +24,7 @@ const historiPresensiController = require("../app/api/historiPresensiController"
 const kontakListController = require("../app/api/kontaklistController");
 const profileController = require("../app/api/profileController");
 const asnController = require("../app/api/asnController");
+const mobileController = require("../app/api/mobileController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -335,5 +336,9 @@ asnRoute.delete(asnController.validate("delete"), asnController.delete);
 router.get("/asn/list", asnController.list);
 router.post("/asn/data", asnController.data);
 /* ASN Route */
+
+/* Mobile Route */
+router.post("/mobile/update-user", mobileController.updateUser);
+/* Mobile Route */
 
 module.exports = router;
