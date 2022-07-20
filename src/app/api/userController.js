@@ -228,6 +228,7 @@ module.exports = {
       await User.update(
         {
           password_user: hashedPw,
+          first_login: false,
         },
         {
           where: {
