@@ -39,7 +39,7 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    if (req.user.first_login) {
+    if (!req.user.first_login) {
       res.status(422).json({
         status: "failed",
         message: "Sudah melakukan login.",
@@ -51,7 +51,7 @@ module.exports = {
       await User.update(
         {
           password_user: hashedPw,
-          first_login: true,
+          first_login: false,
         },
         {
           where: {
