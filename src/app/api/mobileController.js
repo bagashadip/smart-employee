@@ -1,7 +1,7 @@
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
-const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const Op = Sequelize.Op;
 
@@ -33,17 +33,66 @@ module.exports = {
       message: "Data pegawai berhasil diubah.",
     });
   },
+  firstLoginPassword: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    if (!req.user.first_login) {
+      res.status(422).json({
+        status: false,
+        message: "User sudah melakukan login.",
+      });
+    }
+
+    try {
+      const hashedPw = await bcrypt.hash(req.body.new_password, 12);
+      await User.update(
+        {
+          password_user: hashedPw,
+          first_login: false,
+        },
+        {
+          where: {
+            id_user: req.user.id_user,
+          },
+        }
+      );
+      res.json({
+        status: true,
+        message: "Password berhasil diubah",
+      });
+    } catch (err) {
+      res.error(err);
+    }
+  },
   // Validation
   validate: (type) => {
     const ruleNoTelp = body("notelp_pegawai").trim().optional();
     const rulePersetujuanKontak = body("persetujuan_kontak")
       .isBoolean()
       .withMessage("Value must be true or false.");
+    const ruleNewPass = body("new_password")
+      .notEmpty()
+      .trim()
+      .isLength({ min: 6 })
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$.!%*#?&])[A-Za-z\d@$.!%*#?&]{8,}$/
+      )
+      .withMessage(
+        "Password should have minimum six characters, at least one letter, one number and one special character"
+      );
 
     switch (type) {
       case "updateUser":
         {
-          return [ruleNoTelp];
+          return [ruleNoTelp, rulePersetujuanKontak];
+        }
+        break;
+      case "firstLoginPassword":
+        {
+          return [ruleNewPass];
         }
         break;
     }

@@ -339,6 +339,11 @@ router.post("/asn/data", asnController.data);
 
 /* Mobile Route */
 router.post("/mobile/update-user", mobileController.updateUser);
+router.post(
+  "/mobile/firstlogin-password",
+  mobileController.validate("firstLoginPassword"),
+  mobileController.firstLoginPassword
+);
 /* Mobile Route */
 
 module.exports = router;
