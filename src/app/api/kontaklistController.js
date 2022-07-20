@@ -2,7 +2,14 @@
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
-const { Pegawai, Asn, Posisi, File, Jabatan } = require("../../models/model");
+const {
+  Pegawai,
+  Asn,
+  Posisi,
+  File,
+  Jabatan,
+  Divisi,
+} = require("../../models/model");
 const date = require("date-and-time");
 const posisi = require("../../models/posisi");
 const Sequelize = require("sequelize");
@@ -33,8 +40,8 @@ module.exports = {
         {
           model: Jabatan,
           as: "jabatan",
-          attributes: ["kode_jabatan", "nama_jabatan", "urutan_jabatan"]
-        }
+          attributes: ["kode_jabatan", "nama_jabatan", "urutan_jabatan"],
+        },
       ],
       attributes: [
         "nama_asn",
@@ -60,6 +67,11 @@ module.exports = {
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
         },
+        {
+          model: Divisi,
+          as: "divisi",
+          attributes: ["nama_divisi"],
+        },
       ],
       attributes: [
         "namalengkap_pegawai",
@@ -67,7 +79,8 @@ module.exports = {
         "notelp_pegawai",
         "emailpribadi_pegawai",
         "foto_pegawai",
-        "persetujuan_kontak"
+        "persetujuan_kontak",
+        "kode_divisi",
       ],
       order: [["namalengkap_pegawai", "ASC"]],
     };
@@ -105,8 +118,16 @@ module.exports = {
       // email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
       foto: v.foto.path,
       kategori: kategori,
-      ho_hp: "persetujuan_kontak" in v ? (v.persetujuan_kontak == true ? v.notelp_pegawai : null) : null,
-      urutan_jabatan: "jabatan" in v ? v.jabatan.urutan_jabatan : v.posisi.urutan_posisi
+      ho_hp:
+        "persetujuan_kontak" in v
+          ? v.persetujuan_kontak == true
+            ? v.notelp_pegawai
+            : null
+          : null,
+      urutan_jabatan:
+        "jabatan" in v ? v.jabatan.urutan_jabatan : v.posisi.urutan_posisi,
+      kode_divisi: "kode_divisi" in v ? v.kode_divisi : null,
+      nama_divisi: "divisi" in v ? v.divisi.nama_divisi : null,
     }));
 
     resData.sort((a, b) => a.urutan_jabatan - b.urutan_jabatan);
