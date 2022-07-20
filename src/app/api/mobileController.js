@@ -64,7 +64,7 @@ module.exports = {
         message: "Password berhasil diubah",
       });
     } catch (err) {
-      res.error(err);
+      res.status(422).send(err);
     }
   },
   // Validation

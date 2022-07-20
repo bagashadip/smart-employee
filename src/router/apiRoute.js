@@ -280,6 +280,11 @@ router.get(
   userController.validate("permission"),
   userController.permission
 );
+router.post(
+  "/user/send-credential",
+  userController.validate("sendCredential"),
+  userController.sendCredential
+);
 /* User Route */
 
 /* Absensi Route */

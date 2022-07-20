@@ -6,6 +6,8 @@ const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const { User, Pegawai, Role, Permission } = require("../../models/model");
 const bcrypt = require("bcryptjs");
+const generator = require("generate-password");
+const mailer = require("../../util/mailer");
 
 const Op = Sequelize.Op;
 
@@ -192,6 +194,69 @@ module.exports = {
 
     res.send(arrPermission);
   },
+  sendCredential: async (req, res) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    let generatePass = generator.generate({
+      length: 10,
+      numbers: true,
+      symbols: true,
+      excludeSimilarCharacters: true,
+      strict: true,
+      exclude: '$%^()?.,*-_=+~`<>/{}[]:;"',
+    });
+
+    try {
+      const hashedPw = await bcrypt.hash(generatePass, 12);
+      const mUser = await Pegawai.findOne({
+        where: {
+          emailpribadi_pegawai: req.body.email,
+        },
+        attributes: ["kode_pegawai"],
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["username_user"],
+          },
+        ],
+      });
+
+      await User.update(
+        {
+          password_user: hashedPw,
+        },
+        {
+          where: {
+            username_user: mUser.user.username_user,
+          },
+        }
+      );
+
+      let data = {
+        email: req.body.email,
+        message:
+          "<p>Dear rekan JSC,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
+          mUser.user.username_user +
+          "</b></p><p>password: <b>" +
+          generatePass +
+          "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><p>Terimakasih</p>",
+      };
+
+      const sendMail = await mailer(data);
+      if (sendMail) {
+        res.json({
+          status: "success",
+          message: "Credential berhasil dikirim ke email.",
+        });
+      }
+    } catch (err) {
+      res.status(422).send(err);
+    }
+  },
   // Validation
   validate: (type) => {
     let mUser = null;
@@ -292,6 +357,19 @@ module.exports = {
       .withMessage(
         "Password should have minimum six characters, at least one letter, one number and one special character"
       );
+    const ruleFindEmail = body("email")
+      .isEmail()
+      .notEmpty()
+      .custom(async (value) => {
+        const mPegawai = await Pegawai.findOne({
+          where: {
+            emailpribadi_pegawai: value,
+          },
+        });
+        if (!mPegawai) {
+          return Promise.reject("Email tidak ditemukan!");
+        }
+      });
 
     switch (type) {
       case "create":
@@ -336,6 +414,11 @@ module.exports = {
       case "permission":
         {
           return [ruleUsername];
+        }
+        break;
+      case "sendCredential":
+        {
+          return [ruleFindEmail];
         }
         break;
     }
