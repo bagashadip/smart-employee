@@ -247,6 +247,7 @@ module.exports = {
       user: {
         id: loadedUser.id_user,
         username: loadedUser.username_user,
+        first_login: loadedUser.first_login,
       },
       expires_in: process.env.JWT_EXPIRES_IN,
     });
