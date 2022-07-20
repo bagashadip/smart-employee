@@ -2,9 +2,10 @@
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
-const { Pegawai, Asn, Posisi, File } = require("../../models/model");
+const { Pegawai, Asn, Posisi, File, Jabatan } = require("../../models/model");
 const date = require("date-and-time");
 const posisi = require("../../models/posisi");
+const Sequelize = require("sequelize");
 
 module.exports = {
   // Create
@@ -29,6 +30,11 @@ module.exports = {
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
         },
+        {
+          model: Jabatan,
+          as: "jabatan",
+          attributes: ["kode_jabatan", "nama_jabatan", "urutan_jabatan"]
+        }
       ],
       attributes: [
         "nama_asn",
@@ -47,7 +53,7 @@ module.exports = {
         {
           model: Posisi,
           as: "posisi",
-          attributes: ["nama_posisi"],
+          attributes: ["nama_posisi", "urutan_posisi"],
         },
         {
           model: File,
@@ -61,6 +67,7 @@ module.exports = {
         "notelp_pegawai",
         "emailpribadi_pegawai",
         "foto_pegawai",
+        "persetujuan_kontak"
       ],
       order: [["namalengkap_pegawai", "ASC"]],
     };
@@ -69,9 +76,7 @@ module.exports = {
       qWhere = qWhere;
       qWherePegawai = qWherePegawai;
     } else if (kategori === "ASN") {
-      qWhere.where.status_asn = "ASN";
-    } else if (kategori === "CASN") {
-      qWhere.where.status_asn = "CASN";
+      qWhere.where.status_asn = ["ASN", "CASN"];
     } else if (kategori === "TA") {
       qWherePegawai = qWherePegawai;
     }
@@ -88,21 +93,11 @@ module.exports = {
       let arrPegawai = JSON.parse(JSON.stringify(mPegawai));
 
       mRes = arrAsn.concat(arrPegawai);
-      mRes.sort(function (a, b) {
-        var keyA = "nama_asn" in a ? a.nama_asn : a.namalengkap_pegawai,
-          keyB = "nama_asn" in b ? b.nama_asn : b.namalengkap_pegawai;
-        // Compare the 2 dates
-        if (keyA < keyB) return -1;
-        if (keyA > keyB) return 1;
-        return 0;
-      });
-      //   mRes.sort();
     } else {
       mRes = await Asn.findAll(qWhere);
     }
 
     tempRes = JSON.parse(JSON.stringify(mRes));
-    console.log("tempRes", tempRes);
     resData = tempRes.map((v) => ({
       nama: "nama_asn" in v ? v.nama_asn : v.namalengkap_pegawai,
       jabatan: "jabatan_asn" in v ? v.jabatan_asn : v.posisi.nama_posisi,
@@ -110,7 +105,11 @@ module.exports = {
       // email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
       foto: v.foto.path,
       kategori: kategori,
+      ho_hp: "persetujuan_kontak" in v ? (v.persetujuan_kontak == true ? v.notelp_pegawai : null) : null,
+      urutan_jabatan: "jabatan" in v ? v.jabatan.urutan_jabatan : v.posisi.urutan_posisi
     }));
+
+    resData.sort((a, b) => a.urutan_jabatan - b.urutan_jabatan);
 
     res.send(resData);
   },
@@ -123,14 +122,7 @@ module.exports = {
     let mAsn = await Asn.count({
       where: {
         statusaktif_asn: "Aktif",
-        status_asn: "ASN",
-      },
-    });
-
-    let mCasn = await Asn.count({
-      where: {
-        statusaktif_asn: "Aktif",
-        status_asn: "CASN",
+        status_asn: ["ASN", "CASN"],
       },
     });
 
@@ -145,19 +137,13 @@ module.exports = {
     if (kategori === "ALL") {
       resTotal = {
         jumlah_asn: mAsn,
-        jumlah_casn: mCasn,
         jumlah_ta: mTa,
-        total: mAsn + mCasn + mTa,
+        total: mAsn + mTa,
       };
     } else if (kategori === "ASN") {
       resTotal = {
         jumlah_asn: mAsn,
         total: mAsn,
-      };
-    } else if (kategori === "CASN") {
-      resTotal = {
-        jumlah_casn: mCasn,
-        total: mCasn,
       };
     } else if (kategori === "TA") {
       resTotal = {
@@ -173,7 +159,7 @@ module.exports = {
     const ruleKategori = query("kategori")
       .notEmpty()
       .custom(async (value) => {
-        const listKategori = ["ALL", "ASN", "CASN", "TA"];
+        const listKategori = ["ALL", "ASN", "TA"];
         let isKategori = listKategori.includes(value);
         if (!isKategori) {
           return Promise.reject("Kategori tidak terdaftar!");
