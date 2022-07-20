@@ -49,6 +49,7 @@ module.exports = {
         "notelp_asn",
         "email_asn",
         "foto_asn",
+        "status_asn",
       ],
       order: [["nama_asn", "ASC"]],
     };
@@ -117,7 +118,7 @@ module.exports = {
       // no_hp: "notelp_asn" in v ? v.notelp_asn : v.notelp_pegawai,
       // email: "email_asn" in v ? v.email_asn : v.emailpribadi_pegawai,
       foto: v.foto.path,
-      kategori: kategori,
+      kategori: "status_asn" in v ? "ASN" : "TA",
       ho_hp:
         "persetujuan_kontak" in v
           ? v.persetujuan_kontak == true
