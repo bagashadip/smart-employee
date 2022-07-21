@@ -19,6 +19,7 @@ const mOrganisasi = require("./organisasi");
 const mPosisi = require("./posisi");
 const mAbsensi = require("./absensi");
 const mAsn = require("./asn");
+const mDivisiParent = require("./divisiParent");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -38,6 +39,7 @@ const Organisasi = mOrganisasi(sequelize, Sequelize);
 const Posisi = mPosisi(sequelize, Sequelize);
 const Absensi = mAbsensi(sequelize, Sequelize);
 const Asn = mAsn(sequelize, Sequelize);
+const DivisiParent = mDivisiParent(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -108,10 +110,22 @@ Asn.belongsTo(File, {
   targetKey: "id",
 });
 
+Asn.belongsTo(DivisiParent, {
+  as: "divisi_parent",
+  foreignKey: "kode_divisi_parent",
+  targetKey: "kode_divisi_parent",
+});
+
 Divisi.belongsTo(UnitKerja, {
   as: "unitkerja",
   foreignKey: "kode_unitkerja",
   targetKey: "kode_unitkerja",
+});
+
+Divisi.belongsTo(DivisiParent, {
+  as: "divisi_parent",
+  foreignKey: "kode_divisi_parent",
+  targetKey: "kode_divisi_parent",
 });
 
 Role.belongsTo(Permission, {
@@ -191,4 +205,5 @@ module.exports = {
   Posisi,
   Absensi,
   Asn,
+  DivisiParent,
 };

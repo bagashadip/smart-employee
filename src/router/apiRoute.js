@@ -25,6 +25,7 @@ const kontakListController = require("../app/api/kontaklistController");
 const profileController = require("../app/api/profileController");
 const asnController = require("../app/api/asnController");
 const mobileController = require("../app/api/mobileController");
+const divisiParentController = require("../app/api/divisiParentController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -350,5 +351,27 @@ router.post(
   mobileController.firstLoginPassword
 );
 /* Mobile Route */
+
+/* Divisi Parent Route */
+const divisiParentRoute = router.route("/divisi-parent");
+divisiParentRoute.get(
+  divisiParentController.validate("get"),
+  divisiParentController.get
+);
+divisiParentRoute.post(
+  divisiParentController.validate("create"),
+  divisiParentController.create
+);
+divisiParentRoute.patch(
+  divisiParentController.validate("update"),
+  divisiParentController.update
+);
+divisiParentRoute.delete(
+  divisiParentController.validate("delete"),
+  divisiParentController.delete
+);
+router.post("/divisi-parent/data", divisiParentController.data);
+router.get("/divisi-parent/list", divisiParentController.list);
+/* Divisi Parent Route */
 
 module.exports = router;

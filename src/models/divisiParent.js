@@ -1,22 +1,20 @@
 "use strict";
 
 module.exports = (sequelize, DataTypes) => {
-  const divisi = sequelize.define(
-    "tbl_divisi",
+  const divisiParent = sequelize.define(
+    "tbl_divisi_parent",
     {
-      id_divisi: {
+      id_divisi_parent: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
-      kode_divisi: DataTypes.STRING,
-      nama_divisi: DataTypes.STRING,
-      kode_unitkerja: DataTypes.STRING,
       kode_divisi_parent: DataTypes.STRING,
+      nama_divisi_parent: DataTypes.STRING,
     },
     {
       freezeTableName: true,
     }
   );
-  return divisi;
+  return divisiParent;
 };
