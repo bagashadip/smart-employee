@@ -4,7 +4,13 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { User, Pegawai, Role, Permission } = require("../../models/model");
+const {
+  User,
+  Pegawai,
+  Role,
+  Permission,
+  HakAkses,
+} = require("../../models/model");
 const bcrypt = require("bcryptjs");
 const generator = require("generate-password");
 const mailer = require("../../util/mailer");
@@ -25,7 +31,16 @@ module.exports = {
 
     var dataTableObj = await datatable(req.body);
     var count = await User.count();
-    var modules = await User.findAndCountAll(dataTableObj);
+    var modules = await User.findAndCountAll({
+      ...dataTableObj,
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["emailpribadi_pegawai"],
+        },
+      ],
+    });
 
     res.json({
       recordsFiltered: modules.count,
@@ -168,31 +183,31 @@ module.exports = {
     }
   },
   permission: async (req, res) => {
-    const validation = validationResult(req);
-    if (!validation.isEmpty()) {
-      return error(res).validationError(validation.array());
-    }
-
-    const mUser = await User.findOne({
-      where: {
-        username_user: req.query.username_user,
-      },
+    const mUser = await User.findByPk(req.user.id_user, {
       attributes: ["kode_role"],
     });
 
-    let mPermission = await Permission.findAll({
-      where: {
-        kode_role: mUser.kode_role,
-      },
+    let mHakAkses = await HakAkses.findAll({
       attributes: ["kode_hakakses"],
+      include: [
+        {
+          model: Permission,
+          as: "permission",
+          attributes: ["kode_hakakses"],
+          where: {
+            kode_role: mUser.kode_role,
+          },
+          required: false,
+        },
+      ],
     });
-
-    let tempPermission = JSON.parse(JSON.stringify(mPermission));
-    let arrPermission = tempPermission.map((obj) => {
-      return obj.kode_hakakses;
-    });
-
-    res.send(arrPermission);
+    let tempRes = JSON.parse(JSON.stringify(mHakAkses));
+    let resData = null;
+    resData = tempRes.map((val) => ({
+      kode_hakakses: val.kode_hakakses,
+      status: val.permission !== null ? true : false,
+    }));
+    res.send(resData);
   },
   sendCredential: async (req, res) => {
     const validation = validationResult(req);
@@ -410,11 +425,6 @@ module.exports = {
       case "changePassword":
         {
           return [ruleUsernameChangePass, ruleNewPass];
-        }
-        break;
-      case "permission":
-        {
-          return [ruleUsername];
         }
         break;
       case "sendCredential":

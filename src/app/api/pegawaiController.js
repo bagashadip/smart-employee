@@ -4,6 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
+const moment = require("moment");
 const {
   Pegawai,
   Ptkp,
@@ -125,7 +126,13 @@ module.exports = {
             {
               model: UnitKerja,
               as: "unitkerja",
-              attributes: ["kode_unitkerja", "nama_unitkerja", "latitude_unitkerja", "longitude_unitkerja", "radiuslokasi_unitkerja"],
+              attributes: [
+                "kode_unitkerja",
+                "nama_unitkerja",
+                "latitude_unitkerja",
+                "longitude_unitkerja",
+                "radiuslokasi_unitkerja",
+              ],
               include: [
                 {
                   model: Organisasi,
@@ -153,7 +160,13 @@ module.exports = {
         },
       ],
     });
-    res.json(mPegawai);
+    let tempRes = JSON.parse(JSON.stringify(mPegawai));
+    if (tempRes.tanggalbergabung_pegawai) {
+      var currDate = moment().startOf("day");
+      let tglGabung = moment(tempRes.tanggalbergabung_pegawai, "YYYY-MM-DD");
+      tempRes.masa_kerja = moment.duration(currDate.diff(tglGabung)).asDays();
+    }
+    res.json(tempRes);
   },
   // Create
   create: async (req, res) => {

@@ -146,6 +146,12 @@ Permission.belongsTo(Role, {
   targetKey: "kode_role",
 });
 
+HakAkses.belongsTo(Permission, {
+  as: "permission",
+  foreignKey: "kode_hakakses",
+  targetKey: "kode_hakakses",
+});
+
 Organisasi.belongsTo(File, {
   as: "logo",
   foreignKey: "logo_organisasi",

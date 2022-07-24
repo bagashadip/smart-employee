@@ -276,11 +276,7 @@ router.post(
   userController.validate("changePassword"),
   userController.changePassword
 );
-router.get(
-  "/user/permission",
-  userController.validate("permission"),
-  userController.permission
-);
+router.get("/user/permission", userController.permission);
 router.post(
   "/user/send-credential",
   userController.validate("sendCredential"),
