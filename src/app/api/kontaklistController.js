@@ -10,9 +10,6 @@ const {
   Jabatan,
   Divisi,
 } = require("../../models/model");
-const date = require("date-and-time");
-const posisi = require("../../models/posisi");
-const Sequelize = require("sequelize");
 
 module.exports = {
   // Create

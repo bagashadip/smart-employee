@@ -4,7 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Asn, Divisi, Jabatan } = require("../../models/model");
+const { Asn, Divisi, Jabatan, DivisiParent } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -15,9 +15,9 @@ module.exports = {
       attributes: ["id_asn", "nip_asn", "nama_asn", "jabatan_asn"],
       include: [
         {
-          model: Divisi,
-          as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi"],
+          model: DivisiParent,
+          as: "divisi_parent",
+          attributes: ["kode_divisi_parent", "nama_divisi_parent"],
         },
         {
           model: Jabatan,
@@ -40,9 +40,9 @@ module.exports = {
       ...dataTableObj,
       include: [
         {
-          model: Divisi,
-          as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi"],
+          model: DivisiParent,
+          as: "divisi_parent",
+          attributes: ["kode_divisi_parent", "nama_divisi_parent"],
         },
         {
           model: Jabatan,
@@ -75,9 +75,9 @@ module.exports = {
       },
       include: [
         {
-          model: Divisi,
-          as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi"],
+          model: DivisiParent,
+          as: "divisi_parent",
+          attributes: ["kode_divisi_parent", "nama_divisi_parent"],
         },
         {
           model: Jabatan,

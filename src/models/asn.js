@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
       statusaktif_asn: DataTypes.STRING,
       status_asn: DataTypes.STRING,
       alamat_asn: DataTypes.TEXT,
-      kode_divisi: DataTypes.STRING,
       kode_jabatan: DataTypes.STRING,
       kode_divisi_parent: DataTypes.STRING,
     },
