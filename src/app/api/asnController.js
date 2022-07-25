@@ -4,7 +4,13 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Asn, Divisi, Jabatan, DivisiParent } = require("../../models/model");
+const {
+  Asn,
+  Divisi,
+  Jabatan,
+  DivisiParent,
+  File,
+} = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -12,8 +18,25 @@ module.exports = {
   // List
   list: async (req, res) => {
     const mAsn = await Asn.findAll({
-      attributes: ["id_asn", "nip_asn", "nama_asn", "jabatan_asn"],
+      attributes: [
+        "id_asn",
+        "nip_asn",
+        "nama_asn",
+        "jabatan_asn",
+        "tanggallahir_asn",
+        "notelp_asn",
+        "email_asn",
+        "statusaktif_asn",
+        "alamat_asn",
+        "createdAt",
+        "updatedAt",
+      ],
       include: [
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
         {
           model: DivisiParent,
           as: "divisi_parent",
@@ -73,7 +96,25 @@ module.exports = {
       where: {
         nip_asn: req.query.nip_asn,
       },
+      attributes: [
+        "id_asn",
+        "nip_asn",
+        "nama_asn",
+        "jabatan_asn",
+        "tanggallahir_asn",
+        "notelp_asn",
+        "email_asn",
+        "statusaktif_asn",
+        "alamat_asn",
+        "createdAt",
+        "updatedAt",
+      ],
       include: [
+        {
+          model: File,
+          as: "foto",
+          attributes: ["name", "path", "extension", "size"],
+        },
         {
           model: DivisiParent,
           as: "divisi_parent",
@@ -85,7 +126,6 @@ module.exports = {
           attributes: ["kode_jabatan", "nama_jabatan"],
         },
       ],
-      attributes: ["id_asn", "nip_asn", "nama_asn", "jabatan_asn"],
     });
     res.json(mAsn);
   },
