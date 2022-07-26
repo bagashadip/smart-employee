@@ -58,6 +58,11 @@ module.exports = {
       where: {
         kode_organisasi: req.query.kode_organisasi,
       },
+      include: {
+        model: File,
+        as: "logo",
+        attributes: ["name", "path", "extension", "size"],
+      },
     });
     res.json(mOrganisasi);
   },
