@@ -663,7 +663,7 @@ module.exports = {
               .trim()
               .isLength({ min: 6 })
               .matches(
-                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$.!%*#?&])[A-Za-z\d@$.!%*#?&]{8,}$/
+                /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$.!%*#?&])[A-Za-z\d@$.!%*#?&]{6,}$/
               )
               .withMessage(
                 "Password should have minimum six characters, at least one letter, one number and one special character"
