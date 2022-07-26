@@ -14,6 +14,7 @@ const {
   File,
   UnitKerja,
   Organisasi,
+  User,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -200,10 +201,46 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Pegawai.update(
-      { ...req.body },
-      { where: { kode_pegawai: req.query.kode_pegawai } }
-    );
+    const mPegawai = await Pegawai.findOne({
+      where: {
+        kode_pegawai: req.query.kode_pegawai,
+      },
+      attributes: ["emailpribadi_pegawai"],
+    });
+
+    if (mPegawai.emailpribadi_pegawai !== req.body.emailpribadi_pegawai) {
+      const mEmail = await Pegawai.findAll({
+        where: {
+          emailpribadi_pegawai: {
+            [Op.not]: mPegawai.emailpribadi_pegawai,
+          },
+        },
+        attributes: ["emailpribadi_pegawai"],
+      });
+      let findEmail = mEmail.find(
+        (o) => o.emailpribadi_pegawai === req.body.emailpribadi_pegawai
+      );
+
+      if (findEmail) {
+        res.json({
+          status: "Validation Error",
+          errors: [
+            {
+              value: req.body.email,
+              msg: "Email already exist!",
+              param: "emailpribadi_pegawai",
+              location: "body",
+            },
+          ],
+        });
+      }
+    }
+
+    if (mPegawai)
+      await Pegawai.update(
+        { ...req.body },
+        { where: { kode_pegawai: req.query.kode_pegawai } }
+      );
 
     res.json({
       status: true,
@@ -424,7 +461,6 @@ module.exports = {
             ruleStatusPernikahan.optional(),
             ruleAgama.optional(),
             ruleNoTelp.optional(),
-            ruleEmailPribadi.optional(),
             ruleEmailJsc.optional(),
             ruleFoto.optional(),
             ruleAlamatKtp.optional(),
