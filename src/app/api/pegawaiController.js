@@ -326,7 +326,7 @@ module.exports = {
           return Promise.reject("Email already exist!");
         }
       });
-    const ruleEmailJsc = body("emailjsc_pegawai").trim().isEmail().optional();
+    const ruleEmailJsc = body("emailjsc_pegawai").trim().isEmail();
     const ruleFoto = body("foto_pegawai")
       .notEmpty()
       .custom(async (value) => {
@@ -349,7 +349,7 @@ module.exports = {
     const ruleTanggalBergabung = body("tanggalbergabung_pegawai")
       .isDate()
       .notEmpty();
-    const ruleTanggalLulus = body("tanggallulus_pegawai").isDate().optional();
+    const ruleTanggalLulus = body("tanggallulus_pegawai").isDate();
     const ruleStatus = body("status_pegawai").trim();
     const ruleStatusAktif = body("statusaktif_pegawai").trim().notEmpty();
     const rulePtkp = body("ptkp_pegawai")
@@ -421,13 +421,13 @@ module.exports = {
             ruleNamaPegawai,
             ruleNoKtp,
             ruleJenisKelamin,
-            ruleTanggalLahir,
+            ruleTanggalLahir.optional({nullable: true}),
             ruleGolDarah,
             ruleStatusPernikahan,
             ruleAgama,
             ruleNoTelp,
             ruleEmailPribadi,
-            ruleEmailJsc,
+            ruleEmailJsc.optional({nullable: true}),
             ruleFoto,
             ruleAlamatKtp,
             ruleAlamatDomisili,
@@ -439,7 +439,7 @@ module.exports = {
             ruleNoBpjsKes,
             ruleNoBpjsKet,
             ruleTanggalBergabung,
-            ruleTanggalLulus,
+            ruleTanggalLulus.optional({nullable: true}),
             ruleStatus,
             ruleStatusAktif,
             rulePtkp,
@@ -456,12 +456,12 @@ module.exports = {
             ruleNamaPegawai.optional(),
             ruleNoKtp.optional(),
             ruleJenisKelamin.optional(),
-            ruleTanggalLahir.optional(),
+            ruleTanggalLahir.optional({nullable: true}),
             ruleGolDarah.optional(),
             ruleStatusPernikahan.optional(),
             ruleAgama.optional(),
             ruleNoTelp.optional(),
-            ruleEmailJsc.optional(),
+            ruleEmailJsc.optional({nullable: true}),
             ruleFoto.optional(),
             ruleAlamatKtp.optional(),
             ruleAlamatDomisili.optional(),
@@ -473,7 +473,7 @@ module.exports = {
             ruleNoBpjsKes.optional(),
             ruleNoBpjsKet.optional(),
             ruleTanggalBergabung.optional(),
-            ruleTanggalLulus.optional(),
+            ruleTanggalLulus.optional({nullable: true}),
             ruleStatus.optional(),
             rulePtkp.optional(),
             ruleDivisi.optional(),
