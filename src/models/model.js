@@ -122,6 +122,12 @@ Divisi.belongsTo(DivisiParent, {
   targetKey: "kode_divisi_parent",
 });
 
+DivisiParent.hasMany(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi_parent",
+  sourceKey: "kode_divisi_parent",
+});
+
 Role.belongsTo(Permission, {
   as: "permission",
   foreignKey: "kode_role",
