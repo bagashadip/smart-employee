@@ -67,6 +67,17 @@ module.exports = {
       res.status(422).send(err);
     }
   },
+  deleteAccount: async (req, res) => {
+    await User.destroy({
+      where: {
+        id_user: req.user.id_user,
+      },
+    });
+    res.send({
+      status: true,
+      message: "Akun berhasil dihapus.",
+    });
+  },
   // Validation
   validate: (type) => {
     const ruleNoTelp = body("notelp_pegawai").trim().optional();

@@ -346,6 +346,7 @@ router.post(
   mobileController.validate("firstLoginPassword"),
   mobileController.firstLoginPassword
 );
+router.delete("/mobile/delete-account", mobileController.deleteAccount);
 /* Mobile Route */
 
 /* Divisi Parent Route */

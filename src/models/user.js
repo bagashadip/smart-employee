@@ -29,6 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
+      timestamps: true,
+      paranoid: true,
     }
   );
   user.addScope("withoutPassword", {
