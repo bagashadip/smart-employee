@@ -6,39 +6,39 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       nip_asn: {
         type: Sequelize.STRING(30),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       nama_asn: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       tanggallahir_asn: {
-        type: Sequelize.DATEONLY
+        type: Sequelize.DATEONLY,
       },
       jabatan_asn: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       notelp_asn: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       email_asn: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       foto_asn: {
-        type: Sequelize.TEXT
+        type: Sequelize.UUID,
       },
       statusaktif_asn: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       status_asn: {
-        type: Sequelize.STRING(20)
+        type: Sequelize.STRING(20),
       },
       alamat_asn: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       kode_divisi: {
         type: Sequelize.STRING(30),

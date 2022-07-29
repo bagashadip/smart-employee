@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       id_user: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
       },
       username_user: DataTypes.STRING,
       password_user: DataTypes.STRING,
@@ -18,15 +18,19 @@ module.exports = (sequelize, DataTypes) => {
       attempt_user: DataTypes.INTEGER,
       lastlogin_user: DataTypes.DATE,
       onesignal_user: {
-          type: DataTypes.STRING,
-          unique: true
+        type: DataTypes.STRING,
+        unique: true,
       },
       token_user: DataTypes.STRING,
       kode_pegawai: DataTypes.STRING,
-      kode_role: DataTypes.STRING
+      kode_role: DataTypes.STRING,
+      otp_secret: DataTypes.TEXT,
+      first_login: DataTypes.BOOLEAN,
     },
     {
-        freezeTableName: true
+      freezeTableName: true,
+      timestamps: true,
+      paranoid: true,
     }
   );
   user.addScope("withoutPassword", {

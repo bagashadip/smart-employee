@@ -111,7 +111,7 @@ module.exports = {
         kode_hakakses: req.query.kode_hakakses,
       },
     });
-    res.send({ status: true, message: req.query.kode_hakakses + 'berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_hakakses + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

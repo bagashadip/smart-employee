@@ -2,21 +2,69 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
+const uploadController = require("../app/upload/uploadController");
 const jabatanController = require("../app/api/jabatanController");
 const divisiController = require("../app/api/divisiController");
 const ptkpController = require("../app/api/ptkpController");
 const roleController = require("../app/api/roleController");
 const hakAksesController = require("../app/api/hakaksesController");
 const kategoriCutiController = require("../app/api/kategoriCutiController");
+const permissionController = require("../app/api/permissionController");
+const dpaController = require("../app/api/dpaController");
+const organisasiController = require("../app/api/organisasiController");
+const fileCategoryController = require("../app/file/fileCategoryController");
+const fileController = require("../app/file/fileController");
+const unitKerjaController = require("../app/api/unitkerjaController");
+const posisiController = require("../app/api/posisiController");
+const pegawaiController = require("../app/api/pegawaiController");
+const userController = require("../app/api/userController");
+const absensiController = require("../app/api/absensiController");
+const kalkulasiJarakController = require("../app/api/kalkulasiJarakController");
+const historiPresensiController = require("../app/api/historiPresensiController");
+const kontakListController = require("../app/api/kontaklistController");
+const profileController = require("../app/api/profileController");
+const asnController = require("../app/api/asnController");
+const mobileController = require("../app/api/mobileController");
+const divisiParentController = require("../app/api/divisiParentController");
 
-router.use(authMiddleware);
+router.use(authMiddleware); // dont move it to another line
+// upload route
+router.post("/file/upload/:fileCategory?", uploadController.upload);
+router.post("/file/load", uploadController.load);
+router.delete("/file/delete", uploadController.delete);
+router.get("/file/category", uploadController.category);
+router.get("/file/mime-type", uploadController.mime);
+router.get("/file/default", uploadController.default);
+
+/* File Category Route */
+const fileCategoryRoute = router.route("/file-category");
+fileCategoryRoute.get(
+  fileCategoryController.validate("get"),
+  fileCategoryController.get
+);
+fileCategoryRoute.post(
+  fileCategoryController.validate("create"),
+  fileCategoryController.create
+);
+fileCategoryRoute.patch(
+  fileCategoryController.validate("update"),
+  fileCategoryController.update
+);
+fileCategoryRoute.delete(
+  fileCategoryController.validate("delete"),
+  fileCategoryController.delete
+);
+router.post("/file-category/data", fileCategoryController.data);
+router.get("/file-category/list", fileCategoryController.list);
+
+/* File Route */
+const fileRoute = router.route("/file");
+fileRoute.get(fileController.validate("get"), fileController.get);
+router.post("/file/data", fileController.data);
 
 /* Jabatan Route */
 const jabatanRoute = router.route("/jabatan");
-jabatanRoute.get(
-  jabatanController.validate("get"),
-  jabatanController.get
-);
+jabatanRoute.get(jabatanController.validate("get"), jabatanController.get);
 jabatanRoute.post(
   jabatanController.validate("create"),
   jabatanController.create
@@ -35,18 +83,9 @@ router.get("/jabatan/list", jabatanController.list);
 
 /* Divisi Route */
 const divisiRoute = router.route("/divisi");
-divisiRoute.get(
-  divisiController.validate("get"),
-  divisiController.get
-);
-divisiRoute.post(
-  divisiController.validate("create"),
-  divisiController.create
-);
-divisiRoute.patch(
-  divisiController.validate("update"),
-  divisiController.update
-);
+divisiRoute.get(divisiController.validate("get"), divisiController.get);
+divisiRoute.post(divisiController.validate("create"), divisiController.create);
+divisiRoute.patch(divisiController.validate("update"), divisiController.update);
 divisiRoute.delete(
   divisiController.validate("delete"),
   divisiController.delete
@@ -57,54 +96,27 @@ router.get("/divisi/list", divisiController.list);
 
 /* Ptkp Route */
 const ptkpRoute = router.route("/ptkp");
-ptkpRoute.get(
-  ptkpController.validate("get"),
-  ptkpController.get
-);
-ptkpRoute.post(
-  ptkpController.validate("create"),
-  ptkpController.create
-);
-ptkpRoute.patch(
-  ptkpController.validate("update"),
-  ptkpController.update
-);
-ptkpRoute.delete(
-  ptkpController.validate("delete"),
-  ptkpController.delete
-);
+ptkpRoute.get(ptkpController.validate("get"), ptkpController.get);
+ptkpRoute.post(ptkpController.validate("create"), ptkpController.create);
+ptkpRoute.patch(ptkpController.validate("update"), ptkpController.update);
+ptkpRoute.delete(ptkpController.validate("delete"), ptkpController.delete);
 router.post("/ptkp/data", ptkpController.data);
 router.get("/ptkp/list", ptkpController.list);
 /* Ptkp Route */
 
 /* Role Route */
 const roleRoute = router.route("/role");
-roleRoute.get(
-  roleController.validate("get"),
-  roleController.get
-);
-roleRoute.post(
-  roleController.validate("create"),
-  roleController.create
-);
-roleRoute.patch(
-  roleController.validate("update"),
-  roleController.update
-);
-roleRoute.delete(
-  roleController.validate("delete"),
-  roleController.delete
-);
+roleRoute.get(roleController.validate("get"), roleController.get);
+roleRoute.post(roleController.validate("create"), roleController.create);
+roleRoute.patch(roleController.validate("update"), roleController.update);
+roleRoute.delete(roleController.validate("delete"), roleController.delete);
 router.post("/role/data", roleController.data);
 router.get("/role/list", roleController.list);
 /* Role Route */
 
 /* Hak Akses Route */
 const hakAksesRoute = router.route("/hak-akses");
-hakAksesRoute.get(
-  hakAksesController.validate("get"),
-  hakAksesController.get
-);
+hakAksesRoute.get(hakAksesController.validate("get"), hakAksesController.get);
 hakAksesRoute.post(
   hakAksesController.validate("create"),
   hakAksesController.create
@@ -143,5 +155,220 @@ router.post("/kategori-cuti/data", kategoriCutiController.data);
 router.get("/kategori-cuti/list", kategoriCutiController.list);
 /* Kategori Cuti Route */
 
+/* Permission Route */
+const permissionRoute = router.route("/permission");
+permissionRoute.get(
+  permissionController.validate("get"),
+  permissionController.get
+);
+permissionRoute.post(
+  permissionController.validate("create"),
+  permissionController.create
+);
+permissionRoute.patch(
+  permissionController.validate("update"),
+  permissionController.update
+);
+permissionRoute.delete(
+  permissionController.validate("delete"),
+  permissionController.delete
+);
+router.post("/permission/data", permissionController.data);
+router.get("/permission/list", permissionController.list);
+/* Permission Route */
+
+/* DPA Route */
+const dpaRoute = router.route("/dpa");
+dpaRoute.get(dpaController.validate("get"), dpaController.get);
+dpaRoute.post(dpaController.validate("create"), dpaController.create);
+dpaRoute.patch(dpaController.validate("update"), dpaController.update);
+dpaRoute.delete(dpaController.validate("delete"), dpaController.delete);
+router.post("/dpa/data", dpaController.data);
+router.get("/dpa/list", dpaController.list);
+/* DPA Route */
+
+/* Organisasi Route */
+const organisasiRoute = router.route("/organisasi");
+organisasiRoute.get(
+  organisasiController.validate("get"),
+  organisasiController.get
+);
+organisasiRoute.post(
+  organisasiController.validate("create"),
+  organisasiController.create
+);
+organisasiRoute.patch(
+  organisasiController.validate("update"),
+  organisasiController.update
+);
+organisasiRoute.delete(
+  organisasiController.validate("delete"),
+  organisasiController.delete
+);
+router.post("/organisasi/data", organisasiController.data);
+router.get("/organisasi/list", organisasiController.list);
+/* Organisasi Route */
+
+/* Unit Kerja Route */
+const unitKerjaRoute = router.route("/unit-kerja");
+unitKerjaRoute.get(
+  unitKerjaController.validate("get"),
+  unitKerjaController.get
+);
+unitKerjaRoute.post(
+  unitKerjaController.validate("create"),
+  unitKerjaController.create
+);
+unitKerjaRoute.patch(
+  unitKerjaController.validate("update"),
+  unitKerjaController.update
+);
+unitKerjaRoute.delete(
+  unitKerjaController.validate("delete"),
+  unitKerjaController.delete
+);
+router.post("/unit-kerja/data", unitKerjaController.data);
+router.get("/unit-kerja/list", unitKerjaController.list);
+/* Unit Kerja Route */
+
+/* Posisi Route */
+const posisiRoute = router.route("/posisi");
+posisiRoute.get(posisiController.validate("get"), posisiController.get);
+posisiRoute.post(posisiController.validate("create"), posisiController.create);
+posisiRoute.patch(posisiController.validate("update"), posisiController.update);
+posisiRoute.delete(
+  posisiController.validate("delete"),
+  posisiController.delete
+);
+router.post("/posisi/data", posisiController.data);
+router.get("/posisi/list", posisiController.list);
+/* Posisi Route */
+
+/* Pegawai Route */
+const pegawaiRoute = router.route("/pegawai");
+pegawaiRoute.get(pegawaiController.validate("get"), pegawaiController.get);
+pegawaiRoute.post(
+  pegawaiController.validate("create"),
+  pegawaiController.create
+);
+pegawaiRoute.patch(
+  pegawaiController.validate("update"),
+  pegawaiController.update
+);
+pegawaiRoute.delete(
+  pegawaiController.validate("delete"),
+  pegawaiController.delete
+);
+router.post("/pegawai/data", pegawaiController.data);
+router.get("/pegawai/list", pegawaiController.list);
+/* Pegawai Route */
+
+/* User Route */
+const userRoute = router.route("/user");
+userRoute.get(userController.validate("get"), userController.get);
+userRoute.post(userController.validate("create"), userController.create);
+userRoute.patch(userController.validate("update"), userController.update);
+userRoute.delete(userController.validate("delete"), userController.delete);
+router.post("/user/data", userController.data);
+router.get("/user/list", userController.list);
+router.post(
+  "/change-password",
+  userController.validate("changePassword"),
+  userController.changePassword
+);
+router.get("/user/permission", userController.permission);
+router.post(
+  "/user/send-credential",
+  userController.validate("sendCredential"),
+  userController.sendCredential
+);
+/* User Route */
+
+/* Absensi Route */
+const absensiRoute = router.route("/absensi");
+absensiRoute.get(absensiController.validate("get"), absensiController.get);
+absensiRoute.post(
+  absensiController.validate("create"),
+  absensiController.create
+);
+router.post("/absensi/data", absensiController.data);
+router.get("/absensi/list", absensiController.list);
+/* Absensi Route */
+
+/* Kalkulasi Jarak Route */
+const kalkulasiRoute = router.route("/kalkulasi-jarak");
+kalkulasiRoute.post(
+  kalkulasiJarakController.validate("create"),
+  kalkulasiJarakController.create
+);
+/* Kalkulasi Jarak Route */
+
+/* Histori Presensi Route */
+const historiPresensiRoute = router.route("/histori-presensi");
+historiPresensiRoute.get(
+  historiPresensiController.validate("get"),
+  historiPresensiController.get
+);
+/* Histori Presensi Route */
+
+/* Kontak List Route */
+const kontakListRoute = router.route("/kontak-list");
+kontakListRoute.get(
+  kontakListController.validate("get"),
+  kontakListController.get
+);
+const jumlahKontakRoute = router.route("/jumlah-kontak");
+jumlahKontakRoute.get(
+  kontakListController.validate("jumlahKontak"),
+  kontakListController.jumlahKontak
+);
+/* Kontak List Route */
+
+/* Profile Route */
+const profileRoute = router.route("/profile");
+profileRoute.get(profileController.validate("get"), profileController.get);
+/* Profile Route */
+
+/* ASN Route */
+const asnRoute = router.route("/asn");
+asnRoute.get(asnController.validate("get"), asnController.get);
+asnRoute.post(asnController.validate("create"), asnController.create);
+asnRoute.patch(asnController.validate("update"), asnController.update);
+asnRoute.delete(asnController.validate("delete"), asnController.delete);
+router.get("/asn/list", asnController.list);
+router.post("/asn/data", asnController.data);
+/* ASN Route */
+
+/* Mobile Route */
+router.post("/mobile/update-user", mobileController.updateUser);
+router.post(
+  "/mobile/firstlogin-password",
+  mobileController.validate("firstLoginPassword"),
+  mobileController.firstLoginPassword
+);
+router.delete("/mobile/delete-account", mobileController.deleteAccount);
+/* Mobile Route */
+
+/* Divisi Parent Route */
+const divisiParentRoute = router.route("/divisi-parent");
+divisiParentRoute.get(
+  divisiParentController.validate("get"),
+  divisiParentController.get
+);
+divisiParentRoute.post(
+  divisiParentController.validate("create"),
+  divisiParentController.create
+);
+divisiParentRoute.patch(
+  divisiParentController.validate("update"),
+  divisiParentController.update
+);
+divisiParentRoute.delete(
+  divisiParentController.validate("delete"),
+  divisiParentController.delete
+);
+router.post("/divisi-parent/data", divisiParentController.data);
+router.get("/divisi-parent/list", divisiParentController.list);
+/* Divisi Parent Route */
 
 module.exports = router;

@@ -111,7 +111,7 @@ module.exports = {
         kode_ptkp: req.query.kode_ptkp,
       },
     });
-    res.send({ status: true, message: req.query.kode_ptkp + 'berhasil dihapus.' });
+    res.send({ status: true, message: req.query.kode_ptkp + ' berhasil dihapus.' });
   },
   // Validation
   validate: (type) => {

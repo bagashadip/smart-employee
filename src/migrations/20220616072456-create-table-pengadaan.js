@@ -6,34 +6,40 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.INTEGER(11),
-        autoIncrement: true
+        autoIncrement: true,
       },
       kodeprogram_pengadaan: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(50),
       },
       namaprogram_pengadaan: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
+      },
+      kodekegiatan_pengadaan: {
+        type: Sequelize.STRING(50),
+      },
+      namakegiatan_pengadaan: {
+        type: Sequelize.STRING(100),
       },
       kodesubkegiatan_pengadaan: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(50),
       },
       namasubkegiatan_pengadaan: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       koderinciansubkegiatan_pengadaan: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(50),
       },
       namarinciansubkegiatan_pengadaan: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       koderekening_pengadaan: {
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(50),
       },
       namarekening_pengadaan: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(100),
       },
       tahun_pengadaan: {
-        type: Sequelize.STRING(10)
+        type: Sequelize.STRING(10),
       },
       nomor_spk: {
         type: Sequelize.STRING(30),

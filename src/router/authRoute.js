@@ -10,17 +10,39 @@ router.post(
 );
 
 router.post(
-    "/check-user",
-    authController.validate("checkUser"),
-    authController.checkUser
-)
-
-router.post(
-  "/login",
-  authController.validate("login"),
-  authController.login
+  "/check-user",
+  authController.validate("checkUser"),
+  authController.checkUser
 );
 
+router.post("/login", authController.validate("login"), authController.login);
+
+router.post(
+  "/forgot-username",
+  authController.validate("forgotUsername"),
+  authController.forgotUsername
+);
+
+router.get("/reset-attempt", authController.resetAttempt);
+
 router.post("/verify", authController.refreshToken);
+
+router.post(
+  "/forgot-password",
+  authController.validate("forgotPassword"),
+  authController.forgotPassword
+);
+
+router.post(
+  "/verify-otp",
+  authController.validate("verifyOtp"),
+  authController.verifyOtp
+);
+
+router.post(
+  "/reset-password",
+  authController.validate("resetPassword"),
+  authController.resetPassword
+);
 
 module.exports = router;
