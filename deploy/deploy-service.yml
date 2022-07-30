@@ -69,3 +69,6 @@
           MAILER_PASSWORD: "{{ lookup('env', 'MAILER_PASSWORD') | mandatory }}"
           MAILER_HOST: "{{ lookup('env', 'MAILER_HOST') | mandatory }}"
           MAILER_PORT: "{{ lookup('env', 'MAILER_PORT') | mandatory }}"
+
+          WEBCORP_USER: "{{ lookup('env', 'WEBCORP_USER') | mandatory }}"
+          WEBCORP_PASS: "{{ lookup('env', 'WEBCORP_PASS') | mandatory }}"
