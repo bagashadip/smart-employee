@@ -187,7 +187,7 @@ Absensi.belongsTo(Pegawai, {
 });
 
 JamKerjaDetail.belongsTo(JamKerja, {
-  as: "jamkerja",
+  as: "jamkerjaDetail",
   foreignKey: "kode_jamkerja",
   targetKey: "kode_jamkerja",
 });
