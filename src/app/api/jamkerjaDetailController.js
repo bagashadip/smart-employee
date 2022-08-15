@@ -24,7 +24,7 @@ module.exports = {
       include: [
         {
           model: JamKerja,
-          as: "jamkerjaDetail",
+          as: "jamkerja",
           attributes: ["kode_jamkerja", "tampil_jamkerja"],
         },
       ],
@@ -44,7 +44,7 @@ module.exports = {
       include: [
         {
           model: JamKerja,
-          as: "jamkerjaDetail",
+          as: "jamkerja",
           attributes: ["kode_jamkerja", "tampil_jamkerja"],
         },
       ],
@@ -74,7 +74,7 @@ module.exports = {
       include: [
         {
           model: JamKerja,
-          as: "jamkerjaDetail",
+          as: "jamkerja",
           attributes: ["kode_jamkerja", "tampil_jamkerja"],
         },
       ],

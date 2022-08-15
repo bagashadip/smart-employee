@@ -192,8 +192,14 @@ Absensi.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
-JamKerjaDetail.belongsTo(JamKerja, {
+JamKerja.hasMany(JamKerjaDetail, {
   as: "jamkerjaDetail",
+  foreignKey: "kode_jamkerja",
+  sourceKey: "kode_jamkerja",
+});
+
+JamKerjaDetail.belongsTo(JamKerja, {
+  as: "jamkerja",
   foreignKey: "kode_jamkerja",
   targetKey: "kode_jamkerja",
 });

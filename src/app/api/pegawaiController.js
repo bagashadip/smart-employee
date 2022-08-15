@@ -16,6 +16,7 @@ const {
   Organisasi,
   User,
   JamKerja,
+  JamKerjaDetail,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -49,6 +50,16 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
+        },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
         },
       ],
     });
@@ -89,6 +100,16 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
+        },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
         },
       ],
     });
@@ -159,6 +180,16 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
+        },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
         },
       ],
     });
