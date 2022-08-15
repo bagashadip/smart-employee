@@ -180,14 +180,59 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const pegawai = await new Pegawai({
-      ...req.body,
-    }).save();
+    if (!("kode_pegawai" in req.body)) {
+      let num;
+      let now = moment();
+
+      const getLast = await Pegawai.findOne({
+        order: [["kode_pegawai", "DESC"]],
+        limit: 1,
+      });
+
+      if (getLast.kode_pegawai.substring(6, 11) === "99999") {
+        num = "00001";
+      } else {
+        num = parseInt(getLast.kode_pegawai.substring(6, 11)) + 1;
+      }
+
+      const leadZero = `${num}`.padStart(5, "0");
+      req.body.kode_pegawai =
+        String(now.format("YYYY")) + now.format("MM") + leadZero;
+
+      await new Pegawai({
+        ...req.body,
+      }).save();
+    } else {
+      const mPegawai = await Pegawai.findOne({
+        where: {
+          kode_pegawai: {
+            [Op.iLike]: req.body.kode_pegawai,
+          },
+        },
+      });
+      if (mPegawai) {
+        res.status(422).send({
+          status: "Validation Error",
+          errors: [
+            {
+              value: "20220500180",
+              msg: "Data already exist!",
+              param: "kode_pegawai",
+              location: "body",
+            },
+          ],
+        });
+      }
+
+      await new Pegawai({
+        ...req.body,
+      }).save();
+    }
 
     res.json({
       status: true,
       statusCode: 200,
-      message: "Pegawai " + pegawai.kode_pegawai + " berhasil ditambah.",
+      message: "Pegawai " + req.body.kode_pegawai + " berhasil ditambah.",
     });
   },
   // Update
@@ -289,17 +334,18 @@ module.exports = {
       });
     const ruleCreateKodePegawai = body("kode_pegawai")
       .trim()
-      .notEmpty()
       .custom(async (value) => {
-        mPegawai = await Pegawai.findOne({
-          where: {
-            kode_pegawai: {
-              [Op.iLike]: value,
+        if (value) {
+          mPegawai = await Pegawai.findOne({
+            where: {
+              kode_pegawai: {
+                [Op.iLike]: value,
+              },
             },
-          },
-        });
-        if (mPegawai) {
-          return Promise.reject("Data already exist!");
+          });
+          if (mPegawai) {
+            return Promise.reject("Data already exist!");
+          }
         }
       });
     const ruleNamaPegawai = body("namalengkap_pegawai").trim().notEmpty();
@@ -417,17 +463,16 @@ module.exports = {
       case "create":
         {
           return [
-            ruleCreateKodePegawai,
             ruleNamaPegawai,
             ruleNoKtp,
             ruleJenisKelamin,
-            ruleTanggalLahir.optional({nullable: true}),
+            ruleTanggalLahir.optional({ nullable: true }),
             ruleGolDarah,
             ruleStatusPernikahan,
             ruleAgama,
             ruleNoTelp,
             ruleEmailPribadi,
-            ruleEmailJsc.optional({nullable: true}),
+            ruleEmailJsc.optional({ nullable: true }),
             ruleFoto,
             ruleAlamatKtp,
             ruleAlamatDomisili,
@@ -439,7 +484,7 @@ module.exports = {
             ruleNoBpjsKes,
             ruleNoBpjsKet,
             ruleTanggalBergabung,
-            ruleTanggalLulus.optional({nullable: true}),
+            ruleTanggalLulus.optional({ nullable: true }),
             ruleStatus,
             ruleStatusAktif,
             rulePtkp,
@@ -456,12 +501,12 @@ module.exports = {
             ruleNamaPegawai.optional(),
             ruleNoKtp.optional(),
             ruleJenisKelamin.optional(),
-            ruleTanggalLahir.optional({nullable: true}),
+            ruleTanggalLahir.optional({ nullable: true }),
             ruleGolDarah.optional(),
             ruleStatusPernikahan.optional(),
             ruleAgama.optional(),
             ruleNoTelp.optional(),
-            ruleEmailJsc.optional({nullable: true}),
+            ruleEmailJsc.optional({ nullable: true }),
             ruleFoto.optional(),
             ruleAlamatKtp.optional(),
             ruleAlamatDomisili.optional(),
@@ -473,7 +518,7 @@ module.exports = {
             ruleNoBpjsKes.optional(),
             ruleNoBpjsKet.optional(),
             ruleTanggalBergabung.optional(),
-            ruleTanggalLulus.optional({nullable: true}),
+            ruleTanggalLulus.optional({ nullable: true }),
             ruleStatus.optional(),
             rulePtkp.optional(),
             ruleDivisi.optional(),
