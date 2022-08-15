@@ -15,6 +15,7 @@ const {
   UnitKerja,
   Organisasi,
   User,
+  JamKerja,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -458,6 +459,19 @@ module.exports = {
           }
         }
       });
+    const ruleKodeJamKerja = body("kode_jamkerja").custom(async (value) => {
+      if (value) {
+        const mJamkerja = await JamKerja.findOne({
+          where: {
+            kode_jamkerja: value,
+          },
+        });
+
+        if (!mJamkerja) {
+          return Promise.reject("Kode jam kerja tidak ditemukan!");
+        }
+      }
+    });
 
     switch (type) {
       case "create":
@@ -491,6 +505,7 @@ module.exports = {
             ruleDivisi,
             rulePosisi,
             ruleDpa,
+            ruleKodeJamKerja,
           ];
         }
         break;
@@ -524,6 +539,7 @@ module.exports = {
             ruleDivisi.optional(),
             rulePosisi.optional(),
             ruleDpa.optional(),
+            ruleKodeJamKerja.optional(),
           ];
         }
         break;

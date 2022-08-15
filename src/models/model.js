@@ -96,6 +96,12 @@ Pegawai.belongsTo(User, {
   targetKey: "kode_pegawai",
 });
 
+Pegawai.belongsTo(JamKerja, {
+  as: "jamkerja",
+  foreignKey: "kode_jamkerja",
+  targetKey: "kode_jamkerja",
+});
+
 Asn.belongsTo(Jabatan, {
   as: "jabatan",
   foreignKey: "kode_jabatan",
