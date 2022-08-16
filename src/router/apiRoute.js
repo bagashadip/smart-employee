@@ -26,6 +26,8 @@ const profileController = require("../app/api/profileController");
 const asnController = require("../app/api/asnController");
 const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
+const jamKerjaController = require("../app/api/jamkerjaController");
+const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -370,5 +372,46 @@ divisiParentRoute.delete(
 router.post("/divisi-parent/data", divisiParentController.data);
 router.get("/divisi-parent/list", divisiParentController.list);
 /* Divisi Parent Route */
+
+/* Jam Kerja Route */
+const jamKerjaRoute = router.route("/jam-kerja");
+jamKerjaRoute.get(jamKerjaController.validate("get"), jamKerjaController.get);
+jamKerjaRoute.post(
+  jamKerjaController.validate("create"),
+  jamKerjaController.create
+);
+jamKerjaRoute.patch(
+  jamKerjaController.validate("update"),
+  jamKerjaController.update
+);
+jamKerjaRoute.delete(
+  jamKerjaController.validate("delete"),
+  jamKerjaController.delete
+);
+router.post("/jam-kerja/data", jamKerjaController.data);
+router.get("/jam-kerja/list", jamKerjaController.list);
+/* Jam Kerja Route */
+
+/* Jam Kerja Detail Route */
+const jamKerjaDetailRoute = router.route("/jam-kerja-detail");
+jamKerjaDetailRoute.get(
+  jamKerjaDetailController.validate("get"),
+  jamKerjaDetailController.get
+);
+jamKerjaDetailRoute.post(
+  jamKerjaDetailController.validate("create"),
+  jamKerjaDetailController.create
+);
+jamKerjaDetailRoute.patch(
+  jamKerjaDetailController.validate("update"),
+  jamKerjaDetailController.update
+);
+jamKerjaDetailRoute.delete(
+  jamKerjaDetailController.validate("delete"),
+  jamKerjaDetailController.delete
+);
+router.post("/jam-kerja-detail/data", jamKerjaDetailController.data);
+router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
+/* Jam Kerja Detail Route */
 
 module.exports = router;

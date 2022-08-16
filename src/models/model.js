@@ -20,6 +20,8 @@ const mPosisi = require("./posisi");
 const mAbsensi = require("./absensi");
 const mAsn = require("./asn");
 const mDivisiParent = require("./divisiParent");
+const mJamKerja = require("./jamkerja");
+const mJamKerjaDetail = require("./jamkerjaDetail");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -40,6 +42,8 @@ const Posisi = mPosisi(sequelize, Sequelize);
 const Absensi = mAbsensi(sequelize, Sequelize);
 const Asn = mAsn(sequelize, Sequelize);
 const DivisiParent = mDivisiParent(sequelize, Sequelize);
+const JamKerja = mJamKerja(sequelize, Sequelize);
+const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -90,6 +94,12 @@ Pegawai.belongsTo(User, {
   as: "user",
   foreignKey: "kode_pegawai",
   targetKey: "kode_pegawai",
+});
+
+Pegawai.belongsTo(JamKerja, {
+  as: "jamkerja",
+  foreignKey: "kode_jamkerja",
+  targetKey: "kode_jamkerja",
 });
 
 Asn.belongsTo(Jabatan, {
@@ -182,6 +192,18 @@ Absensi.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
+JamKerja.hasMany(JamKerjaDetail, {
+  as: "jamkerjaDetail",
+  foreignKey: "kode_jamkerja",
+  sourceKey: "kode_jamkerja",
+});
+
+JamKerjaDetail.belongsTo(JamKerja, {
+  as: "jamkerja",
+  foreignKey: "kode_jamkerja",
+  targetKey: "kode_jamkerja",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
@@ -212,4 +234,6 @@ module.exports = {
   Absensi,
   Asn,
   DivisiParent,
+  JamKerja,
+  JamKerjaDetail,
 };
