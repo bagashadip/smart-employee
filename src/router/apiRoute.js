@@ -28,6 +28,7 @@ const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
+const exportController = require("../app/api/exportController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -413,5 +414,9 @@ jamKerjaDetailRoute.delete(
 router.post("/jam-kerja-detail/data", jamKerjaDetailController.data);
 router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
 /* Jam Kerja Detail Route */
+
+/* Export Route */
+router.post("/export-absensi", exportController.exportAbsensi);
+/* Export Route */
 
 module.exports = router;
