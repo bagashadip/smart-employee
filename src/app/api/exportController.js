@@ -17,6 +17,7 @@ module.exports = {
   exportAbsensi: async (req, res) => {
     const checkStartDate = "startDate" in req.body;
     const checkEndDate = "endDate" in req.body;
+    const checkDivisi = "divisi" in req.body;
 
     if (checkStartDate === false || checkEndDate === false) {
       res.status(400).json({
@@ -25,6 +26,13 @@ module.exports = {
       });
     }
 
+    let filterDivisi = "";
+    if(checkDivisi){
+      filterDivisi = {
+        kode_divisi: req.body.divisi
+      }
+    }
+    
     const mAbsensi = await Absensi.findAll({
       include: [
         {
@@ -38,6 +46,7 @@ module.exports = {
               attributes: [],
             },
           ],
+          where: filterDivisi
         },
       ],
       attributes: [
@@ -71,7 +80,7 @@ module.exports = {
             { [Op.gte]: req.body.startDate },
             { [Op.lte]: req.body.endDate },
           ],
-        },
+        }
       },
       order: [
         [Sequelize.col("pegawai.kode_divisi"), "ASC"],
