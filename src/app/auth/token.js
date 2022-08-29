@@ -12,7 +12,7 @@ module.exports = function (type) {
 
     const expiresIn =
       type == "password"
-        ? process.env.JWT_EXPIRES_IN
+        ? "120"
         : process.env.JWT_REFRESH_EXPIRES_IN;
 
     const token = jwt.sign(

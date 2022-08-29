@@ -218,12 +218,10 @@ module.exports = {
 
     const accesToken = new Token("password").generate({
       userId: loadedUser.id_user.toString(),
-      scope: req.body.scope,
       grantType: "password",
     });
     const refreshToken = new Token("refresh").generate({
       userId: loadedUser.id_user.toString(),
-      scope: req.body.scope,
       grantType: "password",
     });
 
@@ -249,7 +247,7 @@ module.exports = {
         username: loadedUser.username_user,
         first_login: loadedUser.first_login,
       },
-      expires_in: process.env.JWT_EXPIRES_IN,
+      expires_in: "120",
     });
   },
   changePassword: async (req, res, _) => {
@@ -540,13 +538,11 @@ module.exports = {
       //   return error(res).authenticationError(["Invalid Zone."]);
       // }
       const accesToken = new Token("password").generate({
-        id_user: verify.id_user,
-        scope: verify.scope,
+        userId: verify.userId,
         grantType: "password",
       });
       const refreshToken = new Token("refresh").generate({
         userId: verify.userId,
-        scope: verify.scope,
         grantType: "password",
       });
       res.json({
@@ -558,7 +554,7 @@ module.exports = {
           username: user.username_user,
           first_login: user.first_login
         },
-        expires_in: process.env.JWT_EXPIRES_IN,
+        expires_in: "120",
       });
     } else {
       return error(res).authenticationError(["Invalid token."]);
