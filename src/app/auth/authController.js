@@ -555,8 +555,8 @@ module.exports = {
         refresh_token: refreshToken,
         user: {
           id: user.id_user,
-          email: user.username_user,
-          name: user.firstlogin_user
+          username: user.username_user,
+          first_login: user.first_login
         },
         expires_in: process.env.JWT_EXPIRES_IN,
       });
