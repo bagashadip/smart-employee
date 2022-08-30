@@ -247,7 +247,7 @@ module.exports = {
         username: loadedUser.username_user,
         first_login: loadedUser.first_login,
       },
-      expires_in: "120",
+      expires_in: process.env.JWT_EXPIRES_IN,
     });
   },
   changePassword: async (req, res, _) => {
@@ -554,7 +554,7 @@ module.exports = {
           username: user.username_user,
           first_login: user.first_login
         },
-        expires_in: "120",
+        expires_in: process.env.JWT_EXPIRES_IN,
       });
     } else {
       return error(res).authenticationError(["Invalid token."]);
