@@ -11,6 +11,9 @@ module.exports = {
       foto_kegiatan: {
         type: Sequelize.TEXT
       },
+      desc_kegiatan: {
+        type: Sequelize.TEXT
+      },
       nama_kegiatan: {
         type: Sequelize.STRING(200)
       },

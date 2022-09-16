@@ -22,6 +22,7 @@ const mAsn = require("./asn");
 const mDivisiParent = require("./divisiParent");
 const mJamKerja = require("./jamkerja");
 const mJamKerjaDetail = require("./jamkerjaDetail");
+const mKegiatan = require("./kegiatan");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -44,6 +45,7 @@ const Asn = mAsn(sequelize, Sequelize);
 const DivisiParent = mDivisiParent(sequelize, Sequelize);
 const JamKerja = mJamKerja(sequelize, Sequelize);
 const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
+const Kegiatan = mKegiatan(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -236,4 +238,5 @@ module.exports = {
   DivisiParent,
   JamKerja,
   JamKerjaDetail,
+  Kegiatan
 };
