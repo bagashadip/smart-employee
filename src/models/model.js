@@ -206,6 +206,12 @@ JamKerjaDetail.belongsTo(JamKerja, {
   targetKey: "kode_jamkerja",
 });
 
+Kegiatan.belongsTo(File, {
+  as: "foto",
+  foreignKey: "foto_kegiatan",
+  targetKey: "id",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();

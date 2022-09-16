@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
                 autoIncrement: true,
             },
             foto_kegiatan: DataTypes.UUID,
-            //desc_kegiatan: DataTypes.TEXT,
+            desc_kegiatan: DataTypes.TEXT,
             nama_kegiatan: DataTypes.STRING,
             tanggal_kegiatan: DataTypes.DATE,
             kode_pegawai: DataTypes.STRING
