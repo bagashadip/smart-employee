@@ -29,6 +29,7 @@ const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
 const kegiatanController = require("../app/api/kegiatanController");
+const exportController = require("../app/api/exportController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -425,5 +426,11 @@ kegiatanRoute.delete(kegiatanController.delete);
 router.get("/kegiatan/list", kegiatanController.list);
 router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
+
+
+/* Export Route */
+router.post("/export-absensi", exportController.exportAbsensi);
+/* Export Route */
+
 
 module.exports = router;

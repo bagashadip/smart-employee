@@ -88,7 +88,7 @@ module.exports = {
       message: "User " + jabatan.username_user + " berhasil ditambah.",
     });
   },
-  // Update
+  // Update 
   update: async (req, res) => {
     // if (!(await req.user.hasAccess(_module, "update"))) {
     //   return error(res).permissionError();
