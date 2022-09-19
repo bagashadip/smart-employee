@@ -418,13 +418,12 @@ router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
 
 /* Kegiatan Route */
 const kegiatanRoute = router.route("/kegiatan");
-kegiatanRoute.get(
-    kegiatanController.get
-);
-kegiatanRoute.post(
-    kegiatanController.create
-);
+kegiatanRoute.get(kegiatanController.get);
+kegiatanRoute.post(kegiatanController.create);
+kegiatanRoute.patch(kegiatanController.update);
+kegiatanRoute.delete(kegiatanController.delete);
 router.get("/kegiatan/list", kegiatanController.list);
+router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
 
 module.exports = router;

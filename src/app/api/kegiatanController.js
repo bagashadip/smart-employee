@@ -3,18 +3,20 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Kegiatan, Absensi, Pegawai, File, Divisi} = require("../../models/model");
+const { Kegiatan, Absensi, Pegawai, File, Divisi, Asn} = require("../../models/model");
 
 const Op = Sequelize.Op;
 
 module.exports = {
-    // List
+    // Get all
     list: async (req, res) => {
         const mKegiatan = await Kegiatan.findAll({
             attributes: ["id_kegiatan", "foto_kegiatan", "desc_kegiatan",  "nama_kegiatan", "tanggal_kegiatan", "kode_pegawai"],
         });
         res.json(mKegiatan);
     },
+
+    //Get by kode pegawai and date
     get: async (req, res) => {
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
@@ -39,6 +41,29 @@ module.exports = {
         });
         res.json(mKegiatan);
     },
+
+    detail: async (req, res) => {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return error(res).validationError(validation.array());
+        }
+
+        const mKegiatan = await Kegiatan.findOne({
+            where: {
+                id_kegiatan: req.query.id_kegiatan
+            },
+            include: [
+                {
+                    model: File,
+                    as: "foto",
+                    attributes: ["name", "path", "extension", "size"],
+                },
+            ],
+        });
+        res.json(mKegiatan);
+    },
+
+    //Add new kegiatan
     create: async (req, res) => {
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
@@ -55,6 +80,45 @@ module.exports = {
             message: "Kegiatan " + mKegiatan.nama_kegiatan + " berhasil ditambah."
         });
     },
+
+    //Update kegiatan
+    update: async (req, res) => {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return error(res).validationError(validation.array());
+        }
+
+        await Kegiatan.update(
+            { ...req.body },
+            { where: { id_kegiatan: req.query.id_kegiatan } }
+        );
+
+        res.json({
+            status: true,
+            statusCode: 200,
+            message: "Kegiatan " + req.query.id_kegiatan + " berhasil diubah.",
+        });
+    },
+
+    //Delete
+    delete: async (req, res) => {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return error(res).validationError(validation.array());
+        }
+
+        await Kegiatan.destroy({
+            where: {
+                id_kegiatan: req.query.id_kegiatan,
+            },
+        });
+        res.send({
+            status: true,
+            message: req.query.id_kegiatan + " berhasil dihapus.",
+        });
+    },
+
+    //Validate
     validate: (type) => {
         return type
     }
