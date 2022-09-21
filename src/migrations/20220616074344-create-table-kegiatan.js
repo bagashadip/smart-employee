@@ -9,6 +9,9 @@ module.exports = {
         autoIncrement: true
       },
       foto_kegiatan: {
+        type: Sequelize.UUID
+      },
+      desc_kegiatan: {
         type: Sequelize.TEXT
       },
       nama_kegiatan: {

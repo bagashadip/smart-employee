@@ -28,6 +28,7 @@ const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
+const kegiatanController = require("../app/api/kegiatanController");
 const exportController = require("../app/api/exportController");
 
 router.use(authMiddleware); // dont move it to another line
@@ -415,8 +416,21 @@ router.post("/jam-kerja-detail/data", jamKerjaDetailController.data);
 router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
 /* Jam Kerja Detail Route */
 
+
+/* Kegiatan Route */
+const kegiatanRoute = router.route("/kegiatan");
+kegiatanRoute.get(kegiatanController.get);
+kegiatanRoute.post(kegiatanController.create);
+kegiatanRoute.patch(kegiatanController.update);
+kegiatanRoute.delete(kegiatanController.delete);
+router.get("/kegiatan/list", kegiatanController.list);
+router.get("/kegiatan/detail", kegiatanController.detail);
+/* Kegiatan Route */
+
+
 /* Export Route */
 router.post("/export-absensi", exportController.exportAbsensi);
 /* Export Route */
+
 
 module.exports = router;
