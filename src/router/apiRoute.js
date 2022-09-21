@@ -28,8 +28,11 @@ const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
-const kegiatanController = require("../app/api/kegiatanController");
 const exportController = require("../app/api/exportController");
+
+//Lapbul
+const kegiatanController = require("../app/api/kegiatanController");
+const lapbulController = require("../app/lapbul/lapbulController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -432,5 +435,9 @@ router.get("/kegiatan/detail", kegiatanController.detail);
 router.post("/export-absensi", exportController.exportAbsensi);
 /* Export Route */
 
+
+/* Lapbul Route */
+router.get("/lapbul", lapbulController.generate);
+/* Lapbul Route */
 
 module.exports = router;
