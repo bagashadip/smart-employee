@@ -28,6 +28,7 @@ const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
+const exportController = require("../app/api/exportController");
 
 //Lapbul
 const kegiatanController = require("../app/api/kegiatanController");
@@ -421,14 +422,19 @@ router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
 
 /* Kegiatan Route */
 const kegiatanRoute = router.route("/kegiatan");
-kegiatanRoute.get(
-    kegiatanController.get
-);
-kegiatanRoute.post(
-    kegiatanController.create
-);
+kegiatanRoute.get(kegiatanController.get);
+kegiatanRoute.post(kegiatanController.create);
+kegiatanRoute.patch(kegiatanController.update);
+kegiatanRoute.delete(kegiatanController.delete);
 router.get("/kegiatan/list", kegiatanController.list);
+router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
+
+
+/* Export Route */
+router.post("/export-absensi", exportController.exportAbsensi);
+/* Export Route */
+
 
 /* Lapbul Route */
 router.get("/lapbul", lapbulController.generate);
