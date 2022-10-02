@@ -9,7 +9,34 @@ var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
 
+const { Lapbul} = require("../../models/model");
+
 module.exports = {
+    
+    // Get all
+    list: async (req, res) => {
+        const mLapbul = await Lapbul.findAll();
+        res.json(mLapbul);
+    },
+
+    //Add new kegiatan
+    create: async (req, res) => {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return error(res).validationError(validation.array());
+        }
+
+        const mLapbul = await new Lapbul({
+            ...req.body,
+        }).save();
+
+        res.json({
+            status: true,
+            statusCode: 200,
+            message: "Lapbul " + mKegiatan.periode + " berhasil ditambah."
+        });
+    },
+
     generate: async (req, res) => {
 
         // define your filter functions here, for example
