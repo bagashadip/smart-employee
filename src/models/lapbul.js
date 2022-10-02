@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = (sequelize, DataTypes) => {
-    const kegiatan = sequelize.define(
+    const lapbul = sequelize.define(
         "tbl_lapbul",
         {
             id_lapbul: {
@@ -18,5 +18,5 @@ module.exports = (sequelize, DataTypes) => {
             freezeTableName: true,
         }
     );
-    return kegiatan;
+    return lapbul;
 };
