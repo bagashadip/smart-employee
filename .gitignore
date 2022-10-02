@@ -3,3 +3,5 @@ src/.env
 .DS_Store
 package-lock.json
 public/uploads
+.env
+env-local
