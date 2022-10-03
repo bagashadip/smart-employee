@@ -136,6 +136,18 @@ Divisi.belongsTo(DivisiParent, {
   targetKey: "kode_divisi_parent",
 });
 
+Divisi.belongsTo(Pegawai, {
+  as: "manajer",
+  foreignKey: "kode_pegawai_manajer",
+  targetKey: "kode_pegawai",
+});
+
+Divisi.belongsTo(Asn, {
+  as: "asn",
+  foreignKey: "nip_asn",
+  targetKey: "nip_asn",
+});
+
 DivisiParent.hasMany(Divisi, {
   as: "divisi",
   foreignKey: "kode_divisi_parent",
