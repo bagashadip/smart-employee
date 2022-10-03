@@ -17,6 +17,7 @@ const {
   User,
   JamKerja,
   JamKerjaDetail,
+  Asn,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -164,6 +165,35 @@ module.exports = {
                 },
               ],
             },
+            {
+              model: Pegawai,
+              as: "manajer",
+              attributes: [
+                "kode_pegawai",
+                "namalengkap_pegawai"
+              ],
+              include: [
+                {
+                  model: Posisi,
+                  as: "posisi",
+                  attributes: ["kode_posisi", "nama_posisi"],
+                },
+                {
+                  model: Dpa,
+                  as: "dpa",
+                  attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+                },
+              ],
+            },
+            {
+              model: Asn,
+              as: "asn",
+              attributes: [
+                "nip_asn",
+                "nama_asn",
+                "jabatan_asn"
+              ],
+            }
           ],
         },
         {

@@ -12,7 +12,7 @@ module.exports = {
   // List
   list: async (req, res) => {
     const mDivisi = await Divisi.findAll({
-      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja"],
+      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja","kode_pegawai_manajer","nip_asn"],
     });
     res.json(mDivisi);
   },

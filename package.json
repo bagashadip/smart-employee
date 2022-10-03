@@ -44,6 +44,7 @@
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
-    "babel-register": "^6.26.0"
+    "babel-register": "^6.26.0",
+    "sequelize-cli": "^6.5.1"
   }
 }

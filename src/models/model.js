@@ -23,6 +23,7 @@ const mDivisiParent = require("./divisiParent");
 const mJamKerja = require("./jamkerja");
 const mJamKerjaDetail = require("./jamkerjaDetail");
 const mKegiatan = require("./kegiatan");
+const mLapbul = require("./lapbul");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -46,6 +47,7 @@ const DivisiParent = mDivisiParent(sequelize, Sequelize);
 const JamKerja = mJamKerja(sequelize, Sequelize);
 const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
 const Kegiatan = mKegiatan(sequelize, Sequelize);
+const Lapbul = mLapbul(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -132,6 +134,18 @@ Divisi.belongsTo(DivisiParent, {
   as: "divisi_parent",
   foreignKey: "kode_divisi_parent",
   targetKey: "kode_divisi_parent",
+});
+
+Divisi.belongsTo(Pegawai, {
+  as: "manajer",
+  foreignKey: "kode_pegawai_manajer",
+  targetKey: "kode_pegawai",
+});
+
+Divisi.belongsTo(Asn, {
+  as: "asn",
+  foreignKey: "nip_asn",
+  targetKey: "nip_asn",
 });
 
 DivisiParent.hasMany(Divisi, {
@@ -244,5 +258,6 @@ module.exports = {
   DivisiParent,
   JamKerja,
   JamKerjaDetail,
-  Kegiatan
+  Kegiatan,
+  Lapbul
 };
