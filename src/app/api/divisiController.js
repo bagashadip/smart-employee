@@ -4,7 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Divisi, UnitKerja } = require("../../models/model");
+const { Divisi, UnitKerja, Pegawai, Asn, Posisi, Dpa } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -65,7 +65,35 @@ module.exports = {
     const mDivisi = await Divisi.findOne({
       where: {
         kode_divisi: req.query.kode_divisi
-      }
+      },
+      include: [
+        {
+          model: Pegawai,
+          as: "manajer",
+          attributes: ["kode_pegawai", "namalengkap_pegawai"],
+          include: [
+            {
+              model: Posisi,
+              as: "posisi",
+              attributes: ["kode_posisi", "nama_posisi"],
+            },
+            {
+              model: Dpa,
+              as: "dpa",
+              attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+            },
+          ]
+        },
+        {
+          model: Asn,
+          as: "asn",
+          attributes: [
+            "nip_asn",
+            "nama_asn",
+            "jabatan_asn"
+          ],
+        }
+      ]
     });
     res.json(mDivisi);
   },
