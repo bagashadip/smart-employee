@@ -120,7 +120,7 @@ module.exports = {
         {
           model: Pegawai,
           as: "pegawai",
-          attributes: ["emailpribadi_pegawai"],
+          attributes: ["emailpribadi_pegawai","kode_pegawai"],
         },
       ],
     });
@@ -131,6 +131,8 @@ module.exports = {
         message: "Username tidak ditemukan!",
       });
     }
+
+    console.log(user)
 
     loadedUser = user;
 
@@ -238,7 +240,7 @@ module.exports = {
       }
     );
 
-    res.json({
+    var resJson={
       token_type: "bearer",
       access_token: accesToken,
       refresh_token: refreshToken,
@@ -248,7 +250,13 @@ module.exports = {
         first_login: loadedUser.first_login,
       },
       expires_in: process.env.JWT_EXPIRES_IN,
-    });
+    }
+
+    if(loadedUser.pegawai!=undefined){
+      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai
+    }
+
+    res.json(resJson);
   },
   changePassword: async (req, res, _) => {
     const validation = validationResult(req);
