@@ -52,7 +52,7 @@ module.exports = {
       mAbsensi.forEach((item, index) => {
         let dateFormat = date.format(item.timestamp_absensi, "DD M YYYY HH:mm");
         let splitDate = dateFormat.split(" ");
-        const getMonthName = monthName[parseInt(dateFormat[3] - 1)];
+        const getMonthName = monthName[parseInt(splitDate[1]) - 1];
         splitDate[1] = getMonthName;
         listAbsensi.push({
           timestamp_absensi: splitDate.join(" "),
