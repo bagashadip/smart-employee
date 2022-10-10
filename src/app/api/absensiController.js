@@ -175,13 +175,6 @@ module.exports = {
         }
       });
     const ruleTimeStamp = body("timestamp_absensi").trim().notEmpty();
-    const ruleTimeLimitDatang = body("time_limit_datang")
-      .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
-      .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
-
-    const ruleTimeLimitPulang = body("time_limit_pulang")
-      .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
-      .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
     switch (type) {
       case "create":
@@ -195,8 +188,6 @@ module.exports = {
             ruleTipe,
             ruleKodePegawai,
             ruleTimeStamp,
-            ruleTimeLimitDatang,
-            ruleTimeLimitPulang,
           ];
         }
         break;
