@@ -4,10 +4,14 @@ const sequelize = require("../util/database");
 const mFileCategory = require("./fileCategory");
 const mFile = require("./file");
 const mUser = require("./user");
+const mRole = require("./role");
+const mUserRole = require("./userRole");
+const mModule = require("./module");
+const mAction = require("./action");
+const mStatus = require("./status");
 const mJabatan = require("./jabatan");
 const mLog = require("./log");
 const mPegawai = require("./pegawai");
-const mRole = require("./role");
 const mDivisi = require("./divisi");
 const mUnitKerja = require("./unitkerja");
 const mPtkp = require("./ptkp");
@@ -27,10 +31,14 @@ const mKegiatan = require("./kegiatan");
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
 const User = mUser(sequelize, Sequelize);
+const Role = mRole(sequelize, Sequelize);
+const UserRole = mUserRole(sequelize, Sequelize);
+const Module = mModule(sequelize, Sequelize);
+const Action = mAction(sequelize, Sequelize);
+const Status = mStatus(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
 const Log = mLog(sequelize, Sequelize);
 const Pegawai = mPegawai(sequelize, Sequelize);
-const Role = mRole(sequelize, Sequelize);
 const Divisi = mDivisi(sequelize, Sequelize);
 const UnitKerja = mUnitKerja(sequelize, Sequelize);
 const Ptkp = mPtkp(sequelize, Sequelize);
@@ -50,16 +58,19 @@ const Kegiatan = mKegiatan(sequelize, Sequelize);
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
 
+User.hasMany(UserRole, {
+  sourceKey: "id_user",
+  foreignKey: "userId",
+});
+UserRole.belongsTo(User, {
+  foreignKey: "userId",
+  targetKey: "id_user",
+});
+
 User.belongsTo(Pegawai, {
   as: "pegawai",
   foreignKey: "kode_pegawai",
   targetKey: "kode_pegawai",
-});
-
-User.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
 });
 
 Pegawai.belongsTo(File, {
@@ -140,22 +151,10 @@ DivisiParent.hasMany(Divisi, {
   sourceKey: "kode_divisi_parent",
 });
 
-Role.belongsTo(Permission, {
-  as: "permission",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
-});
-
 Permission.belongsTo(HakAkses, {
   as: "hakakses",
   foreignKey: "kode_hakakses",
   targetKey: "kode_hakakses",
-});
-
-Permission.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
 });
 
 HakAkses.belongsTo(Permission, {
@@ -226,12 +225,12 @@ module.exports = {
   FileCategory,
   File,
   User,
+  Role,
   Jabatan,
   Log,
   Pegawai,
   Divisi,
   UnitKerja,
-  Role,
   Ptkp,
   HakAkses,
   KategoriCuti,
@@ -244,5 +243,9 @@ module.exports = {
   DivisiParent,
   JamKerja,
   JamKerjaDetail,
-  Kegiatan
+  Kegiatan,
+  Module,
+  Action,
+  Status,
+  UserRole,
 };
