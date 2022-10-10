@@ -15,8 +15,6 @@ const {
   UnitKerja,
   Organisasi,
   User,
-  JamKerja,
-  JamKerjaDetail,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -50,16 +48,6 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
-        },
-        {
-          model: JamKerja,
-          as: "jamkerja",
-          attributes: ["kode_jamkerja", "tampil_jamkerja"],
-          include: {
-            model: JamKerjaDetail,
-            as: "jamkerjaDetail",
-            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
-          },
         },
       ],
     });
@@ -100,16 +88,6 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
-        },
-        {
-          model: JamKerja,
-          as: "jamkerja",
-          attributes: ["kode_jamkerja", "tampil_jamkerja"],
-          include: {
-            model: JamKerjaDetail,
-            as: "jamkerjaDetail",
-            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
-          },
         },
       ],
     });
@@ -180,16 +158,6 @@ module.exports = {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
-        },
-        {
-          model: JamKerja,
-          as: "jamkerja",
-          attributes: ["kode_jamkerja", "tampil_jamkerja"],
-          include: {
-            model: JamKerjaDetail,
-            as: "jamkerjaDetail",
-            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
-          },
         },
       ],
     });
@@ -490,19 +458,6 @@ module.exports = {
           }
         }
       });
-    const ruleKodeJamKerja = body("kode_jamkerja").custom(async (value) => {
-      if (value) {
-        const mJamkerja = await JamKerja.findOne({
-          where: {
-            kode_jamkerja: value,
-          },
-        });
-
-        if (!mJamkerja) {
-          return Promise.reject("Kode jam kerja tidak ditemukan!");
-        }
-      }
-    });
 
     switch (type) {
       case "create":
@@ -536,7 +491,6 @@ module.exports = {
             ruleDivisi,
             rulePosisi,
             ruleDpa,
-            ruleKodeJamKerja,
           ];
         }
         break;
@@ -570,7 +524,6 @@ module.exports = {
             ruleDivisi.optional(),
             rulePosisi.optional(),
             ruleDpa.optional(),
-            ruleKodeJamKerja.optional(),
           ];
         }
         break;
