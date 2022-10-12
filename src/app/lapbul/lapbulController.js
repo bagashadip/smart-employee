@@ -1,5 +1,6 @@
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
+var moment = require('moment'); // require
 
 const fs = require("fs");
 const path = require("path");
@@ -91,6 +92,35 @@ module.exports = {
             kakJson=JSON.parse(mLapbul.kak)
             mLapbul.kak=kakJson
         }
+
+        moment.locale('id');
+        let dateMoment = moment(mLapbul.lapbul_periode);
+        let periodeBulan = dateMoment.format('MMMM');
+        let periodeTahun = dateMoment.format('Y');
+
+        if(periodeBulan || periodeTahun)
+        {
+            mLapbul.meta={};
+        }
+
+        if(periodeBulan)
+        {
+            mLapbul.meta.bulan=periodeBulan;
+        }
+
+        if(periodeTahun)
+        {
+            mLapbul.meta.tahun=periodeTahun;
+        }
+
+        let ttdDate = moment(mLapbul.tanggal_ttd);
+        ttdDate = ttdDate.format('DD MMMM Y');
+        if(ttdDate)
+        {
+            mLapbul.meta.tanggal_ttd=ttdDate;
+        }
+
+        console.log(mLapbul)
 
         // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
         doc.render(mLapbul);
