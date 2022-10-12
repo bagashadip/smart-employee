@@ -437,8 +437,11 @@ router.post("/export-absensi", exportController.exportAbsensi);
 
 
 /* Lapbul Route */
-router.get("/lapbul", lapbulController.list);
-router.post("/lapbul",lapbulController.generate);
+const lapulRoute = router.route("/lapbul");
+lapulRoute.get(lapbulController.list);
+lapulRoute.post(lapbulController.create);
+router.post("/lapbul/generate",lapbulController.generate);
+router.post("/lapbul/poc",lapbulController.poc);
 /* Lapbul Route */
 
 module.exports = router;
