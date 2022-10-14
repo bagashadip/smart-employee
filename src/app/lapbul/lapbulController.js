@@ -12,11 +12,13 @@ var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
 
-const { Lapbul, Kegiatan} = require("../../models/model");
+const { Lapbul, Kegiatan, LiburNasional} = require("../../models/model");
 const { unset } = require("lodash");
 
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
+
+let ttdKegiatanStart,ttdKegiatanEnd
 
 module.exports = {
     
@@ -143,9 +145,22 @@ module.exports = {
                 ]
             });
 
+            const mLiburNasional = await LiburNasional.findAll({
+                raw: true,
+                where: {
+                    tanggal: {
+                        [Op.gte]: ttdKegiatanStart,
+                        [Op.lte]: ttdKegiatanEnd
+                    }
+                },
+                order: [
+                    ['tanggal', 'ASC'],
+                ]
+            });
+
             if(mKegiatan)
             {
-                let groupedKeg = groupKegByDate(mKegiatan,ttdKegiatanStart,ttdDateSource)
+                let groupedKeg = groupKegByDate(mKegiatan,ttdKegiatanStart,ttdDateSource,mLiburNasional)
                 mLapbul.kegiatan=groupedKeg;
             }
 
@@ -243,7 +258,7 @@ function angularParser(tag) {
     };
 }
 
-function groupKegByDate(data,ttdKegiatanStart,ttdDateSource)
+function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
 {
     let byDate=[];
     let byDateObj=[]
@@ -251,6 +266,12 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource)
     data.forEach(element => {
         //byDate[element.tanggal_kegiatan]=[];
         byDateSorting.push(element.tanggal_kegiatan);
+    });
+
+    liburNasional.forEach(element => {
+        //byDate[element.tanggal_kegiatan]=[];
+        let thisTanggal = moment(element.tanggal).format('YYYY-MM-DD');
+        byDateSorting.push(thisTanggal);
     });
 
     let ttdMonth = ttdDateSource.format('MM');
@@ -272,6 +293,9 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource)
     }
 
     byDateSorting.sort()
+    byDateSorting =  Array.from(new Set(byDateSorting));
+
+    console.log(byDateSorting)
 
     byDateSorting.forEach(element => {
         byDate[element]=[]
@@ -302,6 +326,19 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource)
             }]
         }
     }
+
+    liburNasional.forEach(element => {
+        //byDate[element.tanggal_kegiatan]=[];
+        let thisTanggal = moment(element.tanggal).format('YYYY-MM-DD');
+        
+        if(!byDate[thisTanggal].length)
+        {
+            byDate[thisTanggal]=[{
+                tanggal : thisTanggal,
+                description : 'Libur'
+            }];
+        }
+    });
 
     console.log(byDate)
 
