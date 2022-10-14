@@ -145,7 +145,7 @@ module.exports = {
 
             if(mKegiatan)
             {
-                let groupedKeg = groupKegByDate(mKegiatan)
+                let groupedKeg = groupKegByDate(mKegiatan,ttdKegiatanStart,ttdDateSource)
                 mLapbul.kegiatan=groupedKeg;
             }
 
@@ -243,14 +243,40 @@ function angularParser(tag) {
     };
 }
 
-function groupKegByDate(data)
+function groupKegByDate(data,ttdKegiatanStart,ttdDateSource)
 {
     let byDate=[];
     let byDateObj=[]
+    let byDateSorting=[]
     data.forEach(element => {
-        byDate[element.tanggal_kegiatan]=[];
+        //byDate[element.tanggal_kegiatan]=[];
+        byDateSorting.push(element.tanggal_kegiatan);
     });
 
+    let ttdMonth = ttdDateSource.format('MM');
+    let firstWeekSat,firstWeekSun,thisMonth,weekEndList=[];
+
+    for(i=0;i<5;i++){
+        let addWeek=moment(ttdKegiatanStart).add(i,'week')
+        thisMonth = addWeek.weekday(6).format('MM')
+        if(thisMonth==ttdMonth)
+        {
+            firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
+            firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
+            //byDate[firstWeekSat]=[]
+            byDateSorting.push(firstWeekSat);
+
+            //byDate[firstWeekSun]=[]
+            byDateSorting.push(firstWeekSun);
+        }
+    }
+
+    byDateSorting.sort()
+
+    byDateSorting.forEach(element => {
+        byDate[element]=[]
+    })
+    
     data.forEach(element => {
         byDate[element.tanggal_kegiatan].push({
             tanggal: element.tanggal_kegiatan,
@@ -258,7 +284,29 @@ function groupKegByDate(data)
         });
     });
 
-    let theIndex=0;
+    for(i=0;i<5;i++){
+        let addWeek=moment(ttdKegiatanStart).add(i,'week')
+        thisMonth = addWeek.weekday(6).format('MM')
+        if(thisMonth==ttdMonth)
+        {
+            firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
+            firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
+            byDate[firstWeekSat]=[{
+                tanggal : firstWeekSat,
+                description : 'Libur'
+            }]
+
+            byDate[firstWeekSun]=[{
+                tanggal : firstWeekSun,
+                description : 'Libur'
+            }]
+        }
+    }
+
+    console.log(byDate)
+
+    let theIndex=0
+    let theIndexLampiran=0
     for(let xThis in byDate)
     {
 
@@ -273,13 +321,24 @@ function groupKegByDate(data)
         let dateMoment = moment(xThis);
         let periodeBulan = dateMoment.format('DD-MM-YYYY');
 
+        let thisLampiran=""
+        
+        if(thisDesc!="- Libur\n")
+        {
+            thisLampiran="Lampiran "+(theIndexLampiran+1)
+            theIndexLampiran++;
+        }
+
         byDateObj[theIndex] = {
             tanggal: periodeBulan,
             description: thisDesc,
-            lampiran_number: "Lampiran "+(theIndex+1)
+            lampiran_number: thisLampiran
         }
+
         theIndex++
     }
+
+    console.log(byDateObj)
 
     return byDateObj;
 }
