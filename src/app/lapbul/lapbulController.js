@@ -1,6 +1,7 @@
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 var moment = require('moment'); // require
+moment.locale('id');
 
 const fs = require("fs");
 const path = require("path");
@@ -11,8 +12,11 @@ var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
 
-const { Lapbul} = require("../../models/model");
+const { Lapbul, Kegiatan} = require("../../models/model");
 const { unset } = require("lodash");
+
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 
 module.exports = {
     
@@ -93,7 +97,6 @@ module.exports = {
             mLapbul.kak=kakJson
         }
 
-        moment.locale('id');
         let dateMoment = moment(mLapbul.lapbul_periode);
         let periodeBulan = dateMoment.format('MMMM');
         let periodeTahun = dateMoment.format('Y');
@@ -113,14 +116,40 @@ module.exports = {
             mLapbul.meta.tahun=periodeTahun;
         }
 
-        let ttdDate = moment(mLapbul.tanggal_ttd);
-        ttdDate = ttdDate.format('DD MMMM Y');
+        let ttdDateSource = moment(mLapbul.tanggal_ttd);
+        ttdDate = ttdDateSource.format('DD MMMM Y');
         if(ttdDate)
         {
             mLapbul.meta.tanggal_ttd=ttdDate;
         }
 
-        console.log(mLapbul)
+        if(mLapbul)
+        {
+
+            ttdKegiatanStart    = ttdDateSource.format('YYYY-MM')+'-'+'01';
+            ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'30';
+
+            const mKegiatan = await Kegiatan.findAll({
+                raw: true,
+                where: {
+                    kode_pegawai: mLapbul.kode_pegawai,
+                    tanggal_kegiatan: {
+                        [Op.gte]: ttdKegiatanStart,
+                        [Op.lte]: ttdKegiatanEnd
+                    }
+                },
+                order: [
+                    ['tanggal_kegiatan', 'ASC'],
+                ]
+            });
+
+            if(mKegiatan)
+            {
+                let groupedKeg = groupKegByDate(mKegiatan)
+                mLapbul.kegiatan=groupedKeg;
+            }
+
+        }
 
         // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
         doc.render(mLapbul);
@@ -213,3 +242,55 @@ function angularParser(tag) {
         },
     };
 }
+
+function groupKegByDate(data)
+{
+    let byDate=[];
+    let byDateObj=[]
+    data.forEach(element => {
+        byDate[element.tanggal_kegiatan]=[];
+    });
+
+    data.forEach(element => {
+        byDate[element.tanggal_kegiatan].push({
+            tanggal: element.tanggal_kegiatan,
+            description:element.desc_kegiatan
+        });
+    });
+
+    let theIndex=0;
+    for(let xThis in byDate)
+    {
+
+        let indexSub=0
+        let thisDesc="";
+        for(let xThisSub in byDate[xThis])
+        {
+            thisDesc+="- "+byDate[xThis][xThisSub].description+"\n";
+            indexSub++;            
+        }
+
+        let dateMoment = moment(xThis);
+        let periodeBulan = dateMoment.format('DD-MM-YYYY');
+
+        byDateObj[theIndex] = {
+            tanggal: periodeBulan,
+            description: thisDesc,
+            lampiran_number: "Lampiran "+(theIndex+1)
+        }
+        theIndex++
+    }
+
+    return byDateObj;
+}
+
+function forDetailKeg(value, index, array) {
+    return {
+        tanggal : index,
+        description : value
+    }
+  }
+
+  function myFunction(value, index, array) {
+    return value;
+  }
