@@ -440,8 +440,12 @@ router.post("/export-absensi", exportController.exportAbsensi);
 const lapulRoute = router.route("/lapbul");
 lapulRoute.get(lapbulController.list);
 lapulRoute.post(lapbulController.create);
+lapulRoute.patch(lapbulController.update);
+lapulRoute.delete(lapbulController.delete);
 router.post("/lapbul/generate",lapbulController.generate);
 router.post("/lapbul/poc",lapbulController.poc);
+router.get("/lapbul/:id_lapbul",lapbulController.get_by_id);
+router.post("/lapbul/data",lapbulController.data);
 /* Lapbul Route */
 
 module.exports = router;
