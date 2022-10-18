@@ -2,6 +2,7 @@ const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 var moment = require('moment'); // require
 moment.locale('id');
+const datatable = require("../../util/datatable");
 
 const fs = require("fs");
 const path = require("path");
@@ -24,7 +25,46 @@ module.exports = {
     
     // Get all
     list: async (req, res) => {
-        const mLapbul = await Lapbul.findAll();
+
+        let params = {where : {}}
+        let mLapbul
+        if(req.query.kode_pegawai!=undefined)
+        {
+            params.where.kode_pegawai = req.query.kode_pegawai;
+        }
+        if(req.query.tanggal_mulai!=undefined && req.query.tanggal_selesai!=undefined)
+        {
+            params.where.lapbul_periode = {
+                [Op.gte]: req.query.tanggal_mulai,
+                [Op.lte]: req.query.tanggal_selesai
+            }
+        }
+
+        if(req.query.kode_pegawai!=undefined || (req.query.tanggal_mulai!=undefined && req.query.tanggal_selesai!=undefined))
+        {
+
+            console.log(params)
+
+            mLapbul = await Lapbul.findAll(params);
+        }
+        else
+        {
+            mLapbul = await Lapbul.findAll({
+                order: [
+                    ['id_lapbul','DESC']
+                ]
+            });
+        }
+
+        res.json(mLapbul);
+    },
+
+    get_by_id: async (req, res) => {
+        mLapbul = await Lapbul.findOne({
+            where: {
+                id_lapbul: req.params.id_lapbul
+            }
+        });
         res.json(mLapbul);
     },
 
@@ -45,6 +85,64 @@ module.exports = {
             message: "Lapbul " + mLapbul.lapbul_periode + " berhasil ditambah."
         });
     },
+
+    update: async (req, res) => {
+       const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+          return error(res).validationError(validation.array());
+        }
+    
+        await Lapbul.update(
+          { ...req.body },
+          { where: { id_lapbul: req.query.id_lapbul } }
+        );
+    
+        res.json({
+          status: true,
+          statusCode: 200,
+          message: "Lapbul " + req.query.id_lapbul + " berhasil diubah.",
+        });
+      },
+
+      //Delete
+    delete: async (req, res) => {
+        const validation = validationResult(req);
+        if (!validation.isEmpty()) {
+            return error(res).validationError(validation.array());
+        }
+
+        await Lapbul.destroy({
+            where: {
+                id_lapbul: req.query.id_lapbul,
+            },
+        });
+        res.send({
+            status: true,
+            message: req.query.id_lapbul + " berhasil dihapus.",
+        });
+    },
+
+    // Datatable
+    data: async (req, res) => {
+        // if (!(await req.user.hasAccess(_module, "view"))) {
+        //   return error(res).permissionError();
+        // }
+
+        var dataTableObj = await datatable(req.body);
+        var count = await Lapbul.count();
+        var modules = await Lapbul.findAndCountAll({
+            where : {
+                kode_pegawai : req.query.kode_pegawai
+            },
+            ...dataTableObj,
+        });
+
+        res.json({
+        recordsFiltered: modules.count,
+        recordsTotal: count,
+        items: modules.rows,
+        });
+  },
 
     generate: async (req, res) => {
 
@@ -379,14 +477,3 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
 
     return byDateObj;
 }
-
-function forDetailKeg(value, index, array) {
-    return {
-        tanggal : index,
-        description : value
-    }
-  }
-
-  function myFunction(value, index, array) {
-    return value;
-  }
