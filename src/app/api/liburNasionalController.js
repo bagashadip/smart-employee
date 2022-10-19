@@ -16,6 +16,25 @@ module.exports = {
         res.json(mLiburNasional);
     },
 
+    // Datatable
+    data: async (req, res) => {
+        // if (!(await req.user.hasAccess(_module, "view"))) {
+        //   return error(res).permissionError();
+        // }
+
+        var dataTableObj = await datatable(req.body);
+        var count = await LiburNasional.count();
+        var modules = await LiburNasional.findAndCountAll({
+            ...dataTableObj,
+        });
+
+        res.json({
+        recordsFiltered: modules.count,
+        recordsTotal: count,
+        items: modules.rows,
+        });
+    },
+
     //Get by kode pegawai and date
     get: async (req, res) => {
         const validation = validationResult(req);
@@ -29,27 +48,6 @@ module.exports = {
             }
         });
         res.json(mLiburNasional);
-    },
-
-    detail: async (req, res) => {
-        const validation = validationResult(req);
-        if (!validation.isEmpty()) {
-            return error(res).validationError(validation.array());
-        }
-
-        const mKegiatan = await Kegiatan.findOne({
-            where: {
-                id_kegiatan: req.query.id_kegiatan
-            },
-            include: [
-                {
-                    model: File,
-                    as: "foto",
-                    attributes: ["name", "path", "extension", "size"],
-                },
-            ],
-        });
-        res.json(mKegiatan);
     },
 
     //Add new kegiatan
@@ -77,15 +75,15 @@ module.exports = {
             return error(res).validationError(validation.array());
         }
 
-        await Kegiatan.update(
+        await LiburNasional.update(
             { ...req.body },
-            { where: { id_kegiatan: req.query.id_kegiatan } }
+            { where: { id_liburnasional: req.query.id_liburnasional } }
         );
 
         res.json({
             status: true,
             statusCode: 200,
-            message: "Kegiatan " + req.query.id_kegiatan + " berhasil diubah.",
+            message: "Libur nasional " + req.query.id_liburnasional + " berhasil diubah.",
         });
     },
 
@@ -96,14 +94,14 @@ module.exports = {
             return error(res).validationError(validation.array());
         }
 
-        await Kegiatan.destroy({
+        await LiburNasional.destroy({
             where: {
-                id_kegiatan: req.query.id_kegiatan,
+                id_liburnasional: req.query.id_liburnasional,
             },
         });
         res.send({
             status: true,
-            message: req.query.id_kegiatan + " berhasil dihapus.",
+            message: req.query.id_liburnasional + " berhasil dihapus.",
         });
     },
 

@@ -453,7 +453,10 @@ router.post("/lapbul/data",lapbulController.data);
 const liburNasionalRoute = router.route("/liburnasional");
 liburNasionalRoute.get(liburNasionalController.get);
 liburNasionalRoute.post(liburNasionalController.create);
+liburNasionalRoute.patch(liburNasionalController.update);
+liburNasionalRoute.delete(liburNasionalController.delete);
 router.get("/liburnasional/list", liburNasionalController.list);
+router.post("/liburnasional/data",liburNasionalController.data);
 /* Libur Nasional Route */
 
 module.exports = router;
