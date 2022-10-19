@@ -14,7 +14,10 @@ module.exports = (sequelize, DataTypes) => {
             nama_liburnasional: DataTypes.STRING
         },
         {
-            freezeTableName: true,
+            freezeTableName: true
+        },
+        {
+            initialAutoIncrement: 100
         }
     );
     return liburnasional;
