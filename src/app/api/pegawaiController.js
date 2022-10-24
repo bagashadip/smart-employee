@@ -199,7 +199,7 @@ module.exports = {
         {
           model: Posisi,
           as: "posisi",
-          attributes: ["kode_posisi", "nama_posisi"],
+          attributes: ["kode_posisi", "nama_posisi","kak"],
         },
         {
           model: Dpa,
