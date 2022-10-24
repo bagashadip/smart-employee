@@ -150,7 +150,7 @@ module.exports = {
         recordsTotal: count,
         items: modules.rows,
         });
-  },
+    },
 
     generate: async (req, res) => {
 
