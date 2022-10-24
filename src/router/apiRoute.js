@@ -428,6 +428,7 @@ kegiatanRoute.post(kegiatanController.create);
 kegiatanRoute.patch(kegiatanController.update);
 kegiatanRoute.delete(kegiatanController.delete);
 router.get("/kegiatan/list", kegiatanController.list);
+router.post("/kegiatan/data", kegiatanController.data);
 router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
 

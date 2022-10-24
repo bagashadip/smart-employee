@@ -118,6 +118,41 @@ module.exports = {
         });
     },
 
+    // Datatable
+    data: async (req, res) => {
+        // if (!(await req.user.hasAccess(_module, "view"))) {
+        //   return error(res).permissionError();
+        // }
+
+        var dataTableObj = await datatable(req.body);
+        var count = await Kegiatan.count();
+        /**
+         * where : {
+                kode_pegawai : req.query.kode_pegawai
+            },
+         */
+        var modules = await Kegiatan.findAndCountAll({
+            ...dataTableObj,
+            include : [
+                {
+                    model : File,
+                    as: "foto",
+                    attributes: ["name", "path", "extension", "size"],
+                },
+                {
+                    model : Pegawai,
+                    as: "pegawai"
+                },
+            ]
+        });
+
+        res.json({
+            recordsFiltered: modules.count,
+            recordsTotal: count,
+            items: modules.rows,
+        });
+    },
+
     //Validate
     validate: (type) => {
         return type
