@@ -13,7 +13,7 @@ var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
 
-const { Lapbul, Kegiatan, LiburNasional} = require("../../models/model");
+const { Lapbul, Kegiatan, LiburNasional, Pegawai} = require("../../models/model");
 const { unset } = require("lodash");
 
 const Sequelize = require("sequelize");
@@ -130,11 +130,19 @@ module.exports = {
 
         var dataTableObj = await datatable(req.body);
         var count = await Lapbul.count();
-        var modules = await Lapbul.findAndCountAll({
-            where : {
+        /**
+         * where : {
                 kode_pegawai : req.query.kode_pegawai
             },
+         */
+        var modules = await Lapbul.findAndCountAll({
             ...dataTableObj,
+            include : [
+                {
+                    model : Pegawai,
+                    as : "pegawai"
+                }   
+            ]
         });
 
         res.json({
@@ -142,7 +150,7 @@ module.exports = {
         recordsTotal: count,
         items: modules.rows,
         });
-  },
+    },
 
     generate: async (req, res) => {
 

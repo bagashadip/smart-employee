@@ -228,6 +228,18 @@ Kegiatan.belongsTo(File, {
   targetKey: "id",
 });
 
+Kegiatan.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
+Lapbul.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
