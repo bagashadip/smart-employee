@@ -11,7 +11,7 @@ module.exports = {
     // Get all
     list: async (req, res) => {
         const mKegiatan = await Kegiatan.findAll({
-            attributes: ["id_kegiatan", "foto_kegiatan", "desc_kegiatan",  "nama_kegiatan", "tanggal_kegiatan", "kode_pegawai"],
+            attributes: ["id_kegiatan", "foto_kegiatan", "desc_kegiatan",  "nama_kegiatan", "tanggal_kegiatan", "kode_pegawai","waktu_kegiatan_mulai","waktu_kegiatan_selesai"],
         });
         res.json(mKegiatan);
     },

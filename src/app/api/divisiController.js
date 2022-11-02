@@ -39,7 +39,8 @@ module.exports = {
                   "radiuslokasi_unitkerja",
                   "alamat_unitkerja",
                   "notelp_unitkerja",
-                  "kode_organisasi"
+                  "kode_organisasi",
+                  "template_lapbul"
                 ],
             },
         ]

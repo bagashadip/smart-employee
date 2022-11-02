@@ -12,7 +12,7 @@ module.exports = {
   // List
   list: async (req, res) => {
     const mDpa = await Dpa.findAll({
-      attributes: ["id_dpa", "kode_dpa", "nama_dpa"],
+      attributes: ["id_dpa", "kode_dpa", "nama_dpa","jenis_kontrak"],
     });
     res.json(mDpa);
   },
