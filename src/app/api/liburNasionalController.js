@@ -42,7 +42,7 @@ module.exports = {
             return error(res).validationError(validation.array());
         }
 
-        const mLiburNasional = await LiburNasional.findAll({
+        const mLiburNasional = await LiburNasional.findOne({
             where: {
                 id_liburnasional: req.query.id_liburnasional
             }
