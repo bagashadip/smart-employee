@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
             desc_kegiatan: DataTypes.TEXT,
             nama_kegiatan: DataTypes.STRING,
             tanggal_kegiatan: DataTypes.DATE,
+            waktu_kegiatan_mulai: DataTypes.TIME,
+            waktu_kegiatan_selesai: DataTypes.TIME,
             kode_pegawai: DataTypes.STRING
         },
         {
