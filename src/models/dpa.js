@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
     },
       kode_dpa: DataTypes.STRING,
       nama_dpa: DataTypes.STRING,
-      grade_dpa: DataTypes.INTEGER
+      grade_dpa: DataTypes.INTEGER,
+      jenis_kontrak: DataTypes.INTEGER
     },
     {
       freezeTableName: true
