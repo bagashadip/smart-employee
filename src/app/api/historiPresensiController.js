@@ -85,10 +85,15 @@ module.exports = {
         [Op.and]: [
           Sequelize.where(
             Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
-            "=",
-            moment(req.query.tanggal).format("YYYY-MM-DD")
+            ">=",
+            moment(req.query.tanggal_mulai).format("YYYY-MM-DD")
           ),
-        ],
+          Sequelize.where(
+            Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+            "<=",
+            moment(req.query.tanggal_selesai).format("YYYY-MM-DD")
+          ),
+        ]
       },
     });
 
