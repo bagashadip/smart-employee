@@ -319,6 +319,13 @@ historiPresensiRoute.get(
 );
 /* Histori Presensi Route */
 
+/* Histori Presensi Day Param Route */
+const historiPresensiDayParamRoute = router.route("/histori-presensi-day");
+historiPresensiDayParamRoute.get(
+  historiPresensiController.getDateParam
+);
+/* Histori Presensi Day Param Route */
+
 /* Kontak List Route */
 const kontakListRoute = router.route("/kontak-list");
 kontakListRoute.get(
