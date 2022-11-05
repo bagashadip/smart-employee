@@ -58,6 +58,8 @@ module.exports = {
           timestamp_absensi: splitDate.join(" "),
           tipe_absensi: item.tipe_absensi,
           label_absensi: item.label_absensi,
+          time_limit_datang: item.time_limit_datang,
+          time_limit_pulang: item.time_limit_pulang,
           catatan_absensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."
