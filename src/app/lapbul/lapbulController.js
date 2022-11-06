@@ -42,9 +42,6 @@ module.exports = {
 
         if(req.query.kode_pegawai!=undefined || (req.query.tanggal_mulai!=undefined && req.query.tanggal_selesai!=undefined))
         {
-
-            console.log(params)
-
             mLapbul = await Lapbul.findAll(params);
         }
         else
@@ -198,6 +195,12 @@ module.exports = {
             mLapbul.nomor_halaman=halamanJson
         }
 
+        let uraianPelaksanaan="";
+        if(mLapbul.uraian_pelaksanaan !="" && mLapbul.uraian_pelaksanaan!=undefined){
+            uraianPelaksanaan=JSON.parse(mLapbul.uraian_pelaksanaan)
+            mLapbul.uraian_pelaksanaan=uraianPelaksanaan
+        }
+
         //Jsonify kak
         let kakJson="";
         if(mLapbul.kak !="" && mLapbul.kak!=undefined){
@@ -231,6 +234,7 @@ module.exports = {
             mLapbul.meta.tanggal_ttd=ttdDate;
         }
 
+        //Get kegiatan
         if(mLapbul)
         {
 
@@ -269,8 +273,9 @@ module.exports = {
                 let groupedKeg = groupKegByDate(mKegiatan,ttdKegiatanStart,ttdDateSource,mLiburNasional)
                 mLapbul.kegiatan=groupedKeg;
             }
-
         }
+
+        console.log(mLapbul)
 
         // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
         doc.render(mLapbul);
@@ -401,8 +406,6 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
     byDateSorting.sort()
     byDateSorting =  Array.from(new Set(byDateSorting));
 
-    console.log(byDateSorting)
-
     byDateSorting.forEach(element => {
         byDate[element]=[]
     })
@@ -446,8 +449,6 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
         }
     });
 
-    console.log(byDate)
-
     let theIndex=0
     let theIndexLampiran=0
     for(let xThis in byDate)
@@ -480,8 +481,6 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
 
         theIndex++
     }
-
-    console.log(byDateObj)
 
     return byDateObj;
 }
