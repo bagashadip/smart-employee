@@ -1,23 +1,21 @@
-const uuid = require("uuid");
+"use strict";
 
 module.exports = (sequelize, DataTypes) => {
-  const role = sequelize.define(
-    "role",
+  const userRole = sequelize.define(
+    "userRole",
     {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
       },
-      slug: DataTypes.STRING,
-      name: DataTypes.STRING,
-      defaultRoute: DataTypes.STRING,
-      permissions: DataTypes.JSON,
+      userId: DataTypes.INTEGER,
+      roles: DataTypes.JSON,
       createdBy: DataTypes.UUID,
       updatedBy: DataTypes.UUID,
     },
     {}
   );
 
-  return role;
+  return userRole;
 };
