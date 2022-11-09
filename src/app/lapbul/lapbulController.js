@@ -411,9 +411,32 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
     })
     
     data.forEach(element => {
+
+        let formatTimeStart
+        if(element.waktu_kegiatan_mulai)
+        {
+            formatTimeStart = moment(element.tanggal_kegiatan+' '+element.waktu_kegiatan_mulai).format('HH:mm');
+        }
+        else
+        {
+            formatTimeStart = '00:00'
+        }
+
+        let formatTimeEnd
+        if(element.waktu_kegiatan_selesai)
+        {
+            formatTimeEnd = moment(element.tanggal_kegiatan+' '+element.waktu_kegiatan_selesai).format('HH:mm');
+        }
+        else
+        {
+            formatTimeEnd = '00:00'
+        }
+
+
+        let thisTanggal='('+formatTimeStart+' - '+formatTimeEnd+')\n'
         byDate[element.tanggal_kegiatan].push({
             tanggal: element.tanggal_kegiatan,
-            description:element.desc_kegiatan
+            description:thisTanggal+element.desc_kegiatan
         });
     });
 
@@ -458,7 +481,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
         let thisDesc="";
         for(let xThisSub in byDate[xThis])
         {
-            thisDesc+="- "+byDate[xThis][xThisSub].description+"\n";
+            thisDesc+=""+byDate[xThis][xThisSub].description+"\n\n";
             indexSub++;            
         }
 
@@ -467,7 +490,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
 
         let thisLampiran=""
         
-        if(thisDesc!="- Libur\n")
+        if(thisDesc!="Libur\n\n")
         {
             thisLampiran="Lampiran "+(theIndexLampiran+1)
             theIndexLampiran++;
