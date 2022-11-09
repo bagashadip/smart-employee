@@ -100,6 +100,92 @@ module.exports = {
 
     res.status(200).send(resData);
   },
+  checkUserEmail: async (req, res, _) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const username = req.body.emailpribadi_pegawai;
+    let loadedUser;
+
+    //Get pegawai by email
+    const pegawaiFind = await Pegawai.findOne({
+      where: {
+        emailpribadi_pegawai: username
+      },
+    });
+
+    if(pegawaiFind)
+    {
+      //Get user by kode pegawai
+      const userFind = await User.findOne({
+        where: {
+          kode_pegawai: pegawaiFind.kode_pegawai
+        },
+      });
+
+      const user = await User.findOne({
+        include: [
+          {
+            model: Pegawai,
+            as: "pegawai",
+            include: [
+              {
+                model: File,
+                as: "foto",
+              },
+            ],
+          },
+        ],
+        where: {
+          kode_pegawai: pegawaiFind.kode_pegawai
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "User tidak ditemukan!",
+        });
+      }
+  
+      loadedUser = user;
+  
+      if (loadedUser.status_user !== "Aktif") {
+        return res.status(401).json({
+          statusCode: 401,
+          message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
+        });
+      }
+  
+      resData = {
+        statusCode: 200,
+        username: loadedUser.username_user,
+        emailpribadi_pegawai: "",
+        namalengkap_pegawai: "",
+        foto_pegawai: "",
+        status_user: loadedUser.status_user,
+      };
+  
+      if (loadedUser.pegawai) {
+        resData.emailpribadi_pegawai = loadedUser.pegawai.emailpribadi_pegawai;
+        resData.namalengkap_pegawai = loadedUser.pegawai.namalengkap_pegawai;
+        resData.foto_pegawai = loadedUser.pegawai.foto.path;
+      }
+  
+      res.status(200).send(resData);
+
+    }
+
+    if (!pegawaiFind) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Email tidak ditemukan!",
+      });
+    }
+
+  },
   login: async (req, res, _) => {
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -257,6 +343,204 @@ module.exports = {
     }
 
     res.json(resJson);
+  },
+  loginByEmail  : async (req, res, _) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    let username
+    let loginType
+
+    if(req.body.username!=undefined){
+        username = req.body.username
+        loginType = "username"
+    }
+
+    if(req.body.emailpribadi_pegawai!=undefined){
+        username = req.body.emailpribadi_pegawai
+        loginType = "email"
+    }
+
+    const password = req.body.password;
+    let loadedUser;
+    let kodePegawai, userWhere
+
+    if(loginType=="email"){
+      //Get pegawai by email
+      const pegawaiFind = await Pegawai.findOne({
+        where: {
+          emailpribadi_pegawai: username
+        },
+      });
+
+      if(pegawaiFind) {
+        kodePegawai = pegawaiFind.kode_pegawai
+      }
+
+      if (!pegawaiFind) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "Email tidak ditemukan!",
+        });
+      }
+
+      userWhere = {
+        kode_pegawai: pegawaiFind.kode_pegawai,
+      }
+
+    }else{
+      kodePegawai = ""
+      userWhere = {
+        username_user: {
+          [Op.iLike]: username,
+        },
+      }
+    }
+
+    const user = await User.findOne({
+      where: userWhere,
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["emailpribadi_pegawai","kode_pegawai"],
+        },
+      ],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Username tidak ditemukan!",
+      });
+    }
+
+    loadedUser = user;
+
+    if (loadedUser.status_user !== "Aktif") {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
+      });
+    }
+
+    if (loadedUser.attempt_user > 2) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Input password salah 3 kali. User dinonaktifkan.",
+      });
+    }
+
+    const isEqual = await bcrypt.compare(password, user.password_user);
+    if (!isEqual) {
+      await User.update(
+        {
+          attempt_user: user.attempt_user + 1,
+        },
+        {
+          where: {
+            username_user: username,
+          },
+        }
+      );
+
+      if (user.attempt_user + 1 > 2) {
+        const token = jwt.sign(
+          {
+            id_user: loadedUser.id_user,
+          },
+          process.env.JWT_SECRET
+        );
+
+        await User.update(
+          {
+            status_user: "Non Aktif",
+          },
+          {
+            where: {
+              username_user: username,
+            },
+          }
+        );
+
+        let data = {
+          email: loadedUser.pegawai.emailpribadi_pegawai,
+          message:
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. Jika anda merasa percobaan tersebut Bukan Anda, silahkan klik link berikut. </p><br><a href=" +
+            process.env.BASE_URL +
+            "/auth/reset-attempt?verify=" +
+            token +
+            ">Klik untuk reset percobaan login</a>",
+        };
+
+        const sendMail = await mailer(data);
+        if (sendMail) {
+          return res.status(401).json({
+            statusCode: 401,
+            message: "Input password salah 3 kali. User dinonaktifkan.",
+          });
+        }
+      }
+
+      const addLog = new Log({
+        aktivitas_log: "Password anda salah!",
+        ipaddress_log: req.socket.remoteAddress,
+        username_user: loadedUser.username_user,
+      });
+
+      await addLog.save();
+
+      return res.status(401).json({
+        statusCode: 401,
+        message:
+          "Password anda salah! Silahkan ulangi. Attempt " +
+          (loadedUser.attempt_user + 1) +
+          " of 3",
+      });
+    }
+
+    const accesToken = new Token("password").generate({
+      userId: loadedUser.id_user.toString(),
+      grantType: "password",
+    });
+    const refreshToken = new Token("refresh").generate({
+      userId: loadedUser.id_user.toString(),
+      grantType: "password",
+    });
+
+    await User.update(
+      {
+        token_user: accesToken,
+        lastlogin_user: new Date(),
+        attempt_user: 0,
+      },
+      {
+        where: {
+          username_user: username,
+        },
+      }
+    );
+
+    var resJson={
+      token_type: "bearer",
+      access_token: accesToken,
+      refresh_token: refreshToken,
+      user: {
+        id: loadedUser.id_user,
+        username: loadedUser.username_user,
+        first_login: loadedUser.first_login,
+      },
+      expires_in: process.env.JWT_EXPIRES_IN,
+    }
+
+    if(loadedUser.pegawai!=undefined){
+      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai
+    }
+
+    res.json(resJson);
+    
   },
   changePassword: async (req, res, _) => {
     const validation = validationResult(req);
@@ -630,12 +914,34 @@ module.exports = {
           ];
         }
         break;
+        case "checkUserEmail":
+        {
+          return [
+            body("emailpribadi_pegawai")
+              .notEmpty()
+              .withMessage("Mohon masukkan emailpribadi_pegawai anda dengan benar."),
+          ];
+        }
+        break;
       case "login":
         {
           return [
             body("username")
               .notEmpty()
               .withMessage("Mohon masukkan Username anda dengan benar."),
+            body("password")
+              .notEmpty()
+              .trim()
+              .withMessage("Password tidak boleh kosong."),
+          ];
+        }
+        break;
+        case "loginByEmail":
+        {
+          return [
+            //body("emailpribadi_pegawai")
+              //.notEmpty()
+              //.withMessage("Mohon masukkan Email Pribadi anda dengan benar."),
             body("password")
               .notEmpty()
               .trim()
