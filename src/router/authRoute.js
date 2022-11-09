@@ -15,6 +15,12 @@ router.post(
   authController.checkUser
 );
 
+router.post(
+  "/check-user-email",
+  authController.validate("checkUserEmail"),
+  authController.checkUserEmail
+);
+
 router.post("/login", authController.validate("login"), authController.login);
 
 router.post(
