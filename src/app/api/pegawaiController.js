@@ -204,7 +204,7 @@ module.exports = {
         {
           model: Dpa,
           as: "dpa",
-          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa","jenis_kontrak"],
         },
         {
           model: File,
