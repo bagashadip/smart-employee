@@ -4,7 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Divisi, UnitKerja, Pegawai, Asn, Posisi, Dpa } = require("../../models/model");
+const { Divisi, UnitKerja, Pegawai, Asn, Posisi, Dpa, File } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -12,7 +12,19 @@ module.exports = {
   // List
   list: async (req, res) => {
     const mDivisi = await Divisi.findAll({
-      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja","kode_pegawai_manajer","nip_asn"],
+      include: [
+      {
+          model: File,
+          as: "template_lapbul_file",
+          attributes: [
+            "name",
+            "path",
+            "extension",
+            "size"
+          ],
+      },
+    ],
+      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja","kode_pegawai_manajer","nip_asn","template_lapbul"],
     });
     res.json(mDivisi);
   },
@@ -39,10 +51,19 @@ module.exports = {
                   "radiuslokasi_unitkerja",
                   "alamat_unitkerja",
                   "notelp_unitkerja",
-                  "kode_organisasi",
-                  "template_lapbul"
+                  "kode_organisasi"
                 ],
             },
+            {
+              model: File,
+              as: "template_lapbul_file",
+              attributes: [
+                "name",
+                "path",
+                "extension",
+                "size"
+              ],
+          },
         ]
     });
 
@@ -93,7 +114,17 @@ module.exports = {
             "nama_asn",
             "jabatan_asn"
           ],
-        }
+        },
+        {
+          model: File,
+          as: "template_lapbul_file",
+          attributes: [
+            "name",
+            "path",
+            "extension",
+            "size"
+          ],
+      },
       ]
     });
     res.json(mDivisi);

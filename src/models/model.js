@@ -150,6 +150,12 @@ Divisi.belongsTo(Asn, {
   targetKey: "nip_asn",
 });
 
+Divisi.belongsTo(File, {
+  as: "template_lapbul_file",
+  foreignKey: "template_lapbul",
+  targetKey: "id",
+});
+
 DivisiParent.hasMany(Divisi, {
   as: "divisi",
   foreignKey: "kode_divisi_parent",

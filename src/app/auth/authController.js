@@ -350,17 +350,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    let username
-    let loginType
+    let username=req.body.username
+    let loginType= "username"
 
-    if(req.body.username!=undefined){
-        username = req.body.username
-        loginType = "username"
-    }
-
-    if(req.body.emailpribadi_pegawai!=undefined){
-        username = req.body.emailpribadi_pegawai
-        loginType = "email"
+    if(username.includes("@"))
+    {
+      loginType="email"
     }
 
     const password = req.body.password;
