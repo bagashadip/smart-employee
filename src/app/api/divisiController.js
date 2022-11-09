@@ -12,7 +12,7 @@ module.exports = {
   // List
   list: async (req, res) => {
     const mDivisi = await Divisi.findAll({
-      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja","kode_pegawai_manajer","nip_asn"],
+      attributes: ["id_divisi", "kode_divisi", "nama_divisi", "kode_unitkerja","kode_pegawai_manajer","nip_asn","template_lapbul"],
     });
     res.json(mDivisi);
   },
@@ -39,8 +39,7 @@ module.exports = {
                   "radiuslokasi_unitkerja",
                   "alamat_unitkerja",
                   "notelp_unitkerja",
-                  "kode_organisasi",
-                  "template_lapbul"
+                  "kode_organisasi"
                 ],
             },
         ]
