@@ -22,6 +22,7 @@ router.post(
 );
 
 router.post("/login", authController.validate("login"), authController.login);
+router.post("/login-email", authController.validate("loginByEmail"), authController.loginByEmail);
 
 router.post(
   "/forgot-username",
