@@ -939,9 +939,12 @@ module.exports = {
         case "loginByEmail":
         {
           return [
-            //body("emailpribadi_pegawai")
-              //.notEmpty()
-              //.withMessage("Mohon masukkan Email Pribadi anda dengan benar."),
+            body('username')
+              .if(body('emailpribadi_pegawai').exists())
+              .optional(),
+            body('emailpribadi_pegawai')
+              .if(body('username').exists())
+              .optional(),
             body("password")
               .notEmpty()
               .trim()
