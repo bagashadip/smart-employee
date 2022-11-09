@@ -240,6 +240,12 @@ Lapbul.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
+Lapbul.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();

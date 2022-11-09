@@ -145,7 +145,7 @@ module.exports = {
         {
           model: Divisi,
           as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja","template_lapbul"],
           include: [
             {
               model: UnitKerja,

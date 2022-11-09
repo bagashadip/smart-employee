@@ -13,7 +13,7 @@ var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
 
-const { Lapbul, Kegiatan, LiburNasional, Pegawai} = require("../../models/model");
+const { Lapbul, Kegiatan, LiburNasional, Pegawai, Divisi, File} = require("../../models/model");
 const { unset } = require("lodash");
 
 const Sequelize = require("sequelize");
@@ -159,10 +159,19 @@ module.exports = {
 
         const mLapbul = await Lapbul.findOne({
             raw: true,
+            include: [
+                {
+                  model: Divisi,
+                  as: "divisi",
+                  attributes: ["template_lapbul"],
+                }
+            ],
             where: {
                 id_lapbul: req.query.id_lapbul
             }
         });
+
+        console.log(mLapbul)
 
         // define your filter functions here, for example
         // to be able to write {clientname | lower}
@@ -174,9 +183,27 @@ module.exports = {
             return input.toLowerCase();
         };
 
+        //Get lapbul template
+        let templateFile = 'template-smart-employee.docx';
+
+        if(mLapbul['divisi.template_lapbul']!=null)
+        {
+            //Get file
+            const mFile = await File.findOne({
+                where: {
+                    id: mLapbul['divisi.template_lapbul']
+                }
+            });
+
+            if(mFile)
+            {
+                templateFile = '../../../public/uploads'+mFile.path;
+            }
+        }
+
         // Load the docx file as binary content
         const content = fs.readFileSync(
-            path.resolve(__dirname, "template-smart-employee.docx"),
+            path.resolve(__dirname, templateFile),
             "binary"
         );
 
@@ -237,7 +264,6 @@ module.exports = {
         //Get kegiatan
         if(mLapbul)
         {
-
             ttdKegiatanStart    = ttdDateSource.format('YYYY-MM')+'-'+'01';
             ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'30';
 
@@ -275,8 +301,6 @@ module.exports = {
             }
         }
 
-        console.log(mLapbul)
-
         // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
         doc.render(mLapbul);
 
@@ -293,7 +317,7 @@ module.exports = {
 
         res.writeHead(200, {
             'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            'Content-disposition': 'attachment;filename=' + "output.docx",
+            'Content-disposition': 'attachment;filename=' + "lapbul-generated.docx",
             'Content-Length': buf.length
         });
         res.end(buf);
