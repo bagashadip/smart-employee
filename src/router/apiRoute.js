@@ -33,6 +33,7 @@ const exportController = require("../app/api/exportController");
 //Lapbul
 const kegiatanController = require("../app/api/kegiatanController");
 const lapbulController = require("../app/lapbul/lapbulController");
+const lampiranController = require("../app/lapbul/lampiranController");
 const liburNasionalController = require("../app/api/liburNasionalController");
 
 router.use(authMiddleware); // dont move it to another line
@@ -466,5 +467,11 @@ liburNasionalRoute.delete(liburNasionalController.delete);
 router.get("/liburnasional/list", liburNasionalController.list);
 router.post("/liburnasional/data",liburNasionalController.data);
 /* Libur Nasional Route */
+
+/* Lampiran Route */
+const lampiranRoute = router.route("/lampiran");
+lampiranRoute.get(lampiranController.list);
+router.get("/lampiran/generate", lampiranController.generate);
+/* Lampiran Route */
 
 module.exports = router;
