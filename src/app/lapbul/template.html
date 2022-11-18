@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Hello world!</title>
+  </head>
+  <body>
+    <h3>LAMPIRAN</h1>
+    <p>Berikut adalah lampiran hasil pekerjaan:</p>
+    <table width="100%" style="border: 1px solid black;">
+        <tr style="border: 1px solid black;">
+            <th style="border: 1px solid black;">No</th>
+            <th style="border: 1px solid black;">Hasil Pekerjaan</th>
+        </tr>
+        {{#each users}}
+        <tr style="border: 1px solid black;">
+            <td style="border: 1px solid black;">{{this.nomor}}</td>
+            <td style="border: 1px solid black;">
+                {{this.tanggal_kegiatan}}<br/><br/>
+                
+                {{#each this.lampiran}}
+                    {{this.desc_kegiatan}}<br/>
+                    <img src="http://localhost:3000/uploads{{this.[foto.path]}}" width="300px"/><br/><br/>
+                {{/each}}
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+  </body>
+</html>
