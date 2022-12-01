@@ -171,8 +171,6 @@ module.exports = {
             }
         });
 
-        console.log(mLapbul)
-
         // define your filter functions here, for example
         // to be able to write {clientname | lower}
         expressions.filters.lower = function (input) {
@@ -460,7 +458,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
         let thisTanggal='('+formatTimeStart+' - '+formatTimeEnd+')\n'
         byDate[element.tanggal_kegiatan].push({
             tanggal: element.tanggal_kegiatan,
-            description:thisTanggal+element.desc_kegiatan
+            description:thisTanggal+element.nama_kegiatan
         });
     });
 
