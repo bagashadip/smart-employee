@@ -11,11 +11,11 @@ module.exports = {
      */
      return Promise.all([
       
-      queryInterface.addColumn("tbl_lapbul", "kode_divisi", {
-        type: Sequelize.TEXT,
-      }),
+        queryInterface.addColumn("tbl_lapbul", "kode_divisi", {
+          type: Sequelize.TEXT,
+        }),
 
-    ]);
+      ]);
   },
 
   async down (queryInterface, Sequelize) {
