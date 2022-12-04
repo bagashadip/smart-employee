@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         "tbl_kegiatan",
         {
             id_kegiatan: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.UUID,
                 primaryKey: true,
                 autoIncrement: true,
             },
