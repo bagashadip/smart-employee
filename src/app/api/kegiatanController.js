@@ -4,6 +4,7 @@ const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const { Kegiatan, Absensi, Pegawai, File, Divisi, Asn} = require("../../models/model");
+const uuid = require("uuid");
 
 const Op = Sequelize.Op;
 
@@ -70,8 +71,10 @@ module.exports = {
             return error(res).validationError(validation.array());
         }
 
+        const id = uuid.v4();
+
         const mKegiatan = await new Kegiatan({
-            ...req.body,
+            ...req.body, id_kegiatan: id
         }).save();
 
         res.json({
