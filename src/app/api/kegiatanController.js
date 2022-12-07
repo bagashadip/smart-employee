@@ -75,17 +75,48 @@ module.exports = {
             return error(res).validationError(validation.array());
         }
 
-        const id = uuid.v4();
-
-        const mKegiatan = await new Kegiatan({
-            ...req.body, id_kegiatan: id
-        }).save();
-
-        res.json({
-            status: true,
-            statusCode: 200,
-            message: "Kegiatan " + mKegiatan.nama_kegiatan + " berhasil ditambah."
+        const mKegiatanGet = await Kegiatan.findOne({
+            where: {
+                tanggal_kegiatan: req.body.tanggal_kegiatan,
+                kode_pegawai: req.body.kode_pegawai,
+            }
         });
+
+        let processInsert=false;
+
+        if (!mKegiatanGet) {
+            if(req.body.foto_kegiatan==undefined || req.body.foto_kegiatan==null || req.body.foto_kegiatan==""){
+                processInsert=false;
+            }else{
+                processInsert=true;
+            }
+        } else {
+            processInsert=true;
+        }
+
+        if(processInsert)
+        {
+            const id = uuid.v4();
+
+            const mKegiatan = await new Kegiatan({
+                ...req.body, id_kegiatan: id
+            }).save();
+    
+            res.json({
+                status: true,
+                statusCode: 200,
+                message: "Kegiatan " + mKegiatan.nama_kegiatan + " berhasil ditambah."
+            });
+        }
+        else
+        {
+            res.status(400).json({
+                status: false,
+                statusCode: 400,
+                message: "Foto kegiatan minimal 1 dalam satu hari",
+            });
+        }
+        
     },
 
     //Update kegiatan
