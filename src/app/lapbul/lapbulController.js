@@ -469,15 +469,22 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
         {
             firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
             firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
-            byDate[firstWeekSat]=[{
-                tanggal : firstWeekSat,
-                description : 'Libur'
-            }]
-
-            byDate[firstWeekSun]=[{
-                tanggal : firstWeekSun,
-                description : 'Libur'
-            }]
+            
+            if(!byDate[firstWeekSat].length)
+            {
+                byDate[firstWeekSat]=[{
+                    tanggal : firstWeekSat,
+                    description : 'Libur'
+                }]
+            }
+            
+            if(!byDate[firstWeekSun].length)
+            {
+                byDate[firstWeekSun]=[{
+                    tanggal : firstWeekSun,
+                    description : 'Libur'
+                }]
+            }
         }
     }
 

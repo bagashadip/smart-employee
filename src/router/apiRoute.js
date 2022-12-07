@@ -36,6 +36,8 @@ const lapbulController = require("../app/lapbul/lapbulController");
 const lampiranController = require("../app/lapbul/lampiranController");
 const liburNasionalController = require("../app/api/liburNasionalController");
 
+const timeController = require("../app/api/timeController");
+
 router.use(authMiddleware); // dont move it to another line
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -473,5 +475,9 @@ const lampiranRoute = router.route("/lampiran");
 lampiranRoute.get(lampiranController.list);
 router.get("/lampiran/generate", lampiranController.generate);
 /* Lampiran Route */
+
+/* Time Route */
+const timeRoute = router.route("/time");
+timeRoute.get(timeController.get);
 
 module.exports = router;
