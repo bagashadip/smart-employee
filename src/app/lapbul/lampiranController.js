@@ -226,7 +226,7 @@ module.exports = {
         data: {
             users: returnLampiran,
         },
-        path: "../public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf",
+        path: "public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf",
         type: "",
         };
 
