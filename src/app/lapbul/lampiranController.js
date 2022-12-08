@@ -14,6 +14,8 @@ const path = require("path");
 var moment = require('moment'); // require
 moment.locale('id');
 
+var html_to_pdf = require('html-pdf-node');
+
 // Read HTML Template
 var html = fs.readFileSync(path.resolve(__dirname, "template.html"), "utf8");
 
@@ -236,6 +238,26 @@ module.exports = {
         })
         .catch((error) => {
             console.error(error);
+        });
+
+    },
+
+    generateNew:  async (req, res) => {
+
+        let options = { format: 'A4' };
+        // Example of options with args //
+        // let options = { format: 'A4', args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+
+        let fileThis = { content: "<h1>Welcome to html-pdf-node</h1>" };
+        
+        html_to_pdf.generatePdf(fileThis, options).then(pdfBuffer => {
+            console.log("PDF Buffer:-", pdfBuffer);
+
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename=name.Pdf')
+            res.setHeader('Content-Length', pdfBuffer.length)
+            return res.end(pdfBuffer)
+            //return res.send(pdfBuffer);
         });
 
     },
