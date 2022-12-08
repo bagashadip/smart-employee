@@ -14,7 +14,7 @@ RUN apk add --no-cache tzdata curl && \
     rm -fR phantomjs-2.1.1-linux-x86_64 && \
     apk del curl
 
-RUN apk add --no-cache glib
+RUN apk add --no-cache glib nss
 WORKDIR /home/node/app
 COPY . /home/node/app
 
