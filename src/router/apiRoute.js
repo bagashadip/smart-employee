@@ -474,6 +474,7 @@ router.post("/liburnasional/data",liburNasionalController.data);
 const lampiranRoute = router.route("/lampiran");
 lampiranRoute.get(lampiranController.list);
 router.get("/lampiran/generate", lampiranController.generate);
+router.get("/lampiran/generateNew", lampiranController.generateNew);
 /* Lampiran Route */
 
 /* Time Route */
