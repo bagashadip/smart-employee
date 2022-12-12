@@ -25,8 +25,8 @@
             <td style="border: 1px solid black;">
                 {{this.tanggal_kegiatan}}<br/><br/>
                 {{#each this.lampiran}}
-                  <img src="http://localhost:3000/uploads{{this.[foto.path]}}" width="300px"/><br/>
-                  {{this.desc_kegiatan}}<br/><br/>
+                  <img src="{{this.base_url}}/uploads{{this.[foto.path]}}" width="300px"/><br/>
+                  {{this.nama_kegiatan}}<br/><br/>
                 {{/each}}
             </td>
         </tr>

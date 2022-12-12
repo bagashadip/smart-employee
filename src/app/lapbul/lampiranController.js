@@ -183,9 +183,12 @@ module.exports = {
             byDateIndex[element]=[]
         })
 
+        let thisUrl = req.protocol+"://"+req.headers.host;
+
         mLampiran.forEach(element => {
             let thisEl = element
             thisEl.foto_kegiatan_path = thisEl['foto.path']
+            thisEl.base_url = thisUrl
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
@@ -212,6 +215,8 @@ module.exports = {
             }
         };
 
+        
+        console.log(thisUrl)
         let dateMoment = moment();
         let periodeBulan = dateMoment.format('DDMMYYHHmmss');
         const thePath="public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf"
@@ -219,10 +224,13 @@ module.exports = {
         html: html,
         data: {
             users: returnLampiran,
+            thisUrl : thisUrl
         },
         path: thePath,
         type: "",
         };
+
+        
 
         pdf
         .create(document, options)
