@@ -189,6 +189,7 @@ module.exports = {
             let thisEl = element
             thisEl.foto_kegiatan_path = thisEl['foto.path']
             thisEl.base_url = thisUrl
+            console.log(thisUrl+'/uploads'+thisEl['foto.path'])
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
@@ -215,8 +216,6 @@ module.exports = {
             }
         };
 
-        
-        console.log(thisUrl)
         let dateMoment = moment();
         let periodeBulan = dateMoment.format('DDMMYYHHmmss');
         const thePath="public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf"
