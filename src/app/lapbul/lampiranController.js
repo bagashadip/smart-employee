@@ -14,8 +14,6 @@ const path = require("path");
 var moment = require('moment'); // require
 moment.locale('id');
 
-var html_to_pdf = require('html-pdf-node');
-
 // Read HTML Template
 var html = fs.readFileSync(path.resolve(__dirname, "template.html"), "utf8");
 
@@ -135,7 +133,7 @@ module.exports = {
                 {
                     model: File,
                     as: "foto",
-                    attributes: ["name", "path", "extension", "size"],
+                    attributes: ["path"],
                 },
             ]
             params.raw = true
@@ -161,7 +159,7 @@ module.exports = {
                     {
                         model: File,
                         as: "foto",
-                        attributes: ["name", "path", "extension", "size"],
+                        attributes: ["path"],
                     },
                 ],
                 raw: true
@@ -186,7 +184,9 @@ module.exports = {
         })
 
         mLampiran.forEach(element => {
-            byDateIndex[element.tanggal_kegiatan].push(element)
+            let thisEl = element
+            thisEl.foto_kegiatan_path = thisEl['foto.path']
+            byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
         let i=0;
@@ -200,66 +200,47 @@ module.exports = {
             })
         }
 
-        //res.json(returnLampiran);
-
         var options = {
             format: "A4",
             orientation: "portrait",
-            border: "10mm",
-            font: '12px',
+            border: "5mm",
             footer: {
-                height: "28mm",
+                height: "10mm",
                 contents: {
-                    
-                    2: 'Second page', // Any page number is working. 1-based index
                     default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-                   
                 }
             }
         };
 
         let dateMoment = moment();
         let periodeBulan = dateMoment.format('DDMMYYHHmmss');
-
+        const thePath="public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf"
         var document = {
         html: html,
         data: {
             users: returnLampiran,
         },
-        path: "public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf",
+        path: thePath,
         type: "",
         };
 
         pdf
         .create(document, options)
-        .then((res) => {
-            console.log(res);
-            //res.json(returnLampiran);
+        .then((response) => {
+            var content = fs.readFileSync(thePath);
+
+            //Save path to database
+
+            //Download result
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename='+'lampiran-'+req.query.kode_pegawai+'-'+periodeBulan+'.pdf')
+            res.setHeader('Content-Length', content.length)
+            return res.end(content)
         })
         .catch((error) => {
             console.error(error);
         });
 
-    },
-
-    generateNew:  async (req, res) => {
-
-        let options = { format: 'A4' };
-        // Example of options with args //
-        // let options = { format: 'A4', args: ['--no-sandbox', '--disable-setuid-sandbox'] };
-
-        let fileThis = { content: "<h1>Welcome to html-pdf-node</h1>" };
-        
-        html_to_pdf.generatePdf(fileThis, options).then(pdfBuffer => {
-            console.log("PDF Buffer:-", pdfBuffer);
-
-            res.setHeader('Content-Type', 'application/pdf')
-            res.setHeader('Content-Disposition', 'attachment; filename=name.Pdf')
-            res.setHeader('Content-Length', pdfBuffer.length)
-            return res.end(pdfBuffer)
-            //return res.send(pdfBuffer);
-        });
-
-    },
+    }
 
 }
