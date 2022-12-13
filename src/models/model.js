@@ -28,6 +28,7 @@ const mJamKerja = require("./jamkerja");
 const mJamKerjaDetail = require("./jamkerjaDetail");
 const mKegiatan = require("./kegiatan");
 const mLapbul = require("./lapbul");
+const mLiburNasional = require("./liburnasional");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -56,6 +57,7 @@ const JamKerja = mJamKerja(sequelize, Sequelize);
 const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
 const Kegiatan = mKegiatan(sequelize, Sequelize);
 const Lapbul = mLapbul(sequelize, Sequelize);
+const LiburNasional = mLiburNasional(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -159,6 +161,12 @@ Divisi.belongsTo(Asn, {
   targetKey: "nip_asn",
 });
 
+Divisi.belongsTo(File, {
+  as: "template_lapbul_file",
+  foreignKey: "template_lapbul",
+  targetKey: "id",
+});
+
 DivisiParent.hasMany(Divisi, {
   as: "divisi",
   foreignKey: "kode_divisi_parent",
@@ -223,6 +231,24 @@ Kegiatan.belongsTo(File, {
   as: "foto",
   foreignKey: "foto_kegiatan",
   targetKey: "id",
+});
+
+Kegiatan.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
+Lapbul.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
+Lapbul.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi",
 });
 
 async function authenticate() {

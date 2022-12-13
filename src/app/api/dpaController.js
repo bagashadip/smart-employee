@@ -15,7 +15,7 @@ module.exports = {
       return error(res).permissionError();
     }
     const mDpa = await Dpa.findAll({
-      attributes: ["id_dpa", "kode_dpa", "nama_dpa"],
+      attributes: ["id_dpa", "kode_dpa", "nama_dpa","jenis_kontrak"],
     });
     res.json(mDpa);
   },

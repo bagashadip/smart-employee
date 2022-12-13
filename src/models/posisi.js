@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       kode_posisi: DataTypes.STRING,
       nama_posisi: DataTypes.STRING,
+      kak: DataTypes.TEXT,
     },
     {
       freezeTableName: true,

@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const mPosisi = await Posisi.findAll({
-      attributes: ["id_posisi", "kode_posisi", "nama_posisi"],
+      attributes: ["id_posisi", "kode_posisi", "nama_posisi", "kak"],
     });
     res.json(mPosisi);
   },

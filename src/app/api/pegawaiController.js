@@ -149,7 +149,7 @@ module.exports = {
         {
           model: Divisi,
           as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja","template_lapbul"],
           include: [
             {
               model: UnitKerja,
@@ -196,12 +196,12 @@ module.exports = {
         {
           model: Posisi,
           as: "posisi",
-          attributes: ["kode_posisi", "nama_posisi"],
+          attributes: ["kode_posisi", "nama_posisi","kak"],
         },
         {
           model: Dpa,
           as: "dpa",
-          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa","jenis_kontrak"],
         },
         {
           model: File,

@@ -35,6 +35,10 @@ const moduleController = require("../app/api/moduleController");
 //Lapbul
 const kegiatanController = require("../app/api/kegiatanController");
 const lapbulController = require("../app/lapbul/lapbulController");
+const lampiranController = require("../app/lapbul/lampiranController");
+const liburNasionalController = require("../app/api/liburNasionalController");
+
+const timeController = require("../app/api/timeController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -320,6 +324,13 @@ historiPresensiRoute.get(
 );
 /* Histori Presensi Route */
 
+/* Histori Presensi Day Param Route */
+const historiPresensiDayParamRoute = router.route("/histori-presensi-day");
+historiPresensiDayParamRoute.get(
+  historiPresensiController.getDateParam
+);
+/* Histori Presensi Day Param Route */
+
 /* Kontak List Route */
 const kontakListRoute = router.route("/kontak-list");
 kontakListRoute.get(
@@ -428,6 +439,7 @@ kegiatanRoute.post(kegiatanController.create);
 kegiatanRoute.patch(kegiatanController.update);
 kegiatanRoute.delete(kegiatanController.delete);
 router.get("/kegiatan/list", kegiatanController.list);
+router.post("/kegiatan/data", kegiatanController.data);
 router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
 
@@ -436,8 +448,15 @@ router.post("/export-absensi", exportController.exportAbsensi);
 /* Export Route */
 
 /* Lapbul Route */
-router.get("/lapbul", lapbulController.list);
-router.post("/lapbul",lapbulController.generate);
+const lapulRoute = router.route("/lapbul");
+lapulRoute.get(lapbulController.list);
+lapulRoute.post(lapbulController.create);
+lapulRoute.patch(lapbulController.update);
+lapulRoute.delete(lapbulController.delete);
+router.post("/lapbul/generate",lapbulController.generate);
+router.post("/lapbul/poc",lapbulController.poc);
+router.get("/lapbul/:id_lapbul",lapbulController.get_by_id);
+router.post("/lapbul/data",lapbulController.data);
 /* Lapbul Route */
 
 /* Libur Nasional Route */
