@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "jabatan";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -11,6 +11,9 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
     const mJabatan = await Jabatan.findAll({
       attributes: ["id_jabatan", "kode_jabatan", "nama_jabatan"],
     });
@@ -18,14 +21,14 @@ module.exports = {
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Jabatan.count();
     var modules = await Jabatan.findAndCountAll(dataTableObj);
-    
+
     res.json({
       recordsFiltered: modules.count,
       recordsTotal: count,
@@ -34,9 +37,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -45,16 +48,16 @@ module.exports = {
 
     const mJabatan = await Jabatan.findOne({
       where: {
-        kode_jabatan: req.query.kode_jabatan
-      }
+        kode_jabatan: req.query.kode_jabatan,
+      },
     });
     res.json(mJabatan);
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -65,17 +68,17 @@ module.exports = {
       ...req.body,
     }).save();
 
-    res.json({ 
+    res.json({
       status: true,
-      statusCode: 200, 
-      message: "Jabatan " + jabatan.kode_jabatan + " berhasil ditambah."
+      statusCode: 200,
+      message: "Jabatan " + jabatan.kode_jabatan + " berhasil ditambah.",
     });
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -83,21 +86,21 @@ module.exports = {
     }
 
     await Jabatan.update(
-      { ...req.body},
+      { ...req.body },
       { where: { kode_jabatan: req.query.kode_jabatan } }
     );
 
-    res.json({ 
-      status: true ,
+    res.json({
+      status: true,
       statusCode: 200,
-      message: "Jabatan " + req.query.kode_jabatan + " berhasil diubah."
+      message: "Jabatan " + req.query.kode_jabatan + " berhasil diubah.",
     });
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -109,7 +112,10 @@ module.exports = {
         kode_jabatan: req.query.kode_jabatan,
       },
     });
-    res.send({ status: true, message: req.query.kode_jabatan + ' berhasil dihapus.' });
+    res.send({
+      status: true,
+      message: req.query.kode_jabatan + " berhasil dihapus.",
+    });
   },
   // Validation
   validate: (type) => {
@@ -119,11 +125,11 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mJabatan = await Jabatan.findOne({
-            where: {
-                kode_jabatan: {
-                    [Op.iLike]: value
-                }
-            }
+          where: {
+            kode_jabatan: {
+              [Op.iLike]: value,
+            },
+          },
         });
         if (!mJabatan) {
           return Promise.reject("Data not found!");
@@ -134,33 +140,27 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mJabatan = await Jabatan.findOne({
-            where: {
-                kode_jabatan: {
-                    [Op.iLike]: value,
-                },
+          where: {
+            kode_jabatan: {
+              [Op.iLike]: value,
             },
+          },
         });
         if (mJabatan) {
           return Promise.reject("Data already exist!");
         }
-    });
+      });
     const ruleNamaJabatan = body("nama_jabatan").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
-            return [
-                ruleCreateKodeJabatan,
-                ruleNamaJabatan,
-            ];
+          return [ruleCreateKodeJabatan, ruleNamaJabatan];
         }
         break;
       case "update":
         {
-            return [
-              ruleKodeJabatan,
-              ruleNamaJabatan.optional()
-            ];
+          return [ruleKodeJabatan, ruleNamaJabatan.optional()];
         }
         break;
       case "get":

@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       slug: DataTypes.STRING,
       name: DataTypes.STRING,
-      defaultRoute: DataTypes.STRING,
       permissions: DataTypes.JSON,
       createdBy: DataTypes.UUID,
       updatedBy: DataTypes.UUID,

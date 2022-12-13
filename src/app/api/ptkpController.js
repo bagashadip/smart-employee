@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "ptkp";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -11,6 +11,10 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mPtkp = await Ptkp.findAll({
       attributes: ["id_ptkp", "kode_ptkp", "keterangan_ptkp"],
     });
@@ -18,14 +22,14 @@ module.exports = {
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Ptkp.count();
     var modules = await Ptkp.findAndCountAll({
-        ...dataTableObj
+      ...dataTableObj,
     });
 
     res.json({
@@ -36,9 +40,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -46,17 +50,17 @@ module.exports = {
     }
 
     const mPtkp = await Ptkp.findOne({
-        where: {
-            kode_ptkp: req.query.kode_ptkp
-        }
+      where: {
+        kode_ptkp: req.query.kode_ptkp,
+      },
     });
     res.json(mPtkp);
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -67,17 +71,17 @@ module.exports = {
       ...req.body,
     }).save();
 
-    res.json({ 
+    res.json({
       status: true,
-      statusCode: 200, 
-      message: "PTKP " + ptkp.kode_ptkp + " berhasil ditambah."
+      statusCode: 200,
+      message: "PTKP " + ptkp.kode_ptkp + " berhasil ditambah.",
     });
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -85,21 +89,21 @@ module.exports = {
     }
 
     await Ptkp.update(
-      { ...req.body},
+      { ...req.body },
       { where: { kode_ptkp: req.query.kode_ptkp } }
     );
 
-    res.json({ 
-      status: true ,
+    res.json({
+      status: true,
       statusCode: 200,
-      message: "PTKP " + req.query.kode_ptkp + " berhasil diubah."
+      message: "PTKP " + req.query.kode_ptkp + " berhasil diubah.",
     });
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -111,7 +115,10 @@ module.exports = {
         kode_ptkp: req.query.kode_ptkp,
       },
     });
-    res.send({ status: true, message: req.query.kode_ptkp + ' berhasil dihapus.' });
+    res.send({
+      status: true,
+      message: req.query.kode_ptkp + " berhasil dihapus.",
+    });
   },
   // Validation
   validate: (type) => {
@@ -121,11 +128,11 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mPtkp = await Ptkp.findOne({
-            where: {
-                kode_ptkp: {
-                    [Op.iLike]: value
-                }
-            }
+          where: {
+            kode_ptkp: {
+              [Op.iLike]: value,
+            },
+          },
         });
         if (!mPtkp) {
           return Promise.reject("Data tidak ditemukan!");
@@ -136,33 +143,27 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mPtkp = await Ptkp.findOne({
-            where: {
-                kode_ptkp: {
-                    [Op.iLike]: value,
-                },
+          where: {
+            kode_ptkp: {
+              [Op.iLike]: value,
             },
+          },
         });
         if (mPtkp) {
           return Promise.reject("Data sudah ada!");
         }
-    });
+      });
     const ruleKeteranganPtkp = body("keterangan_ptkp").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
-            return [
-                ruleCreateKodePtkp,
-                ruleKeteranganPtkp,
-            ];
+          return [ruleCreateKodePtkp, ruleKeteranganPtkp];
         }
         break;
       case "update":
         {
-            return [
-              ruleKodePtkp,
-              ruleKeteranganPtkp.optional()
-            ];
+          return [ruleKodePtkp, ruleKeteranganPtkp.optional()];
         }
         break;
       case "get":

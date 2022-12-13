@@ -50,7 +50,6 @@ module.exports = {
   },
   // Create
   create: async (req, res) => {
-    console.log("TESTTT", await req.user.hasAccess(_module, "create"));
     if (!(await req.user.hasAccess(_module, "create"))) {
       return error(res).permissionError();
     }

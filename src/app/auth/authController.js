@@ -128,7 +128,7 @@ module.exports = {
         {
           model: Pegawai,
           as: "pegawai",
-          attributes: ["emailpribadi_pegawai","kode_pegawai"],
+          attributes: ["emailpribadi_pegawai", "kode_pegawai"],
         },
       ],
     });
@@ -348,7 +348,7 @@ module.exports = {
       }
     );
 
-    var resJson={
+    var resJson = {
       token_type: "bearer",
       access_token: accesToken,
       refresh_token: refreshToken,
@@ -357,12 +357,13 @@ module.exports = {
         username: loadedUser.username_user,
         first_login: loadedUser.first_login,
         activeRole: activeRole,
+        roles: userRole.roles,
       },
       expires_in: process.env.JWT_EXPIRES_IN,
-    }
+    };
 
-    if(loadedUser.pegawai!=undefined){
-      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai
+    if (loadedUser.pegawai != undefined) {
+      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai;
     }
 
     res.json(resJson);

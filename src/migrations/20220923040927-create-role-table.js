@@ -16,10 +16,6 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
-      defaultRoute: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
       permissions: {
         type: Sequelize.JSON,
       },

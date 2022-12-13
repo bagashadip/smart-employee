@@ -9,6 +9,10 @@ const { Module } = require("../../models/model");
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mModule = await Module.findAll({
       attributes: ["id", "slug", "name"],
     });

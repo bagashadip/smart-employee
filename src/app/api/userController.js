@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "user";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -20,14 +20,18 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mUser = await User.findAll();
     res.json(mUser);
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await User.count();
@@ -68,9 +72,9 @@ module.exports = {
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -88,11 +92,11 @@ module.exports = {
       message: "User " + jabatan.username_user + " berhasil ditambah.",
     });
   },
-  // Update 
+  // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -113,9 +117,9 @@ module.exports = {
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -133,6 +137,10 @@ module.exports = {
     });
   },
   changePassword: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "change-password"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
@@ -210,6 +218,10 @@ module.exports = {
     res.send(resData);
   },
   sendCredential: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "send-credential"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
