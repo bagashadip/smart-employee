@@ -193,22 +193,22 @@ module.exports = {
     },
 
     //Validate
-    validate: (type) => {
-        return type
-    }
+  //   validate: (type) => {
+  //       return type
+  //   }
 
-    const mKegiatan = await Kegiatan.findAll({
-      attributes: [
-        "id_kegiatan",
-        "foto_kegiatan",
-        "desc_kegiatan",
-        "nama_kegiatan",
-        "tanggal_kegiatan",
-        "kode_pegawai",
-      ],
-    });
-    res.json(mKegiatan);
-  },
+  //   const mKegiatan = await Kegiatan.findAll({
+  //     attributes: [
+  //       "id_kegiatan",
+  //       "foto_kegiatan",
+  //       "desc_kegiatan",
+  //       "nama_kegiatan",
+  //       "tanggal_kegiatan",
+  //       "kode_pegawai",
+  //     ],
+  //   });
+  //   res.json(mKegiatan);
+  // },
 
   //Get by kode pegawai and date
   get: async (req, res) => {
