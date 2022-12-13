@@ -440,6 +440,26 @@ router.get("/lapbul", lapbulController.list);
 router.post("/lapbul",lapbulController.generate);
 /* Lapbul Route */
 
+/* Libur Nasional Route */
+const liburNasionalRoute = router.route("/liburnasional");
+liburNasionalRoute.get(liburNasionalController.get);
+liburNasionalRoute.post(liburNasionalController.create);
+liburNasionalRoute.patch(liburNasionalController.update);
+liburNasionalRoute.delete(liburNasionalController.delete);
+router.get("/liburnasional/list", liburNasionalController.list);
+router.post("/liburnasional/data",liburNasionalController.data);
+/* Libur Nasional Route */
+
+/* Lampiran Route */
+const lampiranRoute = router.route("/lampiran");
+lampiranRoute.get(lampiranController.list);
+router.get("/lampiran/generate", lampiranController.generate);
+/* Lampiran Route */
+
+/* Time Route */
+const timeRoute = router.route("/time");
+timeRoute.get(timeController.get);
+
 /* Action Route */
 const actionRoute = router.route("/action");
 actionRoute.get(actionController.validate("get"), actionController.get);

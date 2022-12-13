@@ -263,4 +263,5 @@ module.exports = {
   Action,
   Status,
   UserRole,
+  LiburNasional,
 };

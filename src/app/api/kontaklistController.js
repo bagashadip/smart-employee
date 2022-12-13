@@ -1,4 +1,5 @@
 const _module = "kontak-list";
+const Sequelize = require("sequelize");
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
