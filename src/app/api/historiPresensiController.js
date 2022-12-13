@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "histori-presensi";
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
@@ -9,11 +9,10 @@ const Op = Sequelize.Op;
 const moment = require("moment");
 
 module.exports = {
-  // Create
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {

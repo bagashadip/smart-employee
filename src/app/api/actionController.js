@@ -1,12 +1,10 @@
-const _module = "posisi";
+const _module = "action";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Posisi } = require("../../models/model");
-
-const Op = Sequelize.Op;
+const { Action } = require("../../models/model");
 
 module.exports = {
   // List
@@ -14,11 +12,11 @@ module.exports = {
     if (!(await req.user.hasAccess(_module, "view"))) {
       return error(res).permissionError();
     }
-
-    const mPosisi = await Posisi.findAll({
-      attributes: ["id_posisi", "kode_posisi", "nama_posisi", "kak"],
+    console.log("TEST");
+    const mAction = await Action.findAll({
+      attributes: ["id", "slug", "name"],
     });
-    res.json(mPosisi);
+    res.json(mAction);
   },
   // Datatable
   data: async (req, res) => {
@@ -27,13 +25,13 @@ module.exports = {
     }
 
     var dataTableObj = await datatable(req.body);
-    var count = await Posisi.count();
-    var modules = await Posisi.findAndCountAll(dataTableObj);
+    var count = await Action.count();
+    var actions = await Action.findAndCountAll(dataTableObj);
 
     res.json({
-      recordsFiltered: modules.count,
+      recordsFiltered: actions.count,
       recordsTotal: count,
-      items: modules.rows,
+      items: actions.rows,
     });
   },
   // Get One Row require ID
@@ -47,12 +45,8 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const mPosisi = await Posisi.findOne({
-      where: {
-        kode_posisi: req.query.kode_posisi,
-      },
-    });
-    res.json(mPosisi);
+    const mAction = await Action.findByPk(req.query.id);
+    res.json(mAction);
   },
   // Create
   create: async (req, res) => {
@@ -65,15 +59,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const posisi = await new Posisi({
+    const action = await new Action({
       ...req.body,
+      createdBy: req.user.id,
     }).save();
 
-    res.json({
-      status: true,
-      statusCode: 200,
-      message: "Posisi " + posisi.kode_posisi + " berhasil ditambah.",
-    });
+    res.json({ status: true, id: action.id });
   },
   // Update
   update: async (req, res) => {
@@ -86,16 +77,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Posisi.update(
-      { ...req.body },
-      { where: { kode_posisi: req.query.kode_posisi } }
+    await Action.update(
+      { ...req.body, updatedBy: req.user.id },
+      { where: { id: req.query.id } }
     );
 
-    res.json({
-      status: true,
-      statusCode: 200,
-      message: "Posisi " + req.query.kode_posisi + " berhasil diubah.",
-    });
+    res.send({ status: true });
   },
   // Delete
   delete: async (req, res) => {
@@ -108,70 +95,81 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Posisi.destroy({
+    await Action.destroy({
       where: {
-        kode_posisi: req.query.kode_posisi,
+        id: req.query.id,
       },
     });
-    res.send({
-      status: true,
-      message: req.query.kode_posisi + " berhasil dihapus.",
-    });
+    res.send({ status: true });
   },
   // Validation
   validate: (type) => {
-    let mPosisi = null;
-    const ruleKodePosisi = query("kode_posisi")
+    let mAction = null;
+    const ruleId = query("id")
       .trim()
       .notEmpty()
+      .isUUID()
       .custom(async (value) => {
-        mPosisi = await Posisi.findOne({
-          where: {
-            kode_posisi: {
-              [Op.iLike]: value,
-            },
-          },
-        });
-        if (!mPosisi) {
+        mAction = await Action.findByPk(value);
+        if (!mAction) {
           return Promise.reject("Data not found!");
         }
       });
-    const ruleCreateKodePosisi = body("kode_posisi")
-      .trim()
-      .notEmpty()
-      .custom(async (value) => {
-        mPosisi = await Posisi.findOne({
-          where: {
-            kode_posisi: {
-              [Op.iLike]: value,
-            },
-          },
-        });
-        if (mPosisi) {
-          return Promise.reject("Data already exist!");
-        }
-      });
-    const ruleNamaPosisi = body("nama_posisi").trim().notEmpty();
+    const ruleName = body("name").trim().notEmpty();
+    const ruleSlug = body("slug").trim().notEmpty().isSlug();
 
     switch (type) {
       case "create":
         {
-          return [ruleCreateKodePosisi, ruleNamaPosisi];
+          return [
+            ruleSlug.custom((value) => {
+              return Action.findOne({
+                where: {
+                  slug: {
+                    [Sequelize.Op.iLike]: value,
+                  },
+                },
+              }).then((res) => {
+                if (res) {
+                  return Promise.reject("Slug already exists!");
+                }
+              });
+            }),
+            ruleName,
+          ];
         }
         break;
       case "update":
         {
-          return [ruleKodePosisi, ruleNamaPosisi.optional()];
+          return [
+            ruleId,
+            ruleSlug.optional().custom(async (value) => {
+              const slugExists = await Action.findOne({
+                where: {
+                  slug: {
+                    [Sequelize.Op.iLike]: value,
+                  },
+                  id: {
+                    [Sequelize.Op.ne]: mAction.id,
+                  },
+                },
+              });
+              if (slugExists) {
+                return Promise.reject("Slug already exists!");
+              }
+            }),
+            ruleName.optional(),
+          ];
         }
         break;
       case "get":
         {
-          return [ruleKodePosisi];
+          return [ruleId];
         }
         break;
       case "delete":
         {
-          return [ruleKodePosisi];
+          return [ruleId];
         }
         break;
     }

@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "kontak-list";
 const Sequelize = require("sequelize");
 const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
@@ -17,11 +17,11 @@ const moment = require("moment");
 let arrAbsensi=[]
 
 module.exports = {
-  // Create
+  // get
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -163,6 +163,10 @@ module.exports = {
     res.send(resData);
   },
   jumlahKontak: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());

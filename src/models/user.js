@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       token_user: DataTypes.STRING,
       kode_pegawai: DataTypes.STRING,
-      kode_role: DataTypes.STRING,
       otp_secret: DataTypes.TEXT,
       first_login: DataTypes.BOOLEAN,
+      activeRole: DataTypes.UUID,
     },
     {
       freezeTableName: true,
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
     // Uncomment to disable role validation
     // return true;
 
-    const role = await Role.findByPk(this.kode_role, {
+    const role = await Role.findByPk(this.activeRole, {
       attributes: ["permissions"],
     });
     let isAuth = true;

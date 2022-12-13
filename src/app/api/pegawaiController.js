@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "pegawai";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -25,6 +25,10 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mPegawai = await Pegawai.findAll({
       include: [
         {
@@ -68,9 +72,9 @@ module.exports = {
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Pegawai.count();
@@ -123,9 +127,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -168,10 +172,7 @@ module.exports = {
             {
               model: Pegawai,
               as: "manajer",
-              attributes: [
-                "kode_pegawai",
-                "namalengkap_pegawai"
-              ],
+              attributes: ["kode_pegawai", "namalengkap_pegawai"],
               include: [
                 {
                   model: Posisi,
@@ -188,12 +189,8 @@ module.exports = {
             {
               model: Asn,
               as: "asn",
-              attributes: [
-                "nip_asn",
-                "nama_asn",
-                "jabatan_asn"
-              ],
-            }
+              attributes: ["nip_asn", "nama_asn", "jabatan_asn"],
+            },
           ],
         },
         {
@@ -233,9 +230,9 @@ module.exports = {
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -299,9 +296,9 @@ module.exports = {
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -357,9 +354,9 @@ module.exports = {
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {

@@ -29,6 +29,8 @@ const divisiParentController = require("../app/api/divisiParentController");
 const jamKerjaController = require("../app/api/jamkerjaController");
 const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
 const exportController = require("../app/api/exportController");
+const actionController = require("../app/api/actionController");
+const moduleController = require("../app/api/moduleController");
 
 //Lapbul
 const kegiatanController = require("../app/api/kegiatanController");
@@ -430,7 +432,6 @@ router.post("/jam-kerja-detail/data", jamKerjaDetailController.data);
 router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
 /* Jam Kerja Detail Route */
 
-
 /* Kegiatan Route */
 const kegiatanRoute = router.route("/kegiatan");
 kegiatanRoute.get(kegiatanController.get);
@@ -442,11 +443,9 @@ router.post("/kegiatan/data", kegiatanController.data);
 router.get("/kegiatan/detail", kegiatanController.detail);
 /* Kegiatan Route */
 
-
 /* Export Route */
 router.post("/export-absensi", exportController.exportAbsensi);
 /* Export Route */
-
 
 /* Lapbul Route */
 const lapulRoute = router.route("/lapbul");
@@ -479,5 +478,31 @@ router.get("/lampiran/generate", lampiranController.generate);
 /* Time Route */
 const timeRoute = router.route("/time");
 timeRoute.get(timeController.get);
+
+/* Action Route */
+const actionRoute = router.route("/action");
+actionRoute.get(actionController.validate("get"), actionController.get);
+actionRoute.post(actionController.validate("create"), actionController.create);
+actionRoute.patch(actionController.validate("update"), actionController.update);
+actionRoute.delete(
+  actionController.validate("delete"),
+  actionController.delete
+);
+router.post("/action/data", actionController.data);
+router.get("/action/list", actionController.list);
+/* Action Route */
+
+/* Module Route */
+const moduleRoute = router.route("/module");
+moduleRoute.get(moduleController.validate("get"), moduleController.get);
+moduleRoute.post(moduleController.validate("create"), moduleController.create);
+moduleRoute.patch(moduleController.validate("update"), moduleController.update);
+moduleRoute.delete(
+  moduleController.validate("delete"),
+  moduleController.delete
+);
+router.post("/module/data", moduleController.data);
+router.get("/module/list", moduleController.list);
+/* Module Route */
 
 module.exports = router;

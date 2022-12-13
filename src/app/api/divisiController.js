@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+// const _module = "divisi";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -11,6 +11,9 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
     const mDivisi = await Divisi.findAll({
       include: [
       {
@@ -30,9 +33,9 @@ module.exports = {
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Divisi.count();
@@ -75,9 +78,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -86,7 +89,7 @@ module.exports = {
 
     const mDivisi = await Divisi.findOne({
       where: {
-        kode_divisi: req.query.kode_divisi
+        kode_divisi: req.query.kode_divisi,
       },
       include: [
         {
@@ -104,7 +107,7 @@ module.exports = {
               as: "dpa",
               attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
             },
-          ]
+          ],
         },
         {
           model: Asn,
@@ -131,9 +134,9 @@ module.exports = {
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -144,17 +147,17 @@ module.exports = {
       ...req.body,
     }).save();
 
-    res.json({ 
+    res.json({
       status: true,
-      statusCode: 200, 
-      message: "Divisi " + divisi.kode_divisi + " berhasil ditambah."
+      statusCode: 200,
+      message: "Divisi " + divisi.kode_divisi + " berhasil ditambah.",
     });
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -162,21 +165,21 @@ module.exports = {
     }
 
     await Divisi.update(
-      { ...req.body},
+      { ...req.body },
       { where: { kode_divisi: req.query.kode_divisi } }
     );
 
-    res.json({ 
-      status: true ,
+    res.json({
+      status: true,
       statusCode: 200,
-      message: "Divisi " + req.query.kode_divisi + " berhasil diubah."
+      message: "Divisi " + req.query.kode_divisi + " berhasil diubah.",
     });
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -188,7 +191,10 @@ module.exports = {
         kode_divisi: req.query.kode_divisi,
       },
     });
-    res.send({ status: true, message: req.query.kode_divisi + ' berhasil dihapus.' });
+    res.send({
+      status: true,
+      message: req.query.kode_divisi + " berhasil dihapus.",
+    });
   },
   // Validation
   validate: (type) => {
@@ -198,11 +204,11 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mDivisi = await Divisi.findOne({
-            where: {
-                kode_divisi: {
-                    [Op.iLike]: value
-                }
-            }
+          where: {
+            kode_divisi: {
+              [Op.iLike]: value,
+            },
+          },
         });
         if (!mDivisi) {
           return Promise.reject("Data tidak ditemukan!");
@@ -213,33 +219,27 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mDivisi = await Divisi.findOne({
-            where: {
-                kode_divisi: {
-                    [Op.iLike]: value,
-                },
+          where: {
+            kode_divisi: {
+              [Op.iLike]: value,
             },
+          },
         });
         if (mDivisi) {
           return Promise.reject("Data sudah ada!");
         }
-    });
+      });
     const ruleNamaDivisi = body("nama_divisi").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
-            return [
-                ruleCreateKodeDivisi,
-                ruleNamaDivisi,
-            ];
+          return [ruleCreateKodeDivisi, ruleNamaDivisi];
         }
         break;
       case "update":
         {
-            return [
-              ruleKodeDivisi,
-              ruleNamaDivisi.optional()
-            ];
+          return [ruleKodeDivisi, ruleNamaDivisi.optional()];
         }
         break;
       case "get":
