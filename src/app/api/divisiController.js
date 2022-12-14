@@ -1,4 +1,4 @@
-// const _module = "divisi";
+const _module = "divisi";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");

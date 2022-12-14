@@ -218,7 +218,7 @@ module.exports = {
     res.send(resData);
   },
   sendCredential: async (req, res) => {
-    if (!(await req.user.hasAccess(_module, "send-credential"))) {
+    if (!(await req.user.hasAccess(_module, "create"))) {
       return error(res).permissionError();
     }
 

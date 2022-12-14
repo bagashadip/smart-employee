@@ -193,22 +193,22 @@ module.exports = {
     },
 
     //Validate
-  //   validate: (type) => {
-  //       return type
-  //   }
+    // validate: (type) => {
+    //     return type
+    // }
 
-  //   const mKegiatan = await Kegiatan.findAll({
-  //     attributes: [
-  //       "id_kegiatan",
-  //       "foto_kegiatan",
-  //       "desc_kegiatan",
-  //       "nama_kegiatan",
-  //       "tanggal_kegiatan",
-  //       "kode_pegawai",
-  //     ],
-  //   });
-  //   res.json(mKegiatan);
-  // },
+//     const mKegiatan = await Kegiatan.findAll({
+//       attributes: [
+//         "id_kegiatan",
+//         "foto_kegiatan",
+//         "desc_kegiatan",
+//         "nama_kegiatan",
+//         "tanggal_kegiatan",
+//         "kode_pegawai",
+//       ],
+//     });
+//     res.json(mKegiatan);
+//   },
 
   //Get by kode pegawai and date
   get: async (req, res) => {
@@ -266,73 +266,73 @@ module.exports = {
   },
 
   //Add new kegiatan
-  create: async (req, res) => {
-    if (!(await req.user.hasAccess(_module, "create"))) {
-      return error(res).permissionError();
-    }
+//   create: async (req, res) => {
+//     if (!(await req.user.hasAccess(_module, "create"))) {
+//       return error(res).permissionError();
+//     }
 
-    const validation = validationResult(req);
-    if (!validation.isEmpty()) {
-      return error(res).validationError(validation.array());
-    }
+//     const validation = validationResult(req);
+//     if (!validation.isEmpty()) {
+//       return error(res).validationError(validation.array());
+//     }
 
-    const mKegiatan = await new Kegiatan({
-      ...req.body,
-    }).save();
+//     const mKegiatan = await new Kegiatan({
+//       ...req.body,
+//     }).save();
 
-    res.json({
-      status: true,
-      statusCode: 200,
-      message: "Kegiatan " + mKegiatan.nama_kegiatan + " berhasil ditambah.",
-    });
-  },
+//     res.json({
+//       status: true,
+//       statusCode: 200,
+//       message: "Kegiatan " + mKegiatan.nama_kegiatan + " berhasil ditambah.",
+//     });
+//   },
 
-  //Update kegiatan
-  update: async (req, res) => {
-    if (!(await req.user.hasAccess(_module, "update"))) {
-      return error(res).permissionError();
-    }
+//   //Update kegiatan
+//   update: async (req, res) => {
+//     if (!(await req.user.hasAccess(_module, "update"))) {
+//       return error(res).permissionError();
+//     }
 
-    const validation = validationResult(req);
-    if (!validation.isEmpty()) {
-      return error(res).validationError(validation.array());
-    }
+//     const validation = validationResult(req);
+//     if (!validation.isEmpty()) {
+//       return error(res).validationError(validation.array());
+//     }
 
-    await Kegiatan.update(
-      { ...req.body },
-      { where: { id_kegiatan: req.query.id_kegiatan } }
-    );
+//     await Kegiatan.update(
+//       { ...req.body },
+//       { where: { id_kegiatan: req.query.id_kegiatan } }
+//     );
 
-    res.json({
-      status: true,
-      statusCode: 200,
-      message: "Kegiatan " + req.query.id_kegiatan + " berhasil diubah.",
-    });
-  },
+//     res.json({
+//       status: true,
+//       statusCode: 200,
+//       message: "Kegiatan " + req.query.id_kegiatan + " berhasil diubah.",
+//     });
+//   },
 
-  //Delete
-  delete: async (req, res) => {
-    if (!(await req.user.hasAccess(_module, "delete"))) {
-      return error(res).permissionError();
-    }
+//   //Delete
+//   delete: async (req, res) => {
+//     if (!(await req.user.hasAccess(_module, "delete"))) {
+//       return error(res).permissionError();
+//     }
 
-    const validation = validationResult(req);
-    if (!validation.isEmpty()) {
-      return error(res).validationError(validation.array());
-    }
+//     const validation = validationResult(req);
+//     if (!validation.isEmpty()) {
+//       return error(res).validationError(validation.array());
+//     }
 
-    await Kegiatan.destroy({
-      where: {
-        id_kegiatan: req.query.id_kegiatan,
-      },
-    });
-    res.send({
-      status: true,
-      message: req.query.id_kegiatan + " berhasil dihapus.",
-    });
-  },
+//     await Kegiatan.destroy({
+//       where: {
+//         id_kegiatan: req.query.id_kegiatan,
+//       },
+//     });
+//     res.send({
+//       status: true,
+//       message: req.query.id_kegiatan + " berhasil dihapus.",
+//     });
+//   },
 
-  //Validate
+//   //Validate
   validate: (type) => {
     return type;
   },
