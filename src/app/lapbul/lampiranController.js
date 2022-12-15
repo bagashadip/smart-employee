@@ -183,7 +183,7 @@ module.exports = {
             byDateIndex[element]=[]
         })
 
-        let thisUrl = req.protocol+"://"+req.headers.host;
+        let thisUrl = "https://"+req.headers.host;
 
         mLampiran.forEach(element => {
             let thisEl = element

@@ -236,6 +236,10 @@ module.exports = {
           attributes: ["name", "path", "extension", "size"],
         },
       ],
+      order: [
+        ['tanggal_kegiatan','DESC'],
+        ['waktu_kegiatan_mulai','DESC']
+      ]
     });
     res.json(mKegiatan);
   },
