@@ -194,6 +194,7 @@ module.exports = {
             let logo = bitmap.toString('base64');
             console.log(thisUrl+'/uploads'+thisEl['foto.path'].replace('.jpe','.jpg'))
             thisEl.foto_kegiatan_bitmap = logo
+            thisEl.extension = thisEl['foto.extension'].replace('.jpe','.jpg')
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
