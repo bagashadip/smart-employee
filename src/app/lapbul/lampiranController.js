@@ -189,7 +189,7 @@ module.exports = {
             let thisEl = element
             thisEl.foto_kegiatan_path = thisEl['foto.path'].replace('.jpe','.jpg')
             thisEl.base_url = thisUrl
-            console.log(thisUrl+'/uploads'+thisEl['foto.path'])
+            console.log(thisUrl+'/uploads'+thisEl['foto.path'].replace('.jpe','.jpg'))
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
