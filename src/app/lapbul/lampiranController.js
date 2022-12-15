@@ -190,11 +190,12 @@ module.exports = {
             thisEl.foto_kegiatan_path = thisEl['foto.path'].replace('.jpe','.jpg')
             thisEl.base_url = thisUrl
             let thePathImage="public/uploads"+thisEl['foto.path'].replace('.jpe','.jpg')
-            let bitmap = fs.readFileSync(thePathImage);
-            let logo = bitmap.toString('base64');
+            //let bitmap = fs.readFileSync(thePathImage);
+            //let logo = bitmap.toString('base64');
             console.log(thisUrl+'/uploads'+thisEl['foto.path'].replace('.jpe','.jpg'))
-            thisEl.foto_kegiatan_bitmap = logo
+            //thisEl.foto_kegiatan_bitmap = logo
             thisEl.extension = thisEl['foto.extension'].replace('.jpe','.jpg')
+            thisEl.pathImage = thePathImage
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 

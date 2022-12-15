@@ -25,7 +25,9 @@
             <td style="border: 1px solid black;">
                 {{this.tanggal_kegiatan}}<br/><br/>
                 {{#each this.lampiran}}
-                  <img src="data:image/{{this.extension}};base64,{{this.foto_kegiatan_bitmap}}" width="300px"/><br/>
+                {{this.extension}}
+                {{this.foto_kegiatan_bitmap}}
+                  <!--<img src="data:image/{{this.extension}};base64,{{this.foto_kegiatan_bitmap}}" width="300px"/>--><br/>
                   {{this.nama_kegiatan}}<br/><br/>
                 {{/each}}
             </td>
