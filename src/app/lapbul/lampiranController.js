@@ -187,7 +187,7 @@ module.exports = {
 
         mLampiran.forEach(element => {
             let thisEl = element
-            thisEl.foto_kegiatan_path = thisEl['foto.path']
+            thisEl.foto_kegiatan_path = thisEl['foto.path'].replace('.jpe','.jpg')
             thisEl.base_url = thisUrl
             console.log(thisUrl+'/uploads'+thisEl['foto.path'])
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
