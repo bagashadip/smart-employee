@@ -133,7 +133,7 @@ module.exports = {
                 {
                     model: File,
                     as: "foto",
-                    attributes: ["name", "path", "extension", "size"],
+                    attributes: ["path"],
                 },
             ]
             params.raw = true
@@ -159,7 +159,7 @@ module.exports = {
                     {
                         model: File,
                         as: "foto",
-                        attributes: ["name", "path", "extension", "size"],
+                        attributes: ["path"],
                     },
                 ],
                 raw: true
@@ -183,8 +183,14 @@ module.exports = {
             byDateIndex[element]=[]
         })
 
+        let thisUrl = req.protocol+"://"+req.headers.host;
+
         mLampiran.forEach(element => {
-            byDateIndex[element.tanggal_kegiatan].push(element)
+            let thisEl = element
+            thisEl.foto_kegiatan_path = thisEl['foto.path']
+            thisEl.base_url = thisUrl
+            console.log(thisUrl+'/uploads'+thisEl['foto.path'])
+            byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
         let i=0;
@@ -198,46 +204,50 @@ module.exports = {
             })
         }
 
-        //res.json(returnLampiran);
-
         var options = {
             format: "A4",
             orientation: "portrait",
-            border: "10mm",
-            font: '12px',
+            border: "5mm",
             footer: {
-                height: "28mm",
+                height: "10mm",
                 contents: {
-                    
-                    2: 'Second page', // Any page number is working. 1-based index
                     default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-                   
                 }
             }
         };
 
         let dateMoment = moment();
         let periodeBulan = dateMoment.format('DDMMYYHHmmss');
-
+        const thePath="public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf"
         var document = {
         html: html,
         data: {
             users: returnLampiran,
+            thisUrl : thisUrl
         },
-        path: "../public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf",
+        path: thePath,
         type: "",
         };
 
+        
+
         pdf
         .create(document, options)
-        .then((res) => {
-            console.log(res);
-            //res.json(returnLampiran);
+        .then((response) => {
+            var content = fs.readFileSync(thePath);
+
+            //Save path to database
+
+            //Download result
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename='+'lampiran-'+req.query.kode_pegawai+'-'+periodeBulan+'.pdf')
+            res.setHeader('Content-Length', content.length)
+            return res.end(content)
         })
         .catch((error) => {
             console.error(error);
         });
 
-    },
+    }
 
 }
