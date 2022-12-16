@@ -187,15 +187,11 @@ module.exports = {
 
         mLampiran.forEach(element => {
             let thisEl = element
-            thisEl.foto_kegiatan_path = thisEl['foto.path'].replace('.jpe','.jpg')
             thisEl.base_url = thisUrl
-            let thePathImage="public/uploads"+thisEl['foto.path'].replace('.jpe','.jpg')
-            //let bitmap = fs.readFileSync(thePathImage);
-            //let logo = bitmap.toString('base64');
-            console.log(thisUrl+'/uploads'+thisEl['foto.path'].replace('.jpe','.jpg'))
-            //thisEl.foto_kegiatan_bitmap = logo
-            thisEl.extension = thisEl['foto.extension'].replace('.jpe','.jpg')
-            thisEl.pathImage = thePathImage
+            let bitmap = fs.readFileSync("public/uploads"+thisEl['foto.path']);
+            logo = bitmap.toString('base64');
+            thisEl.logo = logo
+            thisEl.extension = thisEl['foto.extension']
             byDateIndex[element.tanggal_kegiatan].push(thisEl)
         })
 
