@@ -31,6 +31,7 @@ const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
 const exportController = require("../app/api/exportController");
 const actionController = require("../app/api/actionController");
 const moduleController = require("../app/api/moduleController");
+const userRoleController = require("../app/api/userRoleController");
 
 //Lapbul
 const kegiatanController = require("../app/api/kegiatanController");
@@ -504,5 +505,25 @@ moduleRoute.delete(
 router.post("/module/data", moduleController.data);
 router.get("/module/list", moduleController.list);
 /* Module Route */
+
+/* User Role */
+const userRoleRoute = router.route("/user-role");
+userRoleRoute.get(userRoleController.validate("get"), userRoleController.get);
+userRoleRoute.post(
+  userRoleController.validate("create"),
+  userRoleController.create
+);
+userRoleRoute.patch(
+  userRoleController.validate("update"),
+  userRoleController.update
+);
+userRoleRoute.delete(
+  userRoleController.validate("delete"),
+  userRoleController.delete
+);
+router.post("/user-role/data", userRoleController.data);
+router.get("/user-role/permission", userRoleController.permission);
+router.get("/user-role/list", userRoleController.list);
+/* User Role */
 
 module.exports = router;
