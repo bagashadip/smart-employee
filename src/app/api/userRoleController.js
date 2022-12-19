@@ -75,7 +75,7 @@ module.exports = {
     });
     var count = await UserRole.count();
 
-    if (req.query.id) {
+    if (req.query.userId) {
       dataTableObj.where = _.merge(dataTableObj.where, {
         userId: req.query.userId,
       });
