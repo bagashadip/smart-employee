@@ -251,6 +251,137 @@ module.exports = {
             console.error(error);
         });
 
-    }
+    },
 
+    generateByLapbulId: async (req, res) => {
+
+        let mLampiran
+
+        //Get lapbul
+        let mLapbul = await Lapbul.findOne({
+            where: {
+                id_lapbul: req.params.id_lapbul
+            }
+        });
+
+        if(mLapbul)
+        {
+            let ttdDateSource = moment(mLapbul.tanggal_ttd);
+            let ttdKegiatanStart    = ttdDateSource.format('YYYY-MM')+'-'+'01';
+            let ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'30';
+
+            let params = {where : {}}
+            
+        
+            params.where.kode_pegawai = mLapbul.kode_pegawai;
+            params.where.tanggal_kegiatan = {
+                    [Op.gte]: ttdKegiatanStart,
+                    [Op.lte]: ttdKegiatanEnd
+            }
+            params.where.foto_kegiatan = {
+                [Op.not]: null
+            }
+            params.order = [
+                ['tanggal_kegiatan','ASC']
+            ]
+
+            params.include = [
+                {
+                    model: File,
+                    as: "foto",
+                    attributes: ["path","extension"]
+                },
+            ]
+            
+            params.raw = true
+            
+            mLampiran = await Kegiatan.findAll(params);
+
+            console.log(mLampiran)
+
+        let byDate=[];
+        let byDateIndex=[];
+        let returnLampiran=[];
+
+        mLampiran.forEach(element => {
+            //byDate[element.tanggal_kegiatan]=[];
+            byDate.push(element.tanggal_kegiatan);
+        });
+
+        byDate =  Array.from(new Set(byDate));
+
+        byDate.forEach(element => {
+            byDateIndex[element]=[]
+        })
+
+        let thisUrl = "https://"+req.headers.host;
+
+        mLampiran.forEach(element => {
+            let thisEl = element
+            thisEl.base_url = thisUrl
+            let bitmap = fs.readFileSync("public/uploads"+thisEl['foto.path']);
+            logo = bitmap.toString('base64');
+            thisEl.logo = logo
+            thisEl.extension = thisEl['foto.extension']
+            byDateIndex[element.tanggal_kegiatan].push(thisEl)
+        })
+
+        let i=0;
+        for(let xThis in byDateIndex)
+        {
+            i+=1;
+            returnLampiran.push({
+                nomor : i,
+                tanggal_kegiatan: xThis,
+                tanggal_kegiatan_format: moment(xThis).format('DD-MM-YYYY'),
+                lampiran: byDateIndex[xThis]
+            })
+        }
+
+        var options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            footer: {
+                height: "20mm",
+                contents: {
+                    default: '<p style="text-align: right; margin-bottom: 15px; margin-right: 30px">{{page}}</p>', // fallback value
+                }
+            }
+        };
+
+        let dateMoment = moment();
+        let periodeBulan = dateMoment.format('DDMMYYHHmmss');
+        const thePath="public/uploads/lampiran-"+req.query.kode_pegawai+"-"+periodeBulan+".pdf"
+        var document = {
+        html: html,
+        data: {
+            users: returnLampiran,
+            thisUrl : thisUrl
+        },
+        path: thePath,
+        type: "",
+        };
+
+        
+
+        pdf
+        .create(document, options)
+        .then((response) => {
+            var content = fs.readFileSync(thePath);
+
+            //Save path to database
+
+            //Download result
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename='+'lampiran-'+req.query.kode_pegawai+'-'+periodeBulan+'.pdf')
+            res.setHeader('Content-Length', content.length)
+            return res.end(content)
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+        }
+
+    }
 }
