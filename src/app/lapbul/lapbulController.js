@@ -396,6 +396,8 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
     let byDate=[];
     let byDateObj=[]
     let byDateSorting=[]
+    let ttdKegiatanEndThis      = ttdDateSource.format('YYYY-MM')+'-'+'30';
+    
     data.forEach(element => {
         //byDate[element.tanggal_kegiatan]=[];
         byDateSorting.push(element.tanggal_kegiatan);
@@ -470,7 +472,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
             firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
             firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
             
-            if(!byDate[firstWeekSat].length)
+            if(!byDate[firstWeekSat].length && firstWeekSat<=ttdKegiatanEndThis)
             {
                 byDate[firstWeekSat]=[{
                     tanggal : firstWeekSat,
@@ -478,7 +480,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
                 }]
             }
             
-            if(!byDate[firstWeekSun].length)
+            if(!byDate[firstWeekSun].length && firstWeekSun<=ttdKegiatanEndThis)
             {
                 byDate[firstWeekSun]=[{
                     tanggal : firstWeekSun,
