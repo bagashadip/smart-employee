@@ -202,6 +202,7 @@ module.exports = {
             returnLampiran.push({
                 nomor : i,
                 tanggal_kegiatan: xThis,
+                tanggal_kegiatan_format: moment(xThis).format('DD-MM-YYYY'),
                 lampiran: byDateIndex[xThis]
             })
         }
@@ -209,11 +210,11 @@ module.exports = {
         var options = {
             format: "A4",
             orientation: "portrait",
-            border: "5mm",
+            border: "10mm",
             footer: {
-                height: "10mm",
+                height: "20mm",
                 contents: {
-                    default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
+                    default: '<p style="text-align: right; margin-bottom: 15px; margin-right: 30px">{{page}}</p>', // fallback value
                 }
             }
         };
