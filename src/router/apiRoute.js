@@ -332,6 +332,13 @@ historiPresensiDayParamRoute.get(
 );
 /* Histori Presensi Day Param Route */
 
+/* Histori Presensi Yesterday Route */
+const historiPresensiYesterdayRoute = router.route("/histori-presensi-kemarin");
+historiPresensiYesterdayRoute.get(
+  historiPresensiController.getYesterday
+);
+/* Histori Presensi Yesterday Route */
+
 /* Kontak List Route */
 const kontakListRoute = router.route("/kontak-list");
 kontakListRoute.get(

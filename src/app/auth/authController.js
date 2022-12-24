@@ -470,7 +470,8 @@ module.exports = {
 
     const password = req.body.password;
     let loadedUser;
-    let kodePegawai, userWhere
+    let kodePegawai, userWhere;
+    let activeRole;
 
     if(loginType=="email"){
       //Get pegawai by email
@@ -522,6 +523,7 @@ module.exports = {
       });
     }
 
+    activeRole = user.activeRole;
     loadedUser = user;
 
     if (loadedUser.status_user !== "Aktif") {
@@ -606,6 +608,108 @@ module.exports = {
       });
     }
 
+    const userRole = await UserRole.findOne({
+      where: { userId: user.id_user },
+    });
+
+    if (!userRole) {
+      return error(res).authenticationError(["You don't have privileges."]);
+    }
+
+    if (!user.activeRole) {
+      // Set Default Role
+      if (!user.activeRole) {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+
+          if (mRole) {
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id_user: user.id_user } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError([
+              "You don't have privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["You don't have privileges."]);
+        }
+      }
+    } else {
+      // Validate Zone & Role
+
+      const mUserRole = await UserRole.findOne({
+        attributes: ["id", "roles"],
+        where: {
+          userId: user.id_user,
+        },
+      });
+
+      if (mUserRole) {
+        const mRole = await Role.findByPk(user.activeRole);
+        to = mRole.defaultRoute;
+        if (mRole) {
+          // Zone is Exists, check is role exists?
+          if (mUserRole.roles && mUserRole.roles.length > 0) {
+            if (mUserRole.roles.indexOf(mRole.slug) == -1) {
+              const mDefaultRole = await Role.findOne({
+                where: {
+                  slug: mUserRole.roles[0],
+                },
+              });
+              // Set Default Role
+              if (mDefaultRole) {
+                await User.update(
+                  { activeRole: mDefaultRole.id },
+                  { where: { id: user.id_user } }
+                );
+                activeRole = mDefaultRole.id;
+                to = mDefaultRole.defaultRoute;
+              } else {
+                return error(res).authenticationError(["Unknown Role."]);
+              }
+            }
+          } else {
+            return error(res).authenticationError([
+              "You don't have role privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["Unknown Role."]);
+        }
+      } else {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+          if (mRole) {
+            // Set To Default Zone
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id: user.id } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError(["Unknown Role."]);
+          }
+        } else {
+          return error(res).authenticationError([
+            "You don't have role privileges.",
+          ]);
+        }
+      }
+    }
+
     const accesToken = new Token("password").generate({
       userId: loadedUser.id_user.toString(),
       grantType: "password",
@@ -636,6 +740,8 @@ module.exports = {
         id: loadedUser.id_user,
         username: loadedUser.username_user,
         first_login: loadedUser.first_login,
+        activeRole: activeRole,
+        roles: userRole.roles,
       },
       expires_in: process.env.JWT_EXPIRES_IN,
     }
