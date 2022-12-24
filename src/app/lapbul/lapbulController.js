@@ -184,6 +184,8 @@ module.exports = {
         //Get lapbul template
         let templateFile = 'template-smart-employee.docx';
 
+        console.log(mLapbul)
+
         if(mLapbul['divisi.template_lapbul']!=null)
         {
             //Get file
@@ -479,21 +481,28 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
             firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
             firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
             
-            if(!byDate[firstWeekSat].length && firstWeekSat<=ttdKegiatanEndThis)
+            if(byDate[firstWeekSat])
             {
-                byDate[firstWeekSat]=[{
-                    tanggal : firstWeekSat,
-                    description : 'Libur'
-                }]
+                if(!byDate[firstWeekSat].length && firstWeekSat<=ttdKegiatanEndThis)
+                {
+                    byDate[firstWeekSat]=[{
+                        tanggal : firstWeekSat,
+                        description : 'Libur'
+                    }]
+                }
             }
             
-            if(!byDate[firstWeekSun].length && firstWeekSun<=ttdKegiatanEndThis)
+            if(byDate[firstWeekSun])
             {
-                byDate[firstWeekSun]=[{
-                    tanggal : firstWeekSun,
-                    description : 'Libur'
-                }]
+                if(!byDate[firstWeekSun].length && firstWeekSun<=ttdKegiatanEndThis)
+                {
+                    byDate[firstWeekSun]=[{
+                        tanggal : firstWeekSun,
+                        description : 'Libur'
+                    }]
+                }
             }
+            
         }
     }
 
