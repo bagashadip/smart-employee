@@ -263,7 +263,7 @@ module.exports = {
         if(mLapbul)
         {
             ttdKegiatanStart    = ttdDateSource.format('YYYY-MM')+'-'+'01';
-            ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'30';
+            ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'31';
 
             const mKegiatan = await Kegiatan.findAll({
                 raw: true,
@@ -396,7 +396,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
     let byDate=[];
     let byDateObj=[]
     let byDateSorting=[]
-    let ttdKegiatanEndThis      = ttdDateSource.format('YYYY-MM')+'-'+'30';
+    let ttdKegiatanEndThis      = ttdDateSource.format('YYYY-MM')+'-'+'31';
     
     data.forEach(element => {
         //byDate[element.tanggal_kegiatan]=[];
@@ -420,10 +420,16 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
             firstWeekSat = addWeek.weekday(6).format('YYYY-MM-DD')
             firstWeekSun = addWeek.weekday(7).format('YYYY-MM-DD')
             //byDate[firstWeekSat]=[]
-            byDateSorting.push(firstWeekSat);
-
+            if(firstWeekSat<=ttdKegiatanEndThis)
+            {
+                byDateSorting.push(firstWeekSat);
+            }
+            
             //byDate[firstWeekSun]=[]
-            byDateSorting.push(firstWeekSun);
+            if(firstWeekSun<=ttdKegiatanEndThis)
+            {
+                byDateSorting.push(firstWeekSun);
+            }
         }
     }
 
