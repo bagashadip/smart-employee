@@ -277,6 +277,7 @@ module.exports = {
                 },
                 order: [
                     ['tanggal_kegiatan', 'ASC'],
+                    ['waktu_kegiatan_mulai', 'ASC']
                 ]
             });
 
