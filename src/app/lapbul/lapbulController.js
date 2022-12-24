@@ -184,8 +184,6 @@ module.exports = {
         //Get lapbul template
         let templateFile = 'template-smart-employee.docx';
 
-        console.log(mLapbul)
-
         if(mLapbul['divisi.template_lapbul']!=null)
         {
             //Get file
