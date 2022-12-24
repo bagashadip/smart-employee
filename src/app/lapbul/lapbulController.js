@@ -263,7 +263,8 @@ module.exports = {
         if(mLapbul)
         {
             ttdKegiatanStart    = ttdDateSource.format('YYYY-MM')+'-'+'01';
-            ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'31';
+            //ttdKegiatanEnd      = ttdDateSource.format('YYYY-MM')+'-'+'31';
+            ttdKegiatanEnd   = ttdDateSource.endOf('month').format('YYYY-MM-DD');
 
             const mKegiatan = await Kegiatan.findAll({
                 raw: true,
@@ -396,7 +397,7 @@ function groupKegByDate(data,ttdKegiatanStart,ttdDateSource,liburNasional)
     let byDate=[];
     let byDateObj=[]
     let byDateSorting=[]
-    let ttdKegiatanEndThis      = ttdDateSource.format('YYYY-MM')+'-'+'31';
+    let ttdKegiatanEndThis      = ttdDateSource.endOf('month').format('YYYY-MM-DD');
     
     data.forEach(element => {
         //byDate[element.tanggal_kegiatan]=[];
