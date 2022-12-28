@@ -18,6 +18,7 @@ const {
   JamKerja,
   JamKerjaDetail,
   Asn,
+  Lapbul
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -226,6 +227,24 @@ module.exports = {
       let tglGabung = moment(tempRes.tanggalbergabung_pegawai, "YYYY-MM-DD");
       tempRes.masa_kerja = moment.duration(currDate.diff(tglGabung)).asDays();
     }
+
+    //Get latest lapbul
+    let mLapbul = await Lapbul.findOne({
+      where: {
+          kode_pegawai: req.query.kode_pegawai
+      },
+      order: [
+        ['id_lapbul','DESC']
+      ]
+    });
+
+    if(mLapbul){
+      tempRes.uraian_pelaksanaan = mLapbul.uraian_pelaksanaan;
+    }
+    else{
+      tempRes.uraian_pelaksanaan = null;
+    }
+
     res.json(tempRes);
   },
   // Create
