@@ -267,11 +267,17 @@ module.exports = {
       let data = {
         email: req.body.email,
         message:
-          "<p>Dear rekan JSC,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
+          "<p>Dear rekan Jakarta Smart City,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
           mUser.user.username_user +
           "</b></p><p>password: <b>" +
           generatePass +
-          "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><p>Terimakasih</p>",
+          "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><br/>" +
+          "<p>Aplikasi bisa diunduh melalui Play Store dan App Store dengan link berikut:</p><br/>"+
+          "<p>Play Store (Android):</p><br/>"+
+          "https://play.google.com/store/apps/details?id=com.jakartasmartcity.smartemployee<br/><br/>"+
+          "<p>App Store (iOS): </p><br/>"+
+          "https://apps.apple.com/id/app/smartemployee/id1629810566<br/><br/>"+
+          "<p>Terimakasih</p>",
       };
 
       const sendMail = await mailer(data);

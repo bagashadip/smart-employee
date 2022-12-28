@@ -200,6 +200,8 @@ module.exports = {
     }
 
     const username = req.body.username;
+    username = username.toLowerCase()
+    username = username.trim()
     const password = req.body.password;
     let loadedUser;
     let activeRole;
@@ -277,11 +279,11 @@ module.exports = {
         let data = {
           email: loadedUser.pegawai.emailpribadi_pegawai,
           message:
-            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. Jika anda merasa percobaan tersebut Bukan Anda, silahkan klik link berikut. </p><br><a href=" +
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan.</p><br><a href=" +
             process.env.BASE_URL +
             "/auth/reset-attempt?verify=" +
             token +
-            ">Klik untuk reset percobaan login</a>",
+            ">Klik untuk reset percobaan login</a> <br/><br/> <p>Jika Anda lupa password, pilih opsi Lupa Password pada aplikasi SmartEmployee setelah melakukan reset percobaan login ini. </p>",
         };
 
         const sendMail = await mailer(data);
@@ -370,7 +372,7 @@ module.exports = {
               if (mDefaultRole) {
                 await User.update(
                   { activeRole: mDefaultRole.id },
-                  { where: { id: user.id_user } }
+                  { where: { id_user: user.id_user } }
                 );
                 activeRole = mDefaultRole.id;
                 to = mDefaultRole.defaultRoute;
@@ -397,7 +399,7 @@ module.exports = {
             // Set To Default Zone
             await User.update(
               { activeRole: mRole.id },
-              { where: { id: user.id } }
+              { where: { id_user: user.id } }
             );
             activeRole = mRole.id;
             to = mRole.defaultRoute;
@@ -461,6 +463,8 @@ module.exports = {
     }
 
     let username=req.body.username
+    username = username.toLowerCase()
+    username = username.trim()
     let loginType= "username"
 
     if(username.includes("@"))
@@ -668,7 +672,7 @@ module.exports = {
               if (mDefaultRole) {
                 await User.update(
                   { activeRole: mDefaultRole.id },
-                  { where: { id: user.id_user } }
+                  { where: { id_user: user.id_user } }
                 );
                 activeRole = mDefaultRole.id;
                 to = mDefaultRole.defaultRoute;
@@ -695,7 +699,7 @@ module.exports = {
             // Set To Default Zone
             await User.update(
               { activeRole: mRole.id },
-              { where: { id: user.id } }
+              { where: { id_user: user.id } }
             );
             activeRole = mRole.id;
             to = mRole.defaultRoute;
@@ -852,7 +856,12 @@ module.exports = {
         }
       );
       if (update) {
-        res.send("Attempt user has been reset.");
+        let mes="Reset Percobaan Login Berhasil.<br><br>"
+        mes+="Silakan login kembali di aplikasi SmartEmployee.<br>"
+        mes+="Jika Anda lupa password, klik Lupa Password pada aplikasi.<br><br>"
+        mes+="Masih memiliki kendala?<br/>"
+        mes+="Hubungi kami melalui email kepegawaian.jsc@gmail.com"
+        res.send(mes);
       } else {
         response.status(400).send(new Error(update));
       }
