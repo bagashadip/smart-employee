@@ -54,6 +54,8 @@ module.exports = {
         [Sequelize.col("pegawai.kode_divisi"), "divisi"],
         [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
         [Sequelize.literal("timestamp_absensi::time"), "jam_absen"],
+        "label_absensi",
+        "catatan_absensi",
         "tipe_absensi",
         [
           Sequelize.literal(

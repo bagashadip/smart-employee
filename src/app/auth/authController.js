@@ -199,7 +199,7 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const username = req.body.username;
+    let username = req.body.username;
     username = username.toLowerCase()
     username = username.trim()
     const password = req.body.password;
