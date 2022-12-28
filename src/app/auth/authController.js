@@ -200,6 +200,8 @@ module.exports = {
     }
 
     const username = req.body.username;
+    username = username.toLowerCase()
+    username = username.trim()
     const password = req.body.password;
     let loadedUser;
     let activeRole;
@@ -461,6 +463,8 @@ module.exports = {
     }
 
     let username=req.body.username
+    username = username.toLowerCase()
+    username = username.trim()
     let loginType= "username"
 
     if(username.includes("@"))
