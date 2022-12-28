@@ -370,7 +370,7 @@ module.exports = {
               if (mDefaultRole) {
                 await User.update(
                   { activeRole: mDefaultRole.id },
-                  { where: { id: user.id_user } }
+                  { where: { id_user: user.id_user } }
                 );
                 activeRole = mDefaultRole.id;
                 to = mDefaultRole.defaultRoute;
@@ -397,7 +397,7 @@ module.exports = {
             // Set To Default Zone
             await User.update(
               { activeRole: mRole.id },
-              { where: { id: user.id } }
+              { where: { id_user: user.id } }
             );
             activeRole = mRole.id;
             to = mRole.defaultRoute;
@@ -668,7 +668,7 @@ module.exports = {
               if (mDefaultRole) {
                 await User.update(
                   { activeRole: mDefaultRole.id },
-                  { where: { id: user.id_user } }
+                  { where: { id_user: user.id_user } }
                 );
                 activeRole = mDefaultRole.id;
                 to = mDefaultRole.defaultRoute;
@@ -695,7 +695,7 @@ module.exports = {
             // Set To Default Zone
             await User.update(
               { activeRole: mRole.id },
-              { where: { id: user.id } }
+              { where: { id_user: user.id } }
             );
             activeRole = mRole.id;
             to = mRole.defaultRoute;
