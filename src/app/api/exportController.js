@@ -18,6 +18,7 @@ module.exports = {
     const checkStartDate = "startDate" in req.body;
     const checkEndDate = "endDate" in req.body;
     const checkDivisi = "divisi" in req.body;
+    const kodePegawai = "kode_pegawai" in req.body;
 
     if (checkStartDate === false || checkEndDate === false) {
       res.status(400).json({
@@ -33,6 +34,25 @@ module.exports = {
       }
     }
     
+    let whereAbsensi = {
+      createdAt: {
+        [Op.and]: [
+          { [Op.gte]: req.body.startDate },
+          { [Op.lte]: req.body.endDate },
+        ],
+      }
+    }
+
+    if(kodePegawai)
+    {
+      whereAbsensi = {
+        ...whereAbsensi,
+        kode_pegawai: req.body.kode_pegawai
+      }
+    }
+
+    console.log(whereAbsensi)
+
     const mAbsensi = await Absensi.findAll({
       include: [
         {
@@ -50,6 +70,7 @@ module.exports = {
         },
       ],
       attributes: [
+        [Sequelize.col("pegawai.kode_pegawai"), "kode_pegawai"],
         [Sequelize.col("pegawai.namalengkap_pegawai"), "nama_pegawai"],
         [Sequelize.col("pegawai.kode_divisi"), "divisi"],
         [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
@@ -76,14 +97,7 @@ module.exports = {
           "keterangan",
         ],
       ],
-      where: {
-        createdAt: {
-          [Op.and]: [
-            { [Op.gte]: req.body.startDate },
-            { [Op.lte]: req.body.endDate },
-          ],
-        }
-      },
+      where: whereAbsensi,
       order: [
         [Sequelize.col("pegawai.kode_divisi"), "ASC"],
         [Sequelize.col("pegawai.namalengkap_pegawai"), "ASC"],
