@@ -7,8 +7,8 @@ const webCorpController = require("../app/webcorp/webCorpController");
 
 const router = express.Router();
 
-router.use("/auth", authRoute);
-router.use("/api/v1", apiRoute);
+router.use("/v2/auth", authRoute);
+router.use("/v2/api", apiRoute);
 
 // const mailerRoute = router.route("/mailer");
 // mailerRoute.get(mailerController.send);
