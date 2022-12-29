@@ -274,7 +274,7 @@ module.exports = {
           "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><br/>" +
           "<p>Aplikasi bisa diunduh melalui Play Store dan App Store dengan link berikut:</p><br/>"+
           "<p>Play Store (Android):</p><br/>"+
-          "https://play.google.com/store/apps/details?id=com.jakartasmartcity.smartemployee<br/><br/>"+
+          "https://play.google.com/store/apps/details?id=id.go.jakarta.smartcity.kepegawaian<br/><br/>"+
           "<p>App Store (iOS): </p><br/>"+
           "https://apps.apple.com/id/app/smartemployee/id1629810566<br/><br/>"+
           "<p>Terimakasih</p>",

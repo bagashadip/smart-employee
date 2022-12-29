@@ -374,7 +374,7 @@ module.exports = {
 
             //Download result
             res.setHeader('Content-Type', 'application/pdf')
-            res.setHeader('Content-Disposition', 'attachment; filename='+'lampiran-'+req.query.kode_pegawai+'-'+periodeBulan+'.pdf')
+            res.setHeader('Content-Disposition', 'attachment; filename='+'lampiran-'+mLapbul.kode_pegawai+'-'+periodeBulan+'.pdf')
             res.setHeader('Content-Length', content.length)
             return res.end(content)
         })

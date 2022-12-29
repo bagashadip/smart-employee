@@ -1,3 +1,4 @@
+const _module = "lapbul";
 const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 var moment = require('moment'); // require
@@ -12,6 +13,7 @@ const { body, query, validationResult } = require("express-validator");
 var assign = require("lodash/assign");
 
 var bodyParser = require('body-parser');
+const error = require("../../util/errors");
 
 const { Lapbul, Kegiatan, LiburNasional, Pegawai, Divisi, File} = require("../../models/model");
 const { unset } = require("lodash");
@@ -25,6 +27,9 @@ module.exports = {
     
     // Get all
     list: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
 
         let params = {where : {}}
         let mLapbul
@@ -57,6 +62,9 @@ module.exports = {
     },
 
     get_by_id: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+        return error(res).permissionError();
+    }
         mLapbul = await Lapbul.findOne({
             where: {
                 id_lapbul: req.params.id_lapbul
@@ -65,8 +73,11 @@ module.exports = {
         res.json(mLapbul);
     },
 
-    //Add new kegiatan
+    //Add new lapbul
     create: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "create"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -84,6 +95,9 @@ module.exports = {
     },
 
     update: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "update"))) {
+            return error(res).permissionError();
+        }
        const validation = validationResult(req);
         if (!validation.isEmpty()) {
           return error(res).validationError(validation.array());
@@ -103,6 +117,9 @@ module.exports = {
 
       //Delete
     delete: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "delete"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -121,9 +138,9 @@ module.exports = {
 
     // Datatable
     data: async (req, res) => {
-        // if (!(await req.user.hasAccess(_module, "view"))) {
-        //   return error(res).permissionError();
-        // }
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
 
         var dataTableObj = await datatable(req.body);
         var count = await Lapbul.count();
@@ -150,6 +167,9 @@ module.exports = {
     },
 
     generate: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "create"))) {
+            return error(res).permissionError();
+        }
 
         //Get from database
         const validation = validationResult(req);

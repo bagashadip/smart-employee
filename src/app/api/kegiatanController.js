@@ -12,6 +12,9 @@ const Op = Sequelize.Op;
 module.exports = {
     // Get all
     list: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
         const mKegiatan = await Kegiatan.findAll({
             attributes: ["id_kegiatan", "foto_kegiatan", "desc_kegiatan",  "nama_kegiatan", "tanggal_kegiatan", "kode_pegawai","waktu_kegiatan_mulai","waktu_kegiatan_selesai"],
         });
@@ -20,6 +23,9 @@ module.exports = {
 
     //Get by kode pegawai and date
     get: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -49,6 +55,9 @@ module.exports = {
     },
 
     detail: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -71,6 +80,9 @@ module.exports = {
 
     //Add new kegiatan
     create: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "create"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -122,6 +134,9 @@ module.exports = {
 
     //Update kegiatan
     update: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "update"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -141,6 +156,9 @@ module.exports = {
 
     //Delete
     delete: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "delete"))) {
+            return error(res).permissionError();
+        }
         const validation = validationResult(req);
         if (!validation.isEmpty()) {
             return error(res).validationError(validation.array());
@@ -159,6 +177,9 @@ module.exports = {
 
     // Datatable
     data: async (req, res) => {
+        if (!(await req.user.hasAccess(_module, "view"))) {
+            return error(res).permissionError();
+        }
         // if (!(await req.user.hasAccess(_module, "view"))) {
         //   return error(res).permissionError();
         // }

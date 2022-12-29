@@ -199,7 +199,7 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const username = req.body.username;
+    let username = req.body.username;
     username = username.toLowerCase()
     username = username.trim()
     const password = req.body.password;
@@ -279,7 +279,7 @@ module.exports = {
         let data = {
           email: loadedUser.pegawai.emailpribadi_pegawai,
           message:
-            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan.</p><br><a href=" +
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. </p><br><a href=" +
             process.env.BASE_URL +
             "/auth/reset-attempt?verify=" +
             token +
@@ -579,11 +579,11 @@ module.exports = {
         let data = {
           email: loadedUser.pegawai.emailpribadi_pegawai,
           message:
-            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. Jika anda merasa percobaan tersebut Bukan Anda, silahkan klik link berikut. </p><br><a href=" +
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. </p><br><a href=" +
             process.env.BASE_URL +
             "/auth/reset-attempt?verify=" +
             token +
-            ">Klik untuk reset percobaan login</a>",
+            ">Klik untuk reset percobaan login</a><br/><br/><p>Jika Anda lupa password, pilih opsi Lupa Password pada aplikasi SmartEmployee setelah melakukan reset percobaan login ini. </p>",
         };
 
         const sendMail = await mailer(data);
