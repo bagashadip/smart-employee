@@ -9,7 +9,14 @@ const speakeasy = require("speakeasy");
 
 const Op = Sequelize.Op;
 
-const { User, Log, Pegawai, File } = require("../../models/model");
+const {
+  User,
+  Log,
+  Pegawai,
+  File,
+  Role,
+  UserRole,
+} = require("../../models/model");
 const { use } = require("../../router/router");
 
 module.exports = {
@@ -100,15 +107,104 @@ module.exports = {
 
     res.status(200).send(resData);
   },
+  checkUserEmail: async (req, res, _) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    const username = req.body.emailpribadi_pegawai;
+    let loadedUser;
+
+    //Get pegawai by email
+    const pegawaiFind = await Pegawai.findOne({
+      where: {
+        emailpribadi_pegawai: username
+      },
+    });
+
+    if(pegawaiFind)
+    {
+      //Get user by kode pegawai
+      const userFind = await User.findOne({
+        where: {
+          kode_pegawai: pegawaiFind.kode_pegawai
+        },
+      });
+
+      const user = await User.findOne({
+        include: [
+          {
+            model: Pegawai,
+            as: "pegawai",
+            include: [
+              {
+                model: File,
+                as: "foto",
+              },
+            ],
+          },
+        ],
+        where: {
+          kode_pegawai: pegawaiFind.kode_pegawai
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "User tidak ditemukan!",
+        });
+      }
+  
+      loadedUser = user;
+  
+      if (loadedUser.status_user !== "Aktif") {
+        return res.status(401).json({
+          statusCode: 401,
+          message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
+        });
+      }
+  
+      resData = {
+        statusCode: 200,
+        username: loadedUser.username_user,
+        emailpribadi_pegawai: "",
+        namalengkap_pegawai: "",
+        foto_pegawai: "",
+        status_user: loadedUser.status_user,
+      };
+  
+      if (loadedUser.pegawai) {
+        resData.emailpribadi_pegawai = loadedUser.pegawai.emailpribadi_pegawai;
+        resData.namalengkap_pegawai = loadedUser.pegawai.namalengkap_pegawai;
+        resData.foto_pegawai = loadedUser.pegawai.foto.path;
+      }
+  
+      res.status(200).send(resData);
+
+    }
+
+    if (!pegawaiFind) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Email tidak ditemukan!",
+      });
+    }
+
+  },
   login: async (req, res, _) => {
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
     }
 
-    const username = req.body.username;
+    let username = req.body.username;
+    username = username.toLowerCase()
+    username = username.trim()
     const password = req.body.password;
     let loadedUser;
+    let activeRole;
 
     const user = await User.findOne({
       where: {
@@ -120,7 +216,7 @@ module.exports = {
         {
           model: Pegawai,
           as: "pegawai",
-          attributes: ["emailpribadi_pegawai"],
+          attributes: ["emailpribadi_pegawai", "kode_pegawai"],
         },
       ],
     });
@@ -131,7 +227,7 @@ module.exports = {
         message: "Username tidak ditemukan!",
       });
     }
-
+    activeRole = user.activeRole;
     loadedUser = user;
 
     if (loadedUser.status_user !== "Aktif") {
@@ -183,11 +279,11 @@ module.exports = {
         let data = {
           email: loadedUser.pegawai.emailpribadi_pegawai,
           message:
-            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. Jika anda merasa percobaan tersebut Bukan Anda, silahkan klik link berikut. </p><br><a href=" +
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. </p><br><a href=" +
             process.env.BASE_URL +
             "/auth/reset-attempt?verify=" +
             token +
-            ">Klik untuk reset percobaan login</a>",
+            ">Klik untuk reset percobaan login</a> <br/><br/> <p>Jika Anda lupa password, pilih opsi Lupa Password pada aplikasi SmartEmployee setelah melakukan reset percobaan login ini. </p>",
         };
 
         const sendMail = await mailer(data);
@@ -216,14 +312,114 @@ module.exports = {
       });
     }
 
+    const userRole = await UserRole.findOne({
+      where: { userId: user.id_user },
+    });
+
+    if (!userRole) {
+      return error(res).authenticationError(["You don't have privileges."]);
+    }
+
+    if (!user.activeRole) {
+      // Set Default Role
+      if (!user.activeRole) {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+
+          if (mRole) {
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id_user: user.id_user } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError([
+              "You don't have privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["You don't have privileges."]);
+        }
+      }
+    } else {
+      // Validate Zone & Role
+
+      const mUserRole = await UserRole.findOne({
+        attributes: ["id", "roles"],
+        where: {
+          userId: user.id_user,
+        },
+      });
+
+      if (mUserRole) {
+        const mRole = await Role.findByPk(user.activeRole);
+        to = mRole.defaultRoute;
+        if (mRole) {
+          // Zone is Exists, check is role exists?
+          if (mUserRole.roles && mUserRole.roles.length > 0) {
+            if (mUserRole.roles.indexOf(mRole.slug) == -1) {
+              const mDefaultRole = await Role.findOne({
+                where: {
+                  slug: mUserRole.roles[0],
+                },
+              });
+              // Set Default Role
+              if (mDefaultRole) {
+                await User.update(
+                  { activeRole: mDefaultRole.id },
+                  { where: { id_user: user.id_user } }
+                );
+                activeRole = mDefaultRole.id;
+                to = mDefaultRole.defaultRoute;
+              } else {
+                return error(res).authenticationError(["Unknown Role."]);
+              }
+            }
+          } else {
+            return error(res).authenticationError([
+              "You don't have role privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["Unknown Role."]);
+        }
+      } else {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+          if (mRole) {
+            // Set To Default Zone
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id_user: user.id } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError(["Unknown Role."]);
+          }
+        } else {
+          return error(res).authenticationError([
+            "You don't have role privileges.",
+          ]);
+        }
+      }
+    }
+
     const accesToken = new Token("password").generate({
       userId: loadedUser.id_user.toString(),
-      scope: req.body.scope,
       grantType: "password",
     });
     const refreshToken = new Token("refresh").generate({
       userId: loadedUser.id_user.toString(),
-      scope: req.body.scope,
       grantType: "password",
     });
 
@@ -240,7 +436,7 @@ module.exports = {
       }
     );
 
-    res.json({
+    var resJson = {
       token_type: "bearer",
       access_token: accesToken,
       refresh_token: refreshToken,
@@ -248,9 +444,318 @@ module.exports = {
         id: loadedUser.id_user,
         username: loadedUser.username_user,
         first_login: loadedUser.first_login,
+        activeRole: activeRole,
+        roles: userRole.roles,
       },
       expires_in: process.env.JWT_EXPIRES_IN,
+    };
+
+    if (loadedUser.pegawai != undefined) {
+      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai;
+    }
+
+    res.json(resJson);
+  },
+  loginByEmail  : async (req, res, _) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return error(res).validationError(validation.array());
+    }
+
+    let username=req.body.username
+    username = username.toLowerCase()
+    username = username.trim()
+    let loginType= "username"
+
+    if(username.includes("@"))
+    {
+      loginType="email"
+    }
+
+    const password = req.body.password;
+    let loadedUser;
+    let kodePegawai, userWhere;
+    let activeRole;
+
+    if(loginType=="email"){
+      //Get pegawai by email
+      const pegawaiFind = await Pegawai.findOne({
+        where: {
+          emailpribadi_pegawai: username
+        },
+      });
+
+      if(pegawaiFind) {
+        kodePegawai = pegawaiFind.kode_pegawai
+      }
+
+      if (!pegawaiFind) {
+        return res.status(404).json({
+          statusCode: 404,
+          message: "Email tidak ditemukan!",
+        });
+      }
+
+      userWhere = {
+        kode_pegawai: pegawaiFind.kode_pegawai,
+      }
+
+    }else{
+      kodePegawai = ""
+      userWhere = {
+        username_user: {
+          [Op.iLike]: username,
+        },
+      }
+    }
+
+    const user = await User.findOne({
+      where: userWhere,
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["emailpribadi_pegawai","kode_pegawai"],
+        },
+      ],
     });
+
+    if (!user) {
+      return res.status(404).json({
+        statusCode: 404,
+        message: "Username tidak ditemukan!",
+      });
+    }
+
+    activeRole = user.activeRole;
+    loadedUser = user;
+
+    if (loadedUser.status_user !== "Aktif") {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Status User Tidak Aktif. Silahkan hubungi Admin.",
+      });
+    }
+
+    if (loadedUser.attempt_user > 2) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Input password salah 3 kali. User dinonaktifkan.",
+      });
+    }
+
+    const isEqual = await bcrypt.compare(password, user.password_user);
+    if (!isEqual) {
+      await User.update(
+        {
+          attempt_user: user.attempt_user + 1,
+        },
+        {
+          where: {
+            username_user: username,
+          },
+        }
+      );
+
+      if (user.attempt_user + 1 > 2) {
+        const token = jwt.sign(
+          {
+            id_user: loadedUser.id_user,
+          },
+          process.env.JWT_SECRET
+        );
+
+        await User.update(
+          {
+            status_user: "Non Aktif",
+          },
+          {
+            where: {
+              username_user: username,
+            },
+          }
+        );
+
+        let data = {
+          email: loadedUser.pegawai.emailpribadi_pegawai,
+          message:
+            "<p>Telah terdeteksi percobaan login yang gagal menggunakan akun Anda sebanyak 3x, saat ini akun Anda sedang dinonaktifkan. </p><br><a href=" +
+            process.env.BASE_URL +
+            "/auth/reset-attempt?verify=" +
+            token +
+            ">Klik untuk reset percobaan login</a><br/><br/><p>Jika Anda lupa password, pilih opsi Lupa Password pada aplikasi SmartEmployee setelah melakukan reset percobaan login ini. </p>",
+        };
+
+        const sendMail = await mailer(data);
+        if (sendMail) {
+          return res.status(401).json({
+            statusCode: 401,
+            message: "Input password salah 3 kali. User dinonaktifkan.",
+          });
+        }
+      }
+
+      const addLog = new Log({
+        aktivitas_log: "Password anda salah!",
+        ipaddress_log: req.socket.remoteAddress,
+        username_user: loadedUser.username_user,
+      });
+
+      await addLog.save();
+
+      return res.status(401).json({
+        statusCode: 401,
+        message:
+          "Password anda salah! Silahkan ulangi. Attempt " +
+          (loadedUser.attempt_user + 1) +
+          " of 3",
+      });
+    }
+
+    const userRole = await UserRole.findOne({
+      where: { userId: user.id_user },
+    });
+
+    if (!userRole) {
+      return error(res).authenticationError(["You don't have privileges."]);
+    }
+
+    if (!user.activeRole) {
+      // Set Default Role
+      if (!user.activeRole) {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+
+          if (mRole) {
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id_user: user.id_user } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError([
+              "You don't have privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["You don't have privileges."]);
+        }
+      }
+    } else {
+      // Validate Zone & Role
+
+      const mUserRole = await UserRole.findOne({
+        attributes: ["id", "roles"],
+        where: {
+          userId: user.id_user,
+        },
+      });
+
+      if (mUserRole) {
+        const mRole = await Role.findByPk(user.activeRole);
+        to = mRole.defaultRoute;
+        if (mRole) {
+          // Zone is Exists, check is role exists?
+          if (mUserRole.roles && mUserRole.roles.length > 0) {
+            if (mUserRole.roles.indexOf(mRole.slug) == -1) {
+              const mDefaultRole = await Role.findOne({
+                where: {
+                  slug: mUserRole.roles[0],
+                },
+              });
+              // Set Default Role
+              if (mDefaultRole) {
+                await User.update(
+                  { activeRole: mDefaultRole.id },
+                  { where: { id_user: user.id_user } }
+                );
+                activeRole = mDefaultRole.id;
+                to = mDefaultRole.defaultRoute;
+              } else {
+                return error(res).authenticationError(["Unknown Role."]);
+              }
+            }
+          } else {
+            return error(res).authenticationError([
+              "You don't have role privileges.",
+            ]);
+          }
+        } else {
+          return error(res).authenticationError(["Unknown Role."]);
+        }
+      } else {
+        if (userRole.roles && userRole.roles.length > 0) {
+          const mRole = await Role.findOne({
+            where: {
+              slug: userRole.roles[0],
+            },
+          });
+          if (mRole) {
+            // Set To Default Zone
+            await User.update(
+              { activeRole: mRole.id },
+              { where: { id_user: user.id } }
+            );
+            activeRole = mRole.id;
+            to = mRole.defaultRoute;
+          } else {
+            return error(res).authenticationError(["Unknown Role."]);
+          }
+        } else {
+          return error(res).authenticationError([
+            "You don't have role privileges.",
+          ]);
+        }
+      }
+    }
+
+    const accesToken = new Token("password").generate({
+      userId: loadedUser.id_user.toString(),
+      grantType: "password",
+    });
+    const refreshToken = new Token("refresh").generate({
+      userId: loadedUser.id_user.toString(),
+      grantType: "password",
+    });
+
+    await User.update(
+      {
+        token_user: accesToken,
+        lastlogin_user: new Date(),
+        attempt_user: 0,
+      },
+      {
+        where: {
+          username_user: username,
+        },
+      }
+    );
+
+    var resJson={
+      token_type: "bearer",
+      access_token: accesToken,
+      refresh_token: refreshToken,
+      user: {
+        id: loadedUser.id_user,
+        username: loadedUser.username_user,
+        first_login: loadedUser.first_login,
+        activeRole: activeRole,
+        roles: userRole.roles,
+      },
+      expires_in: process.env.JWT_EXPIRES_IN,
+    }
+
+    if(loadedUser.pegawai!=undefined){
+      resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai
+    }
+
+    res.json(resJson);
+    
   },
   changePassword: async (req, res, _) => {
     const validation = validationResult(req);
@@ -351,7 +856,12 @@ module.exports = {
         }
       );
       if (update) {
-        res.send("Attempt user has been reset.");
+        let mes="Reset Percobaan Login Berhasil.<br><br>"
+        mes+="Silakan login kembali di aplikasi SmartEmployee.<br>"
+        mes+="Jika Anda lupa password, klik Lupa Password pada aplikasi.<br><br>"
+        mes+="Masih memiliki kendala?<br/>"
+        mes+="Hubungi kami melalui email kepegawaian.jsc@gmail.com"
+        res.send(mes);
       } else {
         response.status(400).send(new Error(update));
       }
@@ -509,58 +1019,58 @@ module.exports = {
     }
   },
   refreshToken: async (req, res, _) => {
-    // const token = req.body.token;
-    // const verify = new Token("refresh").verify(token);
-    // if (verify) {
-    //   const user = await User.findByPk(verify.userId);
-    //   if (!user) {
-    //     return error(res).authenticationError(["User not found."]);
-    //   }
-    //   // Validate Role & Zone
-    //   const mUserRole = await UserRole.findOne({
-    //     attributes: ["id", "roles"],
-    //     where: {
-    //       userId: user.id,
-    //       zoneId: user.activeZone,
-    //     },
-    //   });
-    //   const mRole = await Role.findByPk(user.activeRole);
-    //   if (!mRole) {
-    //     return error(res).authenticationError(["Invalid Role."]);
-    //   }
-    //   if (mUserRole) {
-    //     if (mUserRole.roles.indexOf(mRole.slug) == -1) {
-    //       return error(res).authenticationError(["Invalid Role."]);
-    //     }
-    //   } else {
-    //     return error(res).authenticationError(["Invalid Zone."]);
-    //   }
-    //   const accesToken = new Token("password").generate({
-    //     userId: verify.userId,
-    //     scope: verify.scope,
-    //     grantType: "password",
-    //   });
-    //   const refreshToken = new Token("refresh").generate({
-    //     userId: verify.userId,
-    //     scope: verify.scope,
-    //     grantType: "password",
-    //   });
-    //   res.json({
-    //     token_type: "bearer",
-    //     access_token: accesToken,
-    //     refresh_token: refreshToken,
-    //     user: {
-    //       id: user.id,
-    //       email: user.email,
-    //       name: user.name,
-    //       activeZone: user.activeZone,
-    //       activeRole: user.activeRole,
-    //     },
-    //     expires_in: process.env.JWT_EXPIRES_IN,
-    //   });
-    // } else {
-    //   return error(res).authenticationError(["Invalid token."]);
-    // }
+    const token = req.body.token;
+    const verify = new Token("refresh").verify(token);
+    if (verify) {
+      const user = await User.findOne({
+        where: {
+          id_user: verify.userId,
+        },
+      });
+      if (!user) {
+        return error(res).authenticationError(["User not found."]);
+      }
+      // Validate Role & Zone
+      // const mUserRole = await UserRole.findOne({
+      //   attributes: ["id", "roles"],
+      //   where: {
+      //     userId: user.id,
+      //     zoneId: user.activeZone,
+      //   },
+      // });
+      // const mRole = await Role.findByPk(user.activeRole);
+      // if (!mRole) {
+      //   return error(res).authenticationError(["Invalid Role."]);
+      // }
+      // if (mUserRole) {
+      //   if (mUserRole.roles.indexOf(mRole.slug) == -1) {
+      //     return error(res).authenticationError(["Invalid Role."]);
+      //   }
+      // } else {
+      //   return error(res).authenticationError(["Invalid Zone."]);
+      // }
+      const accesToken = new Token("password").generate({
+        userId: verify.userId,
+        grantType: "password",
+      });
+      const refreshToken = new Token("refresh").generate({
+        userId: verify.userId,
+        grantType: "password",
+      });
+      res.json({
+        token_type: "bearer",
+        access_token: accesToken,
+        refresh_token: refreshToken,
+        user: {
+          id: user.id_user,
+          username: user.username_user,
+          first_login: user.first_login,
+        },
+        expires_in: process.env.JWT_EXPIRES_IN,
+      });
+    } else {
+      return error(res).authenticationError(["Invalid token."]);
+    }
   },
   validate: (type) => {
     const ruleUsername = body("username")
@@ -624,12 +1134,37 @@ module.exports = {
           ];
         }
         break;
+        case "checkUserEmail":
+        {
+          return [
+            body("emailpribadi_pegawai")
+              .notEmpty()
+              .withMessage("Mohon masukkan emailpribadi_pegawai anda dengan benar."),
+          ];
+        }
+        break;
       case "login":
         {
           return [
             body("username")
               .notEmpty()
               .withMessage("Mohon masukkan Username anda dengan benar."),
+            body("password")
+              .notEmpty()
+              .trim()
+              .withMessage("Password tidak boleh kosong."),
+          ];
+        }
+        break;
+        case "loginByEmail":
+        {
+          return [
+            body('username')
+              .if(body('emailpribadi_pegawai').exists())
+              .optional(),
+            body('emailpribadi_pegawai')
+              .if(body('username').exists())
+              .optional(),
             body("password")
               .notEmpty()
               .trim()

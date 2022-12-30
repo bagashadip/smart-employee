@@ -1,20 +1,22 @@
-"use strict";
+const uuid = require("uuid");
 
 module.exports = (sequelize, DataTypes) => {
   const role = sequelize.define(
-    "tbl_role",
+    "role",
     {
-      id_role: {
-        type: DataTypes.INTEGER,
+      id: {
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true
+        defaultValue: DataTypes.UUIDV4,
       },
-      kode_role: DataTypes.STRING,
-      keterangan_role: DataTypes.STRING
+      slug: DataTypes.STRING,
+      name: DataTypes.STRING,
+      permissions: DataTypes.JSON,
+      createdBy: DataTypes.UUID,
+      updatedBy: DataTypes.UUID,
     },
-    {
-      freezeTableName: true
-    }
+    {}
   );
+
   return role;
 };

@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "kalkulasi-jarak";
 const _ = require("lodash");
 const { body, validationResult } = require("express-validator");
 const error = require("../../util/errors");
@@ -8,9 +8,9 @@ const { Pegawai, Divisi, UnitKerja } = require("../../models/model");
 module.exports = {
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {

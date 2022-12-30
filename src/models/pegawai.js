@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       kode_dpa: DataTypes.STRING,
       statusaktif_pegawai: DataTypes.STRING,
       persetujuan_kontak: DataTypes.BOOLEAN,
+      kode_jamkerja: DataTypes.STRING,
     },
     {
       freezeTableName: true,

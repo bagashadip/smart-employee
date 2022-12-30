@@ -26,6 +26,20 @@ const profileController = require("../app/api/profileController");
 const asnController = require("../app/api/asnController");
 const mobileController = require("../app/api/mobileController");
 const divisiParentController = require("../app/api/divisiParentController");
+const jamKerjaController = require("../app/api/jamkerjaController");
+const jamKerjaDetailController = require("../app/api/jamkerjaDetailController");
+const exportController = require("../app/api/exportController");
+const actionController = require("../app/api/actionController");
+const moduleController = require("../app/api/moduleController");
+const userRoleController = require("../app/api/userRoleController");
+
+//Lapbul
+const kegiatanController = require("../app/api/kegiatanController");
+const lapbulController = require("../app/lapbul/lapbulController");
+const lampiranController = require("../app/lapbul/lampiranController");
+const liburNasionalController = require("../app/api/liburNasionalController");
+
+const timeController = require("../app/api/timeController");
 
 router.use(authMiddleware); // dont move it to another line
 // upload route
@@ -311,6 +325,20 @@ historiPresensiRoute.get(
 );
 /* Histori Presensi Route */
 
+/* Histori Presensi Day Param Route */
+const historiPresensiDayParamRoute = router.route("/histori-presensi-day");
+historiPresensiDayParamRoute.get(
+  historiPresensiController.getDateParam
+);
+/* Histori Presensi Day Param Route */
+
+/* Histori Presensi Yesterday Route */
+const historiPresensiYesterdayRoute = router.route("/histori-presensi-kemarin");
+historiPresensiYesterdayRoute.get(
+  historiPresensiController.getYesterday
+);
+/* Histori Presensi Yesterday Route */
+
 /* Kontak List Route */
 const kontakListRoute = router.route("/kontak-list");
 kontakListRoute.get(
@@ -370,5 +398,140 @@ divisiParentRoute.delete(
 router.post("/divisi-parent/data", divisiParentController.data);
 router.get("/divisi-parent/list", divisiParentController.list);
 /* Divisi Parent Route */
+
+/* Jam Kerja Route */
+const jamKerjaRoute = router.route("/jam-kerja");
+jamKerjaRoute.get(jamKerjaController.validate("get"), jamKerjaController.get);
+jamKerjaRoute.post(
+  jamKerjaController.validate("create"),
+  jamKerjaController.create
+);
+jamKerjaRoute.patch(
+  jamKerjaController.validate("update"),
+  jamKerjaController.update
+);
+jamKerjaRoute.delete(
+  jamKerjaController.validate("delete"),
+  jamKerjaController.delete
+);
+router.post("/jam-kerja/data", jamKerjaController.data);
+router.get("/jam-kerja/list", jamKerjaController.list);
+/* Jam Kerja Route */
+
+/* Jam Kerja Detail Route */
+const jamKerjaDetailRoute = router.route("/jam-kerja-detail");
+jamKerjaDetailRoute.get(
+  jamKerjaDetailController.validate("get"),
+  jamKerjaDetailController.get
+);
+jamKerjaDetailRoute.post(
+  jamKerjaDetailController.validate("create"),
+  jamKerjaDetailController.create
+);
+jamKerjaDetailRoute.patch(
+  jamKerjaDetailController.validate("update"),
+  jamKerjaDetailController.update
+);
+jamKerjaDetailRoute.delete(
+  jamKerjaDetailController.validate("delete"),
+  jamKerjaDetailController.delete
+);
+router.post("/jam-kerja-detail/data", jamKerjaDetailController.data);
+router.get("/jam-kerja-detail/list", jamKerjaDetailController.list);
+/* Jam Kerja Detail Route */
+
+/* Kegiatan Route */
+const kegiatanRoute = router.route("/kegiatan");
+kegiatanRoute.get(kegiatanController.get);
+kegiatanRoute.post(kegiatanController.create);
+kegiatanRoute.patch(kegiatanController.update);
+kegiatanRoute.delete(kegiatanController.delete);
+router.get("/kegiatan/list", kegiatanController.list);
+router.post("/kegiatan/data", kegiatanController.data);
+router.get("/kegiatan/detail", kegiatanController.detail);
+/* Kegiatan Route */
+
+/* Export Route */
+router.post("/export-absensi", exportController.exportAbsensi);
+/* Export Route */
+
+/* Lapbul Route */
+const lapulRoute = router.route("/lapbul");
+lapulRoute.get(lapbulController.list);
+lapulRoute.post(lapbulController.create);
+lapulRoute.patch(lapbulController.update);
+lapulRoute.delete(lapbulController.delete);
+router.post("/lapbul/generate",lapbulController.generate);
+router.post("/lapbul/poc",lapbulController.poc);
+router.get("/lapbul/:id_lapbul",lapbulController.get_by_id);
+router.post("/lapbul/data",lapbulController.data);
+/* Lapbul Route */
+
+/* Libur Nasional Route */
+const liburNasionalRoute = router.route("/liburnasional");
+liburNasionalRoute.get(liburNasionalController.get);
+liburNasionalRoute.post(liburNasionalController.create);
+liburNasionalRoute.patch(liburNasionalController.update);
+liburNasionalRoute.delete(liburNasionalController.delete);
+router.get("/liburnasional/list", liburNasionalController.list);
+router.post("/liburnasional/data",liburNasionalController.data);
+/* Libur Nasional Route */
+
+/* Lampiran Route */
+const lampiranRoute = router.route("/lampiran");
+lampiranRoute.get(lampiranController.list);
+router.get("/lampiran/generate", lampiranController.generate);
+router.get("/lampiran/generate/:id_lapbul", lampiranController.generateByLapbulId);
+/* Lampiran Route */
+
+/* Time Route */
+const timeRoute = router.route("/time");
+timeRoute.get(timeController.get);
+
+/* Action Route */
+const actionRoute = router.route("/action");
+actionRoute.get(actionController.validate("get"), actionController.get);
+actionRoute.post(actionController.validate("create"), actionController.create);
+actionRoute.patch(actionController.validate("update"), actionController.update);
+actionRoute.delete(
+  actionController.validate("delete"),
+  actionController.delete
+);
+router.post("/action/data", actionController.data);
+router.get("/action/list", actionController.list);
+/* Action Route */
+
+/* Module Route */
+const moduleRoute = router.route("/module");
+moduleRoute.get(moduleController.validate("get"), moduleController.get);
+moduleRoute.post(moduleController.validate("create"), moduleController.create);
+moduleRoute.patch(moduleController.validate("update"), moduleController.update);
+moduleRoute.delete(
+  moduleController.validate("delete"),
+  moduleController.delete
+);
+router.post("/module/data", moduleController.data);
+router.get("/module/list", moduleController.list);
+/* Module Route */
+
+/* User Role */
+const userRoleRoute = router.route("/user-role");
+userRoleRoute.get(userRoleController.validate("get"), userRoleController.get);
+userRoleRoute.post(
+  userRoleController.validate("create"),
+  userRoleController.create
+);
+userRoleRoute.patch(
+  userRoleController.validate("update"),
+  userRoleController.update
+);
+userRoleRoute.delete(
+  userRoleController.validate("delete"),
+  userRoleController.delete
+);
+router.post("/user-role/data", userRoleController.data);
+router.get("/user-role/permission", userRoleController.permission);
+router.get("/user-role/list", userRoleController.list);
+/* User Role */
 
 module.exports = router;

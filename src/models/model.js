@@ -4,10 +4,14 @@ const sequelize = require("../util/database");
 const mFileCategory = require("./fileCategory");
 const mFile = require("./file");
 const mUser = require("./user");
+const mRole = require("./role");
+const mUserRole = require("./userRole");
+const mModule = require("./module");
+const mAction = require("./action");
+const mStatus = require("./status");
 const mJabatan = require("./jabatan");
 const mLog = require("./log");
 const mPegawai = require("./pegawai");
-const mRole = require("./role");
 const mDivisi = require("./divisi");
 const mUnitKerja = require("./unitkerja");
 const mPtkp = require("./ptkp");
@@ -20,14 +24,23 @@ const mPosisi = require("./posisi");
 const mAbsensi = require("./absensi");
 const mAsn = require("./asn");
 const mDivisiParent = require("./divisiParent");
+const mJamKerja = require("./jamkerja");
+const mJamKerjaDetail = require("./jamkerjaDetail");
+const mKegiatan = require("./kegiatan");
+const mLapbul = require("./lapbul");
+const mLiburNasional = require("./liburnasional");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
 const User = mUser(sequelize, Sequelize);
+const Role = mRole(sequelize, Sequelize);
+const UserRole = mUserRole(sequelize, Sequelize);
+const Module = mModule(sequelize, Sequelize);
+const Action = mAction(sequelize, Sequelize);
+const Status = mStatus(sequelize, Sequelize);
 const Jabatan = mJabatan(sequelize, Sequelize);
 const Log = mLog(sequelize, Sequelize);
 const Pegawai = mPegawai(sequelize, Sequelize);
-const Role = mRole(sequelize, Sequelize);
 const Divisi = mDivisi(sequelize, Sequelize);
 const UnitKerja = mUnitKerja(sequelize, Sequelize);
 const Ptkp = mPtkp(sequelize, Sequelize);
@@ -40,20 +53,28 @@ const Posisi = mPosisi(sequelize, Sequelize);
 const Absensi = mAbsensi(sequelize, Sequelize);
 const Asn = mAsn(sequelize, Sequelize);
 const DivisiParent = mDivisiParent(sequelize, Sequelize);
+const JamKerja = mJamKerja(sequelize, Sequelize);
+const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
+const Kegiatan = mKegiatan(sequelize, Sequelize);
+const Lapbul = mLapbul(sequelize, Sequelize);
+const LiburNasional = mLiburNasional(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
+
+User.hasMany(UserRole, {
+  sourceKey: "id_user",
+  foreignKey: "userId",
+});
+UserRole.belongsTo(User, {
+  foreignKey: "userId",
+  targetKey: "id_user",
+});
 
 User.belongsTo(Pegawai, {
   as: "pegawai",
   foreignKey: "kode_pegawai",
   targetKey: "kode_pegawai",
-});
-
-User.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
 });
 
 Pegawai.belongsTo(File, {
@@ -92,6 +113,12 @@ Pegawai.belongsTo(User, {
   targetKey: "kode_pegawai",
 });
 
+Pegawai.belongsTo(JamKerja, {
+  as: "jamkerja",
+  foreignKey: "kode_jamkerja",
+  targetKey: "kode_jamkerja",
+});
+
 Asn.belongsTo(Jabatan, {
   as: "jabatan",
   foreignKey: "kode_jabatan",
@@ -122,28 +149,34 @@ Divisi.belongsTo(DivisiParent, {
   targetKey: "kode_divisi_parent",
 });
 
+Divisi.belongsTo(Pegawai, {
+  as: "manajer",
+  foreignKey: "kode_pegawai_manajer",
+  targetKey: "kode_pegawai",
+});
+
+Divisi.belongsTo(Asn, {
+  as: "asn",
+  foreignKey: "nip_asn",
+  targetKey: "nip_asn",
+});
+
+Divisi.belongsTo(File, {
+  as: "template_lapbul_file",
+  foreignKey: "template_lapbul",
+  targetKey: "id",
+});
+
 DivisiParent.hasMany(Divisi, {
   as: "divisi",
   foreignKey: "kode_divisi_parent",
   sourceKey: "kode_divisi_parent",
 });
 
-Role.belongsTo(Permission, {
-  as: "permission",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
-});
-
 Permission.belongsTo(HakAkses, {
   as: "hakakses",
   foreignKey: "kode_hakakses",
   targetKey: "kode_hakakses",
-});
-
-Permission.belongsTo(Role, {
-  as: "role",
-  foreignKey: "kode_role",
-  targetKey: "kode_role",
 });
 
 HakAkses.belongsTo(Permission, {
@@ -182,6 +215,42 @@ Absensi.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
+JamKerja.hasMany(JamKerjaDetail, {
+  as: "jamkerjaDetail",
+  foreignKey: "kode_jamkerja",
+  sourceKey: "kode_jamkerja",
+});
+
+JamKerjaDetail.belongsTo(JamKerja, {
+  as: "jamkerja",
+  foreignKey: "kode_jamkerja",
+  targetKey: "kode_jamkerja",
+});
+
+Kegiatan.belongsTo(File, {
+  as: "foto",
+  foreignKey: "foto_kegiatan",
+  targetKey: "id",
+});
+
+Kegiatan.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
+Lapbul.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
+Lapbul.belongsTo(Divisi, {
+  as: "divisi",
+  foreignKey: "kode_divisi",
+  targetKey: "kode_divisi",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
@@ -196,12 +265,12 @@ module.exports = {
   FileCategory,
   File,
   User,
+  Role,
   Jabatan,
   Log,
   Pegawai,
   Divisi,
   UnitKerja,
-  Role,
   Ptkp,
   HakAkses,
   KategoriCuti,
@@ -212,4 +281,13 @@ module.exports = {
   Absensi,
   Asn,
   DivisiParent,
+  JamKerja,
+  JamKerjaDetail,
+  Kegiatan,
+  Lapbul,
+  Module,
+  Action,
+  Status,
+  UserRole,
+  LiburNasional,
 };

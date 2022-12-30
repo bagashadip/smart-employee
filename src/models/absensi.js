@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
       tipe_absensi: DataTypes.STRING,
       timestamp_absensi: DataTypes.DATE,
       kode_pegawai: DataTypes.STRING,
+      time_limit_datang: DataTypes.TIME,
+      time_limit_pulang: DataTypes.TIME,
     },
     {
       freezeTableName: true,

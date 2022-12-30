@@ -1,3 +1,4 @@
+const _module = "profile";
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
@@ -8,6 +9,10 @@ const { User, Pegawai, File } = require("../../models/model");
 
 module.exports = {
   get: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());

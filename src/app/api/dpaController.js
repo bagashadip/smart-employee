@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "dpa";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -11,21 +11,24 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
     const mDpa = await Dpa.findAll({
-      attributes: ["id_dpa", "kode_dpa", "nama_dpa"],
+      attributes: ["id_dpa", "kode_dpa", "nama_dpa","jenis_kontrak"],
     });
     res.json(mDpa);
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Dpa.count();
     var modules = await Dpa.findAndCountAll(dataTableObj);
-    
+
     res.json({
       recordsFiltered: modules.count,
       recordsTotal: count,
@@ -34,9 +37,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -44,17 +47,17 @@ module.exports = {
     }
 
     const mDpa = await Dpa.findOne({
-        where: {
-            kode_dpa: req.query.kode_dpa
-        }
+      where: {
+        kode_dpa: req.query.kode_dpa,
+      },
     });
     res.json(mDpa);
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -65,17 +68,17 @@ module.exports = {
       ...req.body,
     }).save();
 
-    res.json({ 
+    res.json({
       status: true,
-      statusCode: 200, 
-      message: "DPA " + dpa.kode_dpa + " berhasil ditambah."
+      statusCode: 200,
+      message: "DPA " + dpa.kode_dpa + " berhasil ditambah.",
     });
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -83,21 +86,21 @@ module.exports = {
     }
 
     await Dpa.update(
-      { ...req.body},
+      { ...req.body },
       { where: { kode_dpa: req.query.kode_dpa } }
     );
 
-    res.json({ 
-      status: true ,
+    res.json({
+      status: true,
       statusCode: 200,
-      message: "DPA " + req.query.kode_dpa + " berhasil diubah."
+      message: "DPA " + req.query.kode_dpa + " berhasil diubah.",
     });
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -109,7 +112,10 @@ module.exports = {
         kode_dpa: req.query.kode_dpa,
       },
     });
-    res.send({ status: true, message: req.query.kode_dpa + ' berhasil dihapus.' });
+    res.send({
+      status: true,
+      message: req.query.kode_dpa + " berhasil dihapus.",
+    });
   },
   // Validation
   validate: (type) => {
@@ -119,11 +125,11 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mDpa = await Dpa.findOne({
-            where: {
-                kode_dpa: {
-                    [Op.iLike]: value
-                }
-            }
+          where: {
+            kode_dpa: {
+              [Op.iLike]: value,
+            },
+          },
         });
         if (!mDpa) {
           return Promise.reject("Data not found!");
@@ -134,36 +140,28 @@ module.exports = {
       .notEmpty()
       .custom(async (value) => {
         mDpa = await Dpa.findOne({
-            where: {
-                kode_dpa: {
-                    [Op.iLike]: value,
-                },
+          where: {
+            kode_dpa: {
+              [Op.iLike]: value,
             },
+          },
         });
         if (mDpa) {
           return Promise.reject("Data already exist!");
         }
-    });
+      });
     const ruleNamaDpa = body("nama_dpa").trim().notEmpty();
     const ruleGradeDpa = body("grade_dpa").trim().notEmpty();
 
     switch (type) {
       case "create":
         {
-            return [
-                ruleCreateKodeDpa,
-                ruleNamaDpa,
-                ruleGradeDpa
-            ];
+          return [ruleCreateKodeDpa, ruleNamaDpa, ruleGradeDpa];
         }
         break;
       case "update":
         {
-            return [
-              ruleKodeDpa,
-              ruleNamaDpa.optional(),
-              ruleGradeDpa.optional()
-            ];
+          return [ruleKodeDpa, ruleNamaDpa.optional(), ruleGradeDpa.optional()];
         }
         break;
       case "get":

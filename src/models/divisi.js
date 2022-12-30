@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
       nama_divisi: DataTypes.STRING,
       kode_unitkerja: DataTypes.STRING,
       kode_divisi_parent: DataTypes.STRING,
+      kode_pegawai_manajer: DataTypes.INTEGER,
+      nip_asn: DataTypes.INTEGER,
+      template_lapbul: DataTypes.UUID,
     },
     {
       freezeTableName: true,

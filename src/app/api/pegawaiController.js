@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "pegawai";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -15,6 +15,10 @@ const {
   UnitKerja,
   Organisasi,
   User,
+  JamKerja,
+  JamKerjaDetail,
+  Asn,
+  Lapbul
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -22,6 +26,10 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mPegawai = await Pegawai.findAll({
       include: [
         {
@@ -49,15 +57,25 @@ module.exports = {
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
         },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
+        },
       ],
     });
     res.json(mPegawai);
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await Pegawai.count();
@@ -89,6 +107,16 @@ module.exports = {
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
         },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
+        },
       ],
     });
 
@@ -100,9 +128,9 @@ module.exports = {
   },
   // Get One Row require ID
   get: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -122,7 +150,7 @@ module.exports = {
         {
           model: Divisi,
           as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja"],
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja","template_lapbul"],
           include: [
             {
               model: UnitKerja,
@@ -142,22 +170,54 @@ module.exports = {
                 },
               ],
             },
+            {
+              model: Pegawai,
+              as: "manajer",
+              attributes: ["kode_pegawai", "namalengkap_pegawai"],
+              include: [
+                {
+                  model: Posisi,
+                  as: "posisi",
+                  attributes: ["kode_posisi", "nama_posisi"],
+                },
+                {
+                  model: Dpa,
+                  as: "dpa",
+                  attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+                },
+              ],
+            },
+            {
+              model: Asn,
+              as: "asn",
+              attributes: ["nip_asn", "nama_asn", "jabatan_asn"],
+            },
           ],
         },
         {
           model: Posisi,
           as: "posisi",
-          attributes: ["kode_posisi", "nama_posisi"],
+          attributes: ["kode_posisi", "nama_posisi","kak"],
         },
         {
           model: Dpa,
           as: "dpa",
-          attributes: ["kode_dpa", "nama_dpa", "grade_dpa"],
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa","jenis_kontrak"],
         },
         {
           model: File,
           as: "foto",
           attributes: ["name", "path", "extension", "size"],
+        },
+        {
+          model: JamKerja,
+          as: "jamkerja",
+          attributes: ["kode_jamkerja", "tampil_jamkerja"],
+          include: {
+            model: JamKerjaDetail,
+            as: "jamkerjaDetail",
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+          },
         },
       ],
     });
@@ -167,13 +227,31 @@ module.exports = {
       let tglGabung = moment(tempRes.tanggalbergabung_pegawai, "YYYY-MM-DD");
       tempRes.masa_kerja = moment.duration(currDate.diff(tglGabung)).asDays();
     }
+
+    //Get latest lapbul
+    let mLapbul = await Lapbul.findOne({
+      where: {
+          kode_pegawai: req.query.kode_pegawai
+      },
+      order: [
+        ['id_lapbul','DESC']
+      ]
+    });
+
+    if(mLapbul){
+      tempRes.uraian_pelaksanaan = mLapbul.uraian_pelaksanaan;
+    }
+    else{
+      tempRes.uraian_pelaksanaan = null;
+    }
+
     res.json(tempRes);
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -237,9 +315,9 @@ module.exports = {
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -295,9 +373,9 @@ module.exports = {
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -458,6 +536,19 @@ module.exports = {
           }
         }
       });
+    const ruleKodeJamKerja = body("kode_jamkerja").custom(async (value) => {
+      if (value) {
+        const mJamkerja = await JamKerja.findOne({
+          where: {
+            kode_jamkerja: value,
+          },
+        });
+
+        if (!mJamkerja) {
+          return Promise.reject("Kode jam kerja tidak ditemukan!");
+        }
+      }
+    });
 
     switch (type) {
       case "create":
@@ -491,6 +582,7 @@ module.exports = {
             ruleDivisi,
             rulePosisi,
             ruleDpa,
+            ruleKodeJamKerja,
           ];
         }
         break;
@@ -524,6 +616,7 @@ module.exports = {
             ruleDivisi.optional(),
             rulePosisi.optional(),
             ruleDpa.optional(),
+            ruleKodeJamKerja.optional(),
           ];
         }
         break;

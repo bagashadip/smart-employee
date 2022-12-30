@@ -1,4 +1,4 @@
-// const _module = "banner-category";
+const _module = "user";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
@@ -20,14 +20,18 @@ const Op = Sequelize.Op;
 module.exports = {
   // List
   list: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
+
     const mUser = await User.findAll();
     res.json(mUser);
   },
   // Datatable
   data: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "view"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "view"))) {
+      return error(res).permissionError();
+    }
 
     var dataTableObj = await datatable(req.body);
     var count = await User.count();
@@ -68,9 +72,9 @@ module.exports = {
   },
   // Create
   create: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "create"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -90,9 +94,9 @@ module.exports = {
   },
   // Update
   update: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "update"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "update"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -113,9 +117,9 @@ module.exports = {
   },
   // Delete
   delete: async (req, res) => {
-    // if (!(await req.user.hasAccess(_module, "delete"))) {
-    //   return error(res).permissionError();
-    // }
+    if (!(await req.user.hasAccess(_module, "delete"))) {
+      return error(res).permissionError();
+    }
 
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
@@ -133,6 +137,10 @@ module.exports = {
     });
   },
   changePassword: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "change-password"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
@@ -210,6 +218,10 @@ module.exports = {
     res.send(resData);
   },
   sendCredential: async (req, res) => {
+    if (!(await req.user.hasAccess(_module, "create"))) {
+      return error(res).permissionError();
+    }
+
     const validation = validationResult(req);
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
@@ -255,11 +267,17 @@ module.exports = {
       let data = {
         email: req.body.email,
         message:
-          "<p>Dear rekan JSC,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
+          "<p>Dear rekan Jakarta Smart City,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
           mUser.user.username_user +
           "</b></p><p>password: <b>" +
           generatePass +
-          "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><p>Terimakasih</p>",
+          "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><br/>" +
+          "<p>Aplikasi bisa diunduh melalui Play Store dan App Store dengan link berikut:</p><br/>"+
+          "<p>Play Store (Android):</p><br/>"+
+          "https://play.google.com/store/apps/details?id=id.go.jakarta.smartcity.kepegawaian<br/><br/>"+
+          "<p>App Store (iOS): </p><br/>"+
+          "https://apps.apple.com/id/app/smartemployee/id1629810566<br/><br/>"+
+          "<p>Terimakasih</p>",
       };
 
       const sendMail = await mailer(data);
