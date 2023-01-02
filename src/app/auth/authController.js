@@ -546,17 +546,28 @@ module.exports = {
 
     const isEqual = await bcrypt.compare(password, user.password_user);
     if (!isEqual) {
+
+      let userUpdate;
+
+      if(loginType=="email"){
+        userUpdate = {
+          emailpribadi_pegawai: username,
+        }
+      }else{
+        userUpdate = {
+          username_user: username,
+        }
+      }
+
       await User.update(
         {
           attempt_user: user.attempt_user + 1,
         },
         {
-          where: {
-            username_user: username,
-          },
+          where: userUpdate
         }
       );
-
+      
       if (user.attempt_user + 1 > 2) {
         const token = jwt.sign(
           {
@@ -570,9 +581,7 @@ module.exports = {
             status_user: "Non Aktif",
           },
           {
-            where: {
-              username_user: username,
-            },
+            where: userUpdate,
           }
         );
 
