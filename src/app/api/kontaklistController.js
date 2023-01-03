@@ -114,6 +114,13 @@ module.exports = {
     let tempRes = null;
     if (kategori === "TA") {
       mRes = await Pegawai.findAll(qWherePegawai);
+
+      let mAbsensi = await Absensi.findAll(whereAbsensi);
+
+      mAbsensi.forEach(absensiManipulate);
+
+      //console.log(mAbsensi);
+      console.log(arrAbsensi);
     } else if (kategori === "ALL") {
       let mAsn = await Asn.findAll(qWhere);
       let mPegawai = await Pegawai.findAll(qWherePegawai);

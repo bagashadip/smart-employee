@@ -546,17 +546,18 @@ module.exports = {
 
     const isEqual = await bcrypt.compare(password, user.password_user);
     if (!isEqual) {
+
       await User.update(
         {
           attempt_user: user.attempt_user + 1,
         },
         {
           where: {
-            username_user: username,
-          },
+            username_user: loadedUser.username_user,
+          }
         }
       );
-
+      
       if (user.attempt_user + 1 > 2) {
         const token = jwt.sign(
           {
@@ -571,7 +572,7 @@ module.exports = {
           },
           {
             where: {
-              username_user: username,
+              username_user: loadedUser.username_user,
             },
           }
         );
