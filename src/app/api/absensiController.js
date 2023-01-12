@@ -50,6 +50,22 @@ module.exports = {
           attributes: ["name", "path", "extension", "size"],
         },
       ],
+      attributes: [
+        "id_absensi",
+        "foto_absensi",
+        "longitude_absensi",
+        "latitude_absensi",
+        "label_absensi",
+        "catatan_absensi",
+        "tipe_absensi",
+        "timestamp_absensi",
+        "kode_pegawai",
+        "time_limit_datang",
+        "time_limit_pulang",
+        "createdAt",
+        "updatedAt",
+        [Sequelize.literal('"pegawai"."kode_divisi"'), 'kode_divisi']
+    ]
     });
 
     res.json({
