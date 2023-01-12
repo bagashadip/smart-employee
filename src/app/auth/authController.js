@@ -732,7 +732,7 @@ module.exports = {
       },
       {
         where: {
-          username_user: username,
+          username_user: loadedUser.username_user,
         },
       }
     );
