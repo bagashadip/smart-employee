@@ -94,6 +94,9 @@ module.exports = {
           ),
         ]
       },
+      order: [
+        ["timestamp_absensi", "DESC"]
+      ]
     });
 
     if (mAbsensi) {

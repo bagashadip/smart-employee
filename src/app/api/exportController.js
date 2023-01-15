@@ -92,7 +92,7 @@ module.exports = {
         ],
         [
           Sequelize.literal(
-            "case when tipe_absensi = 'Datang' then case when timestamp_absensi::time < time_limit_datang then 'Datang lebih awal' when timestamp_absensi::time between timestamp_absensi::time and (time_limit_datang + interval '1 hour') then 'Datang tepat waktu' when timestamp_absensi::time > (time_limit_datang + interval '1 hour') then 'Datang terlambat' end else case when timestamp_absensi::time < time_limit_pulang then 'Pulang lebih awal' when timestamp_absensi::time > time_limit_pulang then 'Pulang lebih akhir' when timestamp_absensi::time = time_limit_pulang then 'Pulang tepat waktu' end end"
+            "case when tipe_absensi = 'Datang' then case when timestamp_absensi::time < time_limit_datang then 'Datang lebih awal' when timestamp_absensi::time between timestamp_absensi::time and (time_limit_datang + interval '30 minutes') then 'Datang tepat waktu' when timestamp_absensi::time > (time_limit_datang + interval '30 minutes') then 'Datang terlambat' end else case when timestamp_absensi::time < time_limit_pulang then 'Pulang lebih awal' when timestamp_absensi::time > time_limit_pulang then 'Pulang lebih akhir' when timestamp_absensi::time = time_limit_pulang then 'Pulang tepat waktu' end end"
           ),
           "keterangan",
         ],
