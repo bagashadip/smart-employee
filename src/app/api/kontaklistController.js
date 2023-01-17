@@ -14,7 +14,6 @@ const {
 } = require("../../models/model");
 const Op = Sequelize.Op;
 const moment = require("moment");
-let arrAbsensi=[]
 
 module.exports = {
   // get
@@ -57,7 +56,7 @@ module.exports = {
     };
     let qWherePegawai = {
       where: {
-        statusaktif_pegawai: "Aktif",
+        statusaktif_pegawai: "Aktif"
       },
       include: [
         {
@@ -98,7 +97,7 @@ module.exports = {
       qWherePegawai = qWherePegawai;
     }
 
-    let whereAbsensi = {
+    let getAbsensi = await Absensi.findAll({
       where: {
         [Op.and]: [
           Sequelize.where(
@@ -108,19 +107,16 @@ module.exports = {
           ),
         ],
       },
-    }
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('kode_pegawai')) ,'kode_pegawai'],
+        "label_absensi"
+      ]
+    })
 
     let mRes = null;
     let tempRes = null;
     if (kategori === "TA") {
       mRes = await Pegawai.findAll(qWherePegawai);
-
-      let mAbsensi = await Absensi.findAll(whereAbsensi);
-
-      mAbsensi.forEach(absensiManipulate);
-
-      //console.log(mAbsensi);
-      console.log(arrAbsensi);
     } else if (kategori === "ALL") {
       let mAsn = await Asn.findAll(qWhere);
       let mPegawai = await Pegawai.findAll(qWherePegawai);
@@ -130,21 +126,30 @@ module.exports = {
 
       mRes = arrAsn.concat(arrPegawai);
 
-      //console.log(mRes)
-
-      let mAbsensi = await Absensi.findAll(whereAbsensi);
-
-      
-      mAbsensi.forEach(absensiManipulate);
-
-      //console.log(mAbsensi);
-      console.log(arrAbsensi);
-
     } else {
       mRes = await Asn.findAll(qWhere);
     }
 
     tempRes = JSON.parse(JSON.stringify(mRes));
+    let arrLabeled = getAbsensi.map((absensi) => {
+      return absensi.kode_pegawai;
+    })
+
+    tempRes.map((pegawai) => {
+      if("kode_pegawai" in pegawai){
+        let filterLabel = getAbsensi.find(e => {
+          if(e.kode_pegawai === pegawai.kode_pegawai){
+            return {
+              kode_pegawai: e.kode_pegawai,
+              label_absensi: e.label_absensi
+            }
+          }
+        });
+        filterLabel ? pegawai.label_absensi = filterLabel.label_absensi : pegawai.label_absensi = "Belum Absen";
+      }
+      return pegawai;
+    })
+    
     resData = tempRes.map((v) => ({
       nama: "nama_asn" in v ? v.nama_asn : v.namalengkap_pegawai,
       jabatan: "jabatan_asn" in v ? v.jabatan_asn : v.posisi.nama_posisi,
@@ -162,7 +167,7 @@ module.exports = {
         "jabatan" in v ? v.jabatan.urutan_jabatan : v.posisi.urutan_posisi,
       kode_divisi: "kode_divisi" in v ? v.kode_divisi : null,
       nama_divisi: "divisi" in v ? v.divisi.nama_divisi : null,
-      label_absensi : arrAbsensi[v.kode_pegawai] ? arrAbsensi[v.kode_pegawai]['label_absensi'] : 'Belum Absen' 
+      label_absensi: "label_absensi" in v ? v.label_absensi : null, 
     }));
 
     resData.sort((a, b) => a.urutan_jabatan - b.urutan_jabatan);
@@ -240,7 +245,3 @@ module.exports = {
     }
   },
 };
-
-function absensiManipulate(item) {
-  arrAbsensi[item.kode_pegawai]=JSON.parse(JSON.stringify(item));
-}
