@@ -214,7 +214,7 @@ module.exports = {
             footer: {
                 height: "20mm",
                 contents: {
-                    default: '<p style="text-align: right; margin-bottom: 15px; margin-right: 30px">{{page}}</p>', // fallback value
+                    default: '<p style="text-align: right; margin-bottom: 15px; margin-right: 30px"></p>', // fallback value
                 }
             }
         };
