@@ -1,6 +1,6 @@
 module.exports = {
     port: 3000,
-    timeout: 60000,
+    timeout: 120000,
     timezone: "Asia/Jakarta",
     assetDir: "../public",
     whitelistUrl: [],
