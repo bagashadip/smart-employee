@@ -104,7 +104,7 @@ module.exports = {
     const storage = multer.diskStorage({
       destination: dir + "/",
       filename: function (req, file, cb) {
-        console.log(file);
+        // console.log(file);
         let ext = null;
         for (var tp in mimeType) {
           if (mimeType[tp] == file.mimetype) {
@@ -127,21 +127,33 @@ module.exports = {
         storage: storage,
         limits: limits,
         fileFilter: (req, file, cb) => {
-          // console.log("Mime = ", file.mimetype);
+          console.log("Mime = ", file.mimetype);
+          console.log("File Type = ", allowedFileType);
+          
+          const fileSize = parseInt(req.headers['content-length']);
+          if (fileSize > limits.fileSize) {
+            return cb({
+              "status": false,
+              "message": "File size cannot be more than " + module.exports.formatBytes(limits.fileSize)
+            }, false);
+          }
+
           if (allowedFileType.indexOf(file.mimetype) !== -1) {
             cb(null, true);
           } else {
-            cb(null, false);
-            return cb(
-              new Error("Only " + allowedFileType.join(", ") + " Allowed")
-            );
+            return cb({
+              "status": false,
+              "message": "Only " + allowedFileType.join(", ") + " Allowed"
+            }, false);
           }
         },
       }).single("file");
+
       if (upload) {
         uploading = await upload(req, res, async (err) => {
-          console.log(req.file);
-          // console.log(req.body.category);
+          if(err){
+            res.status(400).send(err);
+          }
 
           const file = req.file;
 
@@ -163,7 +175,6 @@ module.exports = {
               extension: extname,
               createdBy: req.user ? req.user.id : null,
             }).save();
-
             res.send(mFile.id);
           } catch (err) {
             next(err);
@@ -234,4 +245,15 @@ module.exports = {
       res.send({ status: true });
     }
   },
+  formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+  }
 };
