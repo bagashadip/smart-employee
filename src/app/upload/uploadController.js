@@ -14,6 +14,7 @@ const mimeType = require("./mimetype.json");
 const rimraf = require("rimraf");
 
 const uploadPath = "./../../../public/uploads/";
+const sharp = require('sharp');
 
 module.exports = {
   default: async (req, res) => {
@@ -155,7 +156,49 @@ module.exports = {
             res.status(400).send(err);
           }
 
+          // compress only image file
           const file = req.file;
+          if (allowedFileType.indexOf(file.mimetype) !== -1) {
+            const imagePath = req.file.path;
+            const outputFile = req.file.path;
+            const targetSize = 200000; // 200kb in bytes
+
+            // Read the input image file
+            fs.readFile(imagePath, function(err, data) {
+              if (err) throw err;
+
+              // Resize and compress the image using sharp
+              sharp(data)
+              .resize({ width: 800, height: 800, fit: 'inside' })
+              .jpeg({ quality: 80, progressive: true, chromaSubsampling: '4:4:4' })
+              .png({ quality: 80, progressive: true, chromaSubsampling: '4:4:4' })
+              .toBuffer(function(err, buffer) {
+                if (err) throw err;
+                // Check if the compressed image is under the target size
+                if (buffer.length > targetSize) {
+                  // If the compressed image is still too big, reduce the quality and try again
+                  sharp(buffer)
+                    .jpeg({ quality: 60, progressive: true, chromaSubsampling: '4:2:0' })
+                    .png({ quality: 60, progressive: true, chromaSubsampling: '4:2:0' })
+                    .toBuffer(function(err, buffer) {
+                      if (err) throw err;
+                      
+                      // Write the compressed image buffer to a file
+                      fs.writeFile(outputFile, buffer, function(err) {
+                        if (err) throw err;
+                        console.log(`Compressed image saved to ${outputFile}`);
+                      });
+                    });
+                } else {
+                  // Write the compressed image buffer to a file
+                  fs.writeFile(outputFile, buffer, function(err) {
+                    if (err) throw err;
+                    console.log(`Compressed image saved to ${outputFile}`);
+                  });
+                }
+              });
+            });
+          }
 
           try {
             let fpath = id + "/" + newName;
