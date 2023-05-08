@@ -35,9 +35,18 @@ module.exports = {
       return error(res).permissionError();
     }
 
+    var { filter } = req.body;
+    let filterKodeDivisi = null;
+    if (filter && filter.length > 0) {
+      filter.forEach((f) => {
+        if (f.column === "kode_divisi") {
+          filterKodeDivisi = f.value;
+        }
+      });
+    }
+
     var dataTableObj = await datatable(req.body);
-    var count = await Absensi.count();
-    var modules = await Absensi.findAndCountAll({
+    var queryFilter = {
       ...dataTableObj,
       include: [
         {
@@ -50,6 +59,7 @@ module.exports = {
           attributes: ["name", "path", "extension", "size"],
         },
       ],
+
       attributes: [
         "id_absensi",
         "foto_absensi",
@@ -64,9 +74,14 @@ module.exports = {
         "time_limit_pulang",
         "createdAt",
         "updatedAt",
-        [Sequelize.literal('"pegawai"."kode_divisi"'), 'kode_divisi']
-    ]
-    });
+        [Sequelize.literal('"pegawai"."kode_divisi"'), "kode_divisi"],
+      ],
+    };
+    if (filterKodeDivisi) {
+      queryFilter.where = Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'");
+    }
+    var count = await Absensi.count();
+    var modules = await Absensi.findAndCountAll(queryFilter);
 
     res.json({
       recordsFiltered: modules.count,
