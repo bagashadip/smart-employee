@@ -45,6 +45,13 @@ module.exports = {
       });
     }
 
+    // remove filter containing kode_divisi
+    const payload = req.body;
+    const filterIndex = payload.filter.findIndex((f) => f.column === "kode_divisi");
+    if (filterIndex !== -1) {
+      payload.filter.splice(filterIndex, 1);
+    }
+
     var dataTableObj = await datatable(req.body);
     var queryFilter = {
       ...dataTableObj,
@@ -77,9 +84,17 @@ module.exports = {
         [Sequelize.literal('"pegawai"."kode_divisi"'), "kode_divisi"],
       ],
     };
+
     if (filterKodeDivisi) {
-      queryFilter.where = Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'");
+      if (queryFilter.where && queryFilter.where[Op.and]) {
+        queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
+      } else {
+        queryFilter.where = {
+          [Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")],
+        };
+      }
     }
+
     var count = await Absensi.count();
     var modules = await Absensi.findAndCountAll(queryFilter);
 
