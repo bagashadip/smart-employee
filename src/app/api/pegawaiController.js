@@ -18,7 +18,7 @@ const {
   JamKerja,
   JamKerjaDetail,
   Asn,
-  Lapbul
+  Lapbul,
 } = require("../../models/model");
 
 const Op = Sequelize.Op;
@@ -28,6 +28,13 @@ module.exports = {
   list: async (req, res) => {
     if (!(await req.user.hasAccess(_module, "view"))) {
       return error(res).permissionError();
+    }
+
+    const { divisi } = req.query;
+
+    const whereClause = {};
+    if (divisi) {
+      whereClause["$divisi.kode_divisi$"] = divisi;
     }
 
     const mPegawai = await Pegawai.findAll({
@@ -68,6 +75,7 @@ module.exports = {
           },
         },
       ],
+      where: whereClause,
     });
     res.json(mPegawai);
   },
@@ -150,7 +158,7 @@ module.exports = {
         {
           model: Divisi,
           as: "divisi",
-          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja","template_lapbul"],
+          attributes: ["kode_divisi", "nama_divisi", "kode_unitkerja", "template_lapbul"],
           include: [
             {
               model: UnitKerja,
@@ -197,12 +205,12 @@ module.exports = {
         {
           model: Posisi,
           as: "posisi",
-          attributes: ["kode_posisi", "nama_posisi","kak"],
+          attributes: ["kode_posisi", "nama_posisi", "kak"],
         },
         {
           model: Dpa,
           as: "dpa",
-          attributes: ["kode_dpa", "nama_dpa", "grade_dpa","jenis_kontrak"],
+          attributes: ["kode_dpa", "nama_dpa", "grade_dpa", "jenis_kontrak"],
         },
         {
           model: File,
@@ -231,17 +239,14 @@ module.exports = {
     //Get latest lapbul
     let mLapbul = await Lapbul.findOne({
       where: {
-          kode_pegawai: req.query.kode_pegawai
+        kode_pegawai: req.query.kode_pegawai,
       },
-      order: [
-        ['id_lapbul','DESC']
-      ]
+      order: [["id_lapbul", "DESC"]],
     });
 
-    if(mLapbul){
+    if (mLapbul) {
       tempRes.uraian_pelaksanaan = mLapbul.uraian_pelaksanaan;
-    }
-    else{
+    } else {
       tempRes.uraian_pelaksanaan = null;
     }
 
@@ -274,8 +279,7 @@ module.exports = {
       }
 
       const leadZero = `${num}`.padStart(5, "0");
-      req.body.kode_pegawai =
-        String(now.format("YYYY")) + now.format("MM") + leadZero;
+      req.body.kode_pegawai = String(now.format("YYYY")) + now.format("MM") + leadZero;
 
       await new Pegawai({
         ...req.body,
@@ -340,9 +344,7 @@ module.exports = {
         },
         attributes: ["emailpribadi_pegawai"],
       });
-      let findEmail = mEmail.find(
-        (o) => o.emailpribadi_pegawai === req.body.emailpribadi_pegawai
-      );
+      let findEmail = mEmail.find((o) => o.emailpribadi_pegawai === req.body.emailpribadi_pegawai);
 
       if (findEmail) {
         res.json({
@@ -359,11 +361,7 @@ module.exports = {
       }
     }
 
-    if (mPegawai)
-      await Pegawai.update(
-        { ...req.body },
-        { where: { kode_pegawai: req.query.kode_pegawai } }
-      );
+    if (mPegawai) await Pegawai.update({ ...req.body }, { where: { kode_pegawai: req.query.kode_pegawai } });
 
     res.json({
       status: true,
@@ -470,9 +468,7 @@ module.exports = {
     const ruleNpwp = body("npwp_pegawai").trim();
     const ruleNoBpjsKes = body("nobpjskesehatan_pegawai").trim();
     const ruleNoBpjsKet = body("nobpjsketenagakerjaan_pegawai").trim();
-    const ruleTanggalBergabung = body("tanggalbergabung_pegawai")
-      .isDate()
-      .notEmpty();
+    const ruleTanggalBergabung = body("tanggalbergabung_pegawai").isDate().notEmpty();
     const ruleTanggalLulus = body("tanggallulus_pegawai").isDate();
     const ruleStatus = body("status_pegawai").trim();
     const ruleStatusAktif = body("statusaktif_pegawai").trim().notEmpty();

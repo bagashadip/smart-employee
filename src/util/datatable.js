@@ -4,15 +4,7 @@ const Op = Sequelize.Op;
 var moment = require("moment");
 
 module.exports = async (params, options) => {
-  let searchStr,
-    pagination,
-    column,
-    order,
-    index,
-    attributes,
-    search,
-    datatableObj,
-    query;
+  let searchStr, pagination, column, order, index, attributes, search, datatableObj, query;
 
   const onColumn = options && options.onColumn ? options.onColumn : null;
   const onColumnField = onColumn ? _.map(onColumn, "column") : null;
@@ -54,10 +46,7 @@ module.exports = async (params, options) => {
       if (columnAssoc.raw) {
         return [Sequelize.literal(columnAssoc.raw), columnAssoc.column];
       } else {
-        return [
-          Sequelize.col(columnAssoc.model + "." + columnAssoc.field),
-          columnAssoc.alias,
-        ];
+        return [Sequelize.col(columnAssoc.model + "." + columnAssoc.field), columnAssoc.alias];
       }
     }
   });
@@ -75,10 +64,7 @@ module.exports = async (params, options) => {
   if (search) {
     // Build search Query for all columns
     const querySearch = _.map(params.columns, function (value, key) {
-      if (
-        value.data == "id" ||
-        (typeof value.searchable != "undefined" && value.searchable == false)
-      ) {
+      if (value.data == "id" || (typeof value.searchable != "undefined" && value.searchable == false)) {
         return;
       } else {
         const columnAssoc = getColumnAssoc(value.data);
@@ -119,17 +105,10 @@ module.exports = async (params, options) => {
         orderColumn = params.order.column;
       } else {
         if (columnAssoc.raw) {
-          query.order = [
-            [
-              Sequelize.literal('"' + columnAssoc.column + '"'),
-              params.order.dir,
-            ],
-          ];
+          query.order = [[Sequelize.literal('"' + columnAssoc.column + '"'), params.order.dir]];
           orderColumn = columnAssoc.column;
         } else {
-          query.order = [
-            [columnAssoc.model, columnAssoc.field, params.order.dir],
-          ];
+          query.order = [[columnAssoc.model, columnAssoc.field, params.order.dir]];
           orderColumn = columnAssoc.field;
         }
       }
