@@ -191,6 +191,19 @@ module.exports = {
                 kode_pegawai : req.query.kode_pegawai
             },
          */
+
+        const startDate = req.body.dateRange?.startDate;
+        const endDate = req.body.dateRange?.endDate;
+        let queryDate = {};
+
+        if(startDate && endDate) {
+            queryDate = {
+                tanggal_kegiatan: {
+                    [Sequelize.Op.between]: [startDate, endDate],
+                },
+            }
+        }
+
         var modules = await Kegiatan.findAndCountAll({
             ...dataTableObj,
             include : [
@@ -203,7 +216,8 @@ module.exports = {
                     model : Pegawai,
                     as: "pegawai"
                 },
-            ]
+            ],
+            where: queryDate,
         });
 
         res.json({
