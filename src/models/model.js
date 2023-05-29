@@ -77,6 +77,12 @@ User.belongsTo(Pegawai, {
   targetKey: "kode_pegawai",
 });
 
+User.belongsTo(Asn, {
+  as: "asn",
+  foreignKey: "nip_asn",
+  targetKey: "nip_asn",
+});
+
 Pegawai.belongsTo(File, {
   as: "foto",
   foreignKey: "foto_pegawai",

@@ -16,6 +16,7 @@ const {
   File,
   Role,
   UserRole,
+  Asn
 } = require("../../models/model");
 const { use } = require("../../router/router");
 
@@ -218,6 +219,11 @@ module.exports = {
           as: "pegawai",
           attributes: ["emailpribadi_pegawai", "kode_pegawai"],
         },
+        {
+          model: Asn,
+          as: "asn",
+          attributes: ["kode_divisi"]
+        }
       ],
     });
 
@@ -452,6 +458,11 @@ module.exports = {
 
     if (loadedUser.pegawai != undefined) {
       resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai;
+    }
+
+    if (loadedUser.nip_asn !== '' && loadedUser.nip_asn !== null) {
+      resJson.user.nip_asn = loadedUser.nip_asn;
+      resJson.user.kode_divisi = loadedUser.asn.kode_divisi;
     }
 
     res.json(resJson);

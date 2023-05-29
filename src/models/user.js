@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       otp_secret: DataTypes.TEXT,
       first_login: DataTypes.BOOLEAN,
       activeRole: DataTypes.UUID,
+      nip_asn: DataTypes.STRING
     },
     {
       freezeTableName: true,
