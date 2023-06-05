@@ -183,7 +183,17 @@ module.exports = {
         // if (!(await req.user.hasAccess(_module, "view"))) {
         //   return error(res).permissionError();
         // }
+        let request = Object.assign({}, req.body);;
 
+        const startDate = req.body.filter.find(obj => obj.column === "startDate")?.value;
+        const endDate = req.body.filter.find(obj => obj.column === "endDate")?.value;
+        let queryDate = {};
+        var query;
+        if(req.body.filter){
+            req.body.filter = req.body.filter.filter(obj => obj.column !== "startDate");
+            req.body.filter = req.body.filter.filter(obj => obj.column !== "endDate");
+        }
+        console.log("NGETESTTT", req.body);
         var dataTableObj = await datatable(req.body);
         var count = await Kegiatan.count();
         /**
@@ -192,33 +202,49 @@ module.exports = {
             },
          */
 
-        const startDate = req.body.dateRange?.startDate;
-        const endDate = req.body.dateRange?.endDate;
-        let queryDate = {};
-
         if(startDate && endDate) {
-            queryDate = {
-                tanggal_kegiatan: {
-                    [Sequelize.Op.between]: [startDate, endDate],
-                },
+            query = {
+                ...dataTableObj,
+                include : [
+                    {
+                        model : File,
+                        as: "foto",
+                        attributes: ["name", "path", "extension", "size"],
+                    },
+                    {
+                        model : Pegawai,
+                        as: "pegawai"
+                    },
+                ]
+            };
+            if(query.hasOwnProperty('where')){
+                let queryDate = {
+                    tanggal_kegiatan: {
+                        [Sequelize.Op.between]: [startDate, endDate],
+                    },
+                }
+                query.where[Op.and].push(queryDate);
+            } else {
+                query.where = queryDate;
             }
+        } else {
+            query = {
+                ...dataTableObj,
+                include : [
+                    {
+                        model : File,
+                        as: "foto",
+                        attributes: ["name", "path", "extension", "size"],
+                    },
+                    {
+                        model : Pegawai,
+                        as: "pegawai"
+                    },
+                ]
+            };
         }
 
-        var modules = await Kegiatan.findAndCountAll({
-            ...dataTableObj,
-            include : [
-                {
-                    model : File,
-                    as: "foto",
-                    attributes: ["name", "path", "extension", "size"],
-                },
-                {
-                    model : Pegawai,
-                    as: "pegawai"
-                },
-            ],
-            where: queryDate,
-        });
+        var modules = await Kegiatan.findAndCountAll(query);
 
         res.json({
             recordsFiltered: modules.count,
