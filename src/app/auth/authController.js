@@ -53,20 +53,43 @@ module.exports = {
 
     const username = req.body.username;
 
-    let loadedUser;
+    let loadedUser, modelUser;
+
+    const checkUser = await User.findOne({
+      where: {
+        username_user: {
+          [Op.iLike]: username,
+        },
+      },
+    });
+
+    if(checkUser.nip_asn) {
+      modelUser = {
+        model: Asn,
+        as: "asn",
+        include: [
+          {
+            model: File,
+            as: "foto"
+          }
+        ]
+      };
+    } else {
+      modelUser = {
+        model: Pegawai,
+        as: "pegawai",
+        include: [
+          {
+            model: File,
+            as: "foto",
+          },
+        ],
+      };
+    }
 
     const user = await User.findOne({
       include: [
-        {
-          model: Pegawai,
-          as: "pegawai",
-          include: [
-            {
-              model: File,
-              as: "foto",
-            },
-          ],
-        },
+        modelUser
       ],
       where: {
         username_user: {
@@ -83,7 +106,7 @@ module.exports = {
     }
 
     loadedUser = user;
-
+    console.log("USERRRRR", loadedUser);
     if (loadedUser.status_user !== "Aktif") {
       return res.status(401).json({
         statusCode: 401,
@@ -94,15 +117,19 @@ module.exports = {
     resData = {
       statusCode: 200,
       username: loadedUser.username_user,
-      emailpribadi_pegawai: "",
-      namalengkap_pegawai: "",
-      foto_pegawai: "",
+      email: "",
+      nama_lengkap: "",
+      foto: "",
       status_user: loadedUser.status_user,
     };
 
-    if (loadedUser.pegawai) {
-      resData.emailpribadi_pegawai = loadedUser.pegawai.emailpribadi_pegawai;
-      resData.namalengkap_pegawai = loadedUser.pegawai.namalengkap_pegawai;
+    if (checkUser.nip_asn) {
+      resData.email = loadedUser.asn.email_asn;
+      resData.nama_lengkap = loadedUser.asn.nama_asn;
+      resData.foto_pegawai = loadedUser.asn.foto.path;
+    } else {
+      resData.email = loadedUser.pegawai.emailpribadi_pegawai;
+      resData.nama_lengkap = loadedUser.pegawai.namalengkap_pegawai;
       resData.foto_pegawai = loadedUser.pegawai.foto.path;
     }
 
