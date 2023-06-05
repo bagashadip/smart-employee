@@ -16,7 +16,9 @@ const {
   File,
   Role,
   UserRole,
-  Asn
+  Asn,
+  DivisiParent,
+  Divisi
 } = require("../../models/model");
 const { use } = require("../../router/router");
 
@@ -249,7 +251,18 @@ module.exports = {
         {
           model: Asn,
           as: "asn",
-          attributes: ["kode_divisi"]
+          include: [
+            {
+              model: DivisiParent,
+              as: "divisi_parent",
+              include: [
+                {
+                  model: Divisi,
+                  as: "divisi"
+                }
+              ]
+            }
+          ]
         }
       ],
     });
@@ -488,8 +501,9 @@ module.exports = {
     }
 
     if (loadedUser.nip_asn !== '' && loadedUser.nip_asn !== null) {
+      let listDivisi = loadedUser?.asn?.divisi_parent?.divisi?.map(obj => obj.kode_divisi) || [];
       resJson.user.nip_asn = loadedUser.nip_asn;
-      resJson.user.kode_divisi = loadedUser.asn.kode_divisi;
+      resJson.user.divisi = listDivisi;
     }
 
     res.json(resJson);
