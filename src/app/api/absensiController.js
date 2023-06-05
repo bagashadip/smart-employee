@@ -87,11 +87,14 @@ module.exports = {
 
     if (filterKodeDivisi) {
       if (queryFilter.where && queryFilter.where[Op.and]) {
-        queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
+        Array.isArray(filterKodeDivisi) 
+        ? queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')) 
+        : queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
       } else {
-        queryFilter.where = {
-          [Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")],
-        };
+        let queryDivisi = Array.isArray(filterKodeDivisi)
+        ? {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')]}
+        : {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")]};
+        queryFilter.where = queryDivisi;
       }
     }
 
