@@ -143,6 +143,12 @@ Asn.belongsTo(DivisiParent, {
   targetKey: "kode_divisi_parent",
 });
 
+Asn.belongsTo(User, {
+  as: "user",
+  foreignKey: "nip_asn",
+  targetKey: "nip_asn",
+});
+
 Divisi.belongsTo(UnitKerja, {
   as: "unitkerja",
   foreignKey: "kode_unitkerja",

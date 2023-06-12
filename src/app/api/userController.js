@@ -44,6 +44,11 @@ module.exports = {
           as: "pegawai",
           attributes: ["emailpribadi_pegawai"],
         },
+        {
+          model: Asn,
+          as: "asn",
+          attributes: ["email_asn"],
+        },
       ],
     });
 
@@ -253,6 +258,27 @@ module.exports = {
         ],
       });
 
+      if (!mUser) {
+        const mAsn = await Asn.findOne({
+          where: {
+            email_asn: req.body.email
+          },
+          attributes: ["nip_asn"],
+          include: [
+            {
+              model: User,
+              as: "user",
+              attributes: ["username_user"],
+            },
+          ],
+        });
+        if (mAsn) {
+          username = mAsn.user.username_user;
+        }
+      } else {
+        username = mUser.user.username_user;
+      }
+      
       await User.update(
         {
           password_user: hashedPw,
@@ -260,7 +286,7 @@ module.exports = {
         },
         {
           where: {
-            username_user: mUser.user.username_user,
+            username_user: username,
           },
         }
       );
@@ -269,7 +295,7 @@ module.exports = {
         email: req.body.email,
         message:
           "<p>Dear rekan Jakarta Smart City,</p><br><p>Berikut informasi user akses anda di aplikasi Smart Employee</p><p>username: <b>" +
-          mUser.user.username_user +
+          username +
           "</b></p><p>password: <b>" +
           generatePass +
           "</b></p><p>Silahkan login dan atur ulang password baru anda di aplikasi.</p><br><br/>" +
@@ -416,7 +442,14 @@ module.exports = {
             emailpribadi_pegawai: value,
           },
         });
-        if (!mPegawai) {
+
+        const mAsn = await Asn.findOne({
+          where: {
+            email_asn: value
+          }
+        });
+
+        if (!mPegawai && !mAsn) {
           return Promise.reject("Email tidak ditemukan!");
         }
       });
