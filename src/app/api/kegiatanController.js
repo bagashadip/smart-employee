@@ -292,7 +292,7 @@ module.exports = {
               query.where = queryDivisi;
             }
           }
-        console.log("QUERYYYYY+++++", query.where[Op.and]);
+          
         var modules = await Kegiatan.findAndCountAll(query);
 
         res.json({
