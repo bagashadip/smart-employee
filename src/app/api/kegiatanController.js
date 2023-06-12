@@ -183,19 +183,49 @@ module.exports = {
         // if (!(await req.user.hasAccess(_module, "view"))) {
         //   return error(res).permissionError();
         // }
-        let request = Object.assign({}, req.body);;
-
+        let request = Object.assign({}, req.body);
         const startDate = req.body.filter.find(obj => obj.column === "startDate")?.value;
         const endDate = req.body.filter.find(obj => obj.column === "endDate")?.value;
-        let queryDate = {};
-        var query;
         if(req.body.filter){
             req.body.filter = req.body.filter.filter(obj => obj.column !== "startDate");
             req.body.filter = req.body.filter.filter(obj => obj.column !== "endDate");
         }
-        console.log("NGETESTTT", req.body);
+
+        // Filter by divisi
+        var { filter } = req.body;
+        let filterKodeDivisi = null;
+        if (filter && filter.length > 0) {
+        filter.forEach((f) => {
+            if (f.column === "kode_divisi") {
+            filterKodeDivisi = f.value;
+            }
+        });
+        }
+
+        // remove filter containing kode_divisi
+        const payload = req.body;
+        const filterIndex = payload.filter.findIndex((f) => f.column === "kode_divisi");
+        if (filterIndex !== -1) {
+        payload.filter.splice(filterIndex, 1);
+        }
+
+
         var dataTableObj = await datatable(req.body);
         var count = await Kegiatan.count();
+        let query = {
+            ...dataTableObj,
+            include : [
+                {
+                    model : File,
+                    as: "foto",
+                    attributes: ["name", "path", "extension", "size"],
+                },
+                {
+                    model : Pegawai,
+                    as: "pegawai"
+                },
+            ]
+        };
         /**
          * where : {
                 kode_pegawai : req.query.kode_pegawai
@@ -203,47 +233,66 @@ module.exports = {
          */
 
         if(startDate && endDate) {
-            query = {
-                ...dataTableObj,
-                include : [
+            let queryDate = {
+                [Op.and]: [
                     {
-                        model : File,
-                        as: "foto",
-                        attributes: ["name", "path", "extension", "size"],
-                    },
-                    {
-                        model : Pegawai,
-                        as: "pegawai"
-                    },
+                        tanggal_kegiatan: {
+                            [Op.between]: [startDate, endDate],
+                        },
+                    }
                 ]
-            };
+            }
             if(query.hasOwnProperty('where')){
-                let queryDate = {
-                    tanggal_kegiatan: {
-                        [Sequelize.Op.between]: [startDate, endDate],
-                    },
-                }
                 query.where[Op.and].push(queryDate);
             } else {
                 query.where = queryDate;
             }
-        } else {
-            query = {
-                ...dataTableObj,
-                include : [
+        } else if(startDate && !endDate) {
+            let queryDate = {
+                [Op.and]: [
                     {
-                        model : File,
-                        as: "foto",
-                        attributes: ["name", "path", "extension", "size"],
-                    },
-                    {
-                        model : Pegawai,
-                        as: "pegawai"
-                    },
+                        tanggal_kegiatan: {
+                            [Op.gt]: startDate,
+                        },
+                    }
                 ]
-            };
+            }
+            if(query.hasOwnProperty('where')){
+                query.where[Op.and].push(queryDate);
+            } else {
+                query.where = queryDate;
+            }
+        } else if(!startDate && endDate) {
+            let queryDate = {
+                [Op.and]: [
+                    {
+                        tanggal_kegiatan: {
+                            [Op.lt]: endDate,
+                        },
+                    }
+                ]
+            }
+            if(query.hasOwnProperty('where')){
+                query.where[Op.and].push(queryDate);
+            } else {
+                query.where = queryDate;
+            }
         }
-
+        
+        // Filter by divisi
+        if (filterKodeDivisi) {
+            if (query.where && query.where[Op.and]) {
+              Array.isArray(filterKodeDivisi) 
+              ? query.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')) 
+              : query.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
+            } else {
+              let queryDivisi = Array.isArray(filterKodeDivisi)
+              ? {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')]}
+              : {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")]};
+              query.where = queryDivisi;
+            }
+          }
+        console.log("QUERYYYYY+++++", query.where[Op.and]);
         var modules = await Kegiatan.findAndCountAll(query);
 
         res.json({

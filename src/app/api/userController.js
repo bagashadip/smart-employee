@@ -10,6 +10,7 @@ const {
   Role,
   Permission,
   HakAkses,
+  Asn
 } = require("../../models/model");
 const bcrypt = require("bcryptjs");
 const generator = require("generate-password");
@@ -338,7 +339,7 @@ module.exports = {
     const ruleOneSignalId = body("onesignalid_user").trim().optional();
     const ruleKodePegawai = body("kode_pegawai")
       .trim()
-      .optional()
+      .optional({ nullable: true })
       .custom(async (value) => {
         if (value) {
           mPegawai = await Pegawai.findOne({
@@ -351,6 +352,21 @@ module.exports = {
           }
         }
       });
+    const ruleNipAsn = body("nip_asn")
+    .trim()
+    .optional({ nullable: true })
+    .custom(async (value) => {
+      if (value) {
+        mAsn = await Asn.findOne({
+          where: {
+            nip_asn: value,
+          },
+        });
+        if (!mAsn) {
+          return Promise.reject("NIP ASN tidak ditemukan!");
+        }
+      }
+    });
     const ruleRole = body("kode_role")
       .trim()
       .optional()
@@ -414,6 +430,7 @@ module.exports = {
             ruleStatus,
             ruleOneSignalId,
             ruleKodePegawai,
+            ruleNipAsn,
             ruleRole,
           ];
         }
@@ -426,6 +443,7 @@ module.exports = {
             ruleStatus.optional(),
             ruleOneSignalId.optional(),
             ruleKodePegawai.optional(),
+            ruleNipAsn.optional(),
             ruleRole.optional(),
           ];
         }
