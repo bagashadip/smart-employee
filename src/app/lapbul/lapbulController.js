@@ -142,14 +142,27 @@ module.exports = {
             return error(res).permissionError();
         }
 
+        let queryFilter;
+        // get divisi object from filter
+        var { filter } = req.body;
+        let filterKodeDivisi = null;
+        if (filter && filter.length > 0) {
+        filter.forEach((f) => {
+            if (f.column === "kode_divisi") {
+            filterKodeDivisi = f.value;
+            }
+        });
+        }
+
+        // remove filter containing kode_divisi
+        const payload = req.body;
+        const filterIndex = payload.filter.findIndex((f) => f.column === "kode_divisi");
+        if (filterIndex !== -1) {
+            payload.filter.splice(filterIndex, 1);
+        }
+
         var dataTableObj = await datatable(req.body);
-        var count = await Lapbul.count();
-        /**
-         * where : {
-                kode_pegawai : req.query.kode_pegawai
-            },
-         */
-        var modules = await Lapbul.findAndCountAll({
+        queryFilter = {
             ...dataTableObj,
             include : [
                 {
@@ -157,12 +170,33 @@ module.exports = {
                     as : "pegawai"
                 }   
             ]
-        });
+        };
+
+        if (filterKodeDivisi) {
+            if (queryFilter.where && queryFilter.where[Op.and]) {
+                Array.isArray(filterKodeDivisi) 
+                ? queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')) 
+                : queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
+            } else {
+                let queryDivisi = Array.isArray(filterKodeDivisi)
+                ? {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')]}
+                : {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")]};
+                queryFilter.where = queryDivisi;
+            }
+        }
+
+        var count = await Lapbul.count();
+        /**
+         * where : {
+                kode_pegawai : req.query.kode_pegawai
+            },
+         */
+        var modules = await Lapbul.findAndCountAll(queryFilter);
 
         res.json({
-        recordsFiltered: modules.count,
-        recordsTotal: count,
-        items: modules.rows,
+            recordsFiltered: modules.count,
+            recordsTotal: count,
+            items: modules.rows,
         });
     },
 
