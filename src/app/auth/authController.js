@@ -65,7 +65,7 @@ module.exports = {
       },
     });
 
-    if(checkUser.nip_asn) {
+    if(checkUser && checkUser.nip_asn) {
       modelUser = {
         model: Asn,
         as: "asn",
@@ -108,7 +108,7 @@ module.exports = {
     }
 
     loadedUser = user;
-    console.log("USERRRRR", loadedUser);
+
     if (loadedUser.status_user !== "Aktif") {
       return res.status(401).json({
         statusCode: 401,
@@ -128,11 +128,11 @@ module.exports = {
     if (checkUser.nip_asn) {
       resData.email = loadedUser.asn.email_asn;
       resData.nama_lengkap = loadedUser.asn.nama_asn;
-      resData.foto_pegawai = loadedUser.asn.foto.path;
+      resData.foto_pegawai = loadedUser.asn.foto ? loadedUser.asn.foto.path : null;
     } else {
       resData.email = loadedUser.pegawai.emailpribadi_pegawai;
       resData.nama_lengkap = loadedUser.pegawai.namalengkap_pegawai;
-      resData.foto_pegawai = loadedUser.pegawai.foto.path;
+      resData.foto_pegawai = loadedUser.pegawai.foto ? loadedUser.pegawai.foto.path : null;
     }
 
     res.status(200).send(resData);
