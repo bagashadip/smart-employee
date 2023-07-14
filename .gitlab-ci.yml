@@ -29,8 +29,8 @@ build:development:
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build --rm --tag $APP_IMAGE:$CI_BUILD_REF_NAME .
-    - docker push $APP_IMAGE:$CI_BUILD_REF_NAME
+    - docker build --rm --tag $APP_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker push $APP_IMAGE:$CI_COMMIT_REF_NAME
 
 migrate:development:
   stage: migrate
@@ -54,7 +54,7 @@ migrate:development:
         --env-file swarm_env
         --env-file docker_env
         --env ANSIBLE_HOST_KEY_CHECKING=False
-        $APP_IMAGE:$CI_BUILD_REF_NAME
+        $APP_IMAGE:$CI_COMMIT_REF_NAME
           npx sequelize-cli db:migrate 
 
 deploy:development:
@@ -81,7 +81,7 @@ deploy:development:
         --env ANSIBLE_HOST_KEY_CHECKING=False
         $ANSIBLE_IMAGE
           ansible-playbook -v -i inventory
-            -e service_image="$APP_IMAGE:$CI_BUILD_REF_NAME"
+            -e service_image="$APP_IMAGE:$CI_COMMIT_REF_NAME"
             deploy/deploy-service.yml
 
 migrate:production:
@@ -109,7 +109,7 @@ migrate:production:
         --env-file swarm_env
         --env-file docker_env
         --env ANSIBLE_HOST_KEY_CHECKING=False
-        $APP_IMAGE:$CI_BUILD_REF_NAME
+        $APP_IMAGE:$CI_COMMIT_REF_NAME
           npx sequelize-cli db:migrate 
 
 deploy:production:
@@ -140,5 +140,5 @@ deploy:production:
         --env ANSIBLE_HOST_KEY_CHECKING=False
         $ANSIBLE_IMAGE
           ansible-playbook -v -i inventory
-            -e service_image="$APP_IMAGE:$CI_BUILD_REF_NAME"
+            -e service_image="$APP_IMAGE:$CI_COMMIT_REF_NAME"
             deploy-service.yml
