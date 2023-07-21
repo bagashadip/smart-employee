@@ -157,6 +157,14 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
+    if(req.body.nip_asn){
+      req.body.kode_pegawai = null;
+    }
+
+    if(req.body.kode_pegawai){
+      req.body.nip_asn = null;
+    }
+
     await UserRole.update(
       { ...req.body, updatedBy: req.user.id },
       { where: { id: req.query.id } }

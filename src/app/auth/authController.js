@@ -16,6 +16,9 @@ const {
   File,
   Role,
   UserRole,
+  Asn,
+  DivisiParent,
+  Divisi
 } = require("../../models/model");
 const { use } = require("../../router/router");
 
@@ -52,20 +55,43 @@ module.exports = {
 
     const username = req.body.username;
 
-    let loadedUser;
+    let loadedUser, modelUser;
+
+    const checkUser = await User.findOne({
+      where: {
+        username_user: {
+          [Op.iLike]: username,
+        },
+      },
+    });
+
+    if(checkUser && checkUser.nip_asn) {
+      modelUser = {
+        model: Asn,
+        as: "asn",
+        include: [
+          {
+            model: File,
+            as: "foto"
+          }
+        ]
+      };
+    } else {
+      modelUser = {
+        model: Pegawai,
+        as: "pegawai",
+        include: [
+          {
+            model: File,
+            as: "foto",
+          },
+        ],
+      };
+    }
 
     const user = await User.findOne({
       include: [
-        {
-          model: Pegawai,
-          as: "pegawai",
-          include: [
-            {
-              model: File,
-              as: "foto",
-            },
-          ],
-        },
+        modelUser
       ],
       where: {
         username_user: {
@@ -93,16 +119,20 @@ module.exports = {
     resData = {
       statusCode: 200,
       username: loadedUser.username_user,
-      emailpribadi_pegawai: "",
-      namalengkap_pegawai: "",
-      foto_pegawai: "",
+      email: "",
+      nama_lengkap: "",
+      foto: "",
       status_user: loadedUser.status_user,
     };
 
-    if (loadedUser.pegawai) {
-      resData.emailpribadi_pegawai = loadedUser.pegawai.emailpribadi_pegawai;
-      resData.namalengkap_pegawai = loadedUser.pegawai.namalengkap_pegawai;
-      resData.foto_pegawai = loadedUser.pegawai.foto.path;
+    if (checkUser.nip_asn) {
+      resData.email = loadedUser.asn.email_asn;
+      resData.nama_lengkap = loadedUser.asn.nama_asn;
+      resData.foto_pegawai = loadedUser.asn.foto ? loadedUser.asn.foto.path : null;
+    } else {
+      resData.email = loadedUser.pegawai.emailpribadi_pegawai;
+      resData.nama_lengkap = loadedUser.pegawai.namalengkap_pegawai;
+      resData.foto_pegawai = loadedUser.pegawai.foto ? loadedUser.pegawai.foto.path : null;
     }
 
     res.status(200).send(resData);
@@ -218,6 +248,22 @@ module.exports = {
           as: "pegawai",
           attributes: ["emailpribadi_pegawai", "kode_pegawai"],
         },
+        {
+          model: Asn,
+          as: "asn",
+          include: [
+            {
+              model: DivisiParent,
+              as: "divisi_parent",
+              include: [
+                {
+                  model: Divisi,
+                  as: "divisi"
+                }
+              ]
+            }
+          ]
+        }
       ],
     });
 
@@ -454,6 +500,12 @@ module.exports = {
       resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai;
     }
 
+    if (loadedUser.nip_asn !== '' && loadedUser.nip_asn !== null) {
+      let listDivisi = loadedUser?.asn?.divisi_parent?.divisi?.map(obj => obj.kode_divisi) || [];
+      resJson.user.nip_asn = loadedUser.nip_asn;
+      resJson.user.divisi = listDivisi;
+    }
+
     res.json(resJson);
   },
   loginByEmail  : async (req, res, _) => {
@@ -474,7 +526,7 @@ module.exports = {
 
     const password = req.body.password;
     let loadedUser;
-    let kodePegawai, userWhere;
+    let userWhere;
     let activeRole;
 
     if(loginType=="email"){
@@ -485,23 +537,30 @@ module.exports = {
         },
       });
 
-      if(pegawaiFind) {
-        kodePegawai = pegawaiFind.kode_pegawai
-      }
-
       if (!pegawaiFind) {
-        return res.status(404).json({
-          statusCode: 404,
-          message: "Email tidak ditemukan!",
+        const asnFind = await Asn.findOne({
+          where: {
+            email_asn: username,
+          }
         });
-      }
 
-      userWhere = {
-        kode_pegawai: pegawaiFind.kode_pegawai,
+        if (!asnFind) {
+          return res.status(404).json({
+            statusCode: 404,
+            message: "Email tidak ditemukan!",
+          });
+        }
+
+        userWhere = {
+          nip_asn: asnFind.nip_asn,
+        };
+      } else {
+        userWhere = {
+          kode_pegawai: pegawaiFind.kode_pegawai,
+        };
       }
 
     }else{
-      kodePegawai = ""
       userWhere = {
         username_user: {
           [Op.iLike]: username,
@@ -516,6 +575,23 @@ module.exports = {
           model: Pegawai,
           as: "pegawai",
           attributes: ["emailpribadi_pegawai","kode_pegawai"],
+        },
+        {
+          model: Asn,
+          as: "asn",
+          attributes: ["email_asn","nip_asn"],
+          include: [
+            {
+              model: DivisiParent,
+              as: "divisi_parent",
+              include: [
+                {
+                  model: Divisi,
+                  as: "divisi"
+                }
+              ]
+            }
+          ]
         },
       ],
     });
@@ -753,6 +829,12 @@ module.exports = {
 
     if(loadedUser.pegawai!=undefined){
       resJson.user.kode_pegawai = loadedUser.pegawai.kode_pegawai
+    }
+
+    if (loadedUser.nip_asn) {
+      let listDivisi = loadedUser?.asn?.divisi_parent?.divisi?.map(obj => obj.kode_divisi) || [];
+      resJson.user.nip_asn = loadedUser.nip_asn;
+      resJson.user.divisi = listDivisi;
     }
 
     res.json(resJson);
