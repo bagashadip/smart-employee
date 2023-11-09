@@ -464,10 +464,10 @@ lapulRoute.get(lapbulController.list);
 lapulRoute.post(lapbulController.create);
 lapulRoute.patch(lapbulController.update);
 lapulRoute.delete(lapbulController.delete);
-router.post("/lapbul/generate",lapbulController.generate);
-router.post("/lapbul/poc",lapbulController.poc);
-router.get("/lapbul/:id_lapbul",lapbulController.get_by_id);
-router.post("/lapbul/data",lapbulController.data);
+router.post("/lapbul/generate", lapbulController.generate);
+router.post("/lapbul/poc", lapbulController.poc);
+router.get("/lapbul/:id_lapbul", lapbulController.get_by_id);
+router.post("/lapbul/data", lapbulController.data);
 /* Lapbul Route */
 
 /* Libur Nasional Route */
@@ -477,7 +477,7 @@ liburNasionalRoute.post(liburNasionalController.create);
 liburNasionalRoute.patch(liburNasionalController.update);
 liburNasionalRoute.delete(liburNasionalController.delete);
 router.get("/liburnasional/list", liburNasionalController.list);
-router.post("/liburnasional/data",liburNasionalController.data);
+router.post("/liburnasional/data", liburNasionalController.data);
 /* Libur Nasional Route */
 
 /* Lampiran Route */
@@ -537,9 +537,15 @@ router.get("/user-role/permission", userRoleController.permission);
 router.get("/user-role/list", userRoleController.list);
 /* User Role */
 
-/* Event Route */
 
+/* Event Route */
 const eventRoute = router.route("/event");
-eventRoute.get(eventController.validate("list"), eventController.list);
+eventRoute.get(eventController.validate("get"), eventController.get);
+eventRoute.post(eventController.validate("create"), eventController.create);
+eventRoute.patch(eventController.validate("update"), eventController.update);
+eventRoute.delete(eventController.validate("delete"), eventController.delete);
+
+router.get("/event/list", eventController.list);
+/* Event Route */
 
 module.exports = router;

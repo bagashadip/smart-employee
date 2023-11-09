@@ -52,14 +52,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false
-      },
-      createdBy: {
-        type: Sequelize.UUID,
-        allowNull: false
-      },
-      updatedBy: {
-        type: Sequelize.UUID,
-        allowNull: false
+      },   
+	  push_date_event: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
       status_event: {
         type: Sequelize.STRING(50),

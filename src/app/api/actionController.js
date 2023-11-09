@@ -12,7 +12,7 @@ module.exports = {
     if (!(await req.user.hasAccess(_module, "view"))) {
       return error(res).permissionError();
     }
-    console.log("TEST");
+    // console.log("TEST");
     const mAction = await Action.findAll({
       attributes: ["id", "slug", "name"],
     });
