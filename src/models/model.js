@@ -29,6 +29,7 @@ const mJamKerjaDetail = require("./jamkerjaDetail");
 const mKegiatan = require("./kegiatan");
 const mLapbul = require("./lapbul");
 const mLiburNasional = require("./liburnasional");
+const mEvent = require("./event");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -58,6 +59,7 @@ const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
 const Kegiatan = mKegiatan(sequelize, Sequelize);
 const Lapbul = mLapbul(sequelize, Sequelize);
 const LiburNasional = mLiburNasional(sequelize, Sequelize);
+const Event = mEvent(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -302,4 +304,5 @@ module.exports = {
   Status,
   UserRole,
   LiburNasional,
+  Event,
 };

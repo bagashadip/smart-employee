@@ -41,6 +41,9 @@ const liburNasionalController = require("../app/api/liburNasionalController");
 
 const timeController = require("../app/api/timeController");
 
+//Event
+const eventController = require("../app/event/eventController");
+
 router.use(authMiddleware); // dont move it to another line
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -533,5 +536,10 @@ router.post("/user-role/data", userRoleController.data);
 router.get("/user-role/permission", userRoleController.permission);
 router.get("/user-role/list", userRoleController.list);
 /* User Role */
+
+/* Event Route */
+
+const eventRoute = router.route("/event");
+eventRoute.get(eventController.validate("list"), eventController.list);
 
 module.exports = router;
