@@ -279,6 +279,7 @@ pegawaiRoute.delete(
 );
 router.post("/pegawai/data", pegawaiController.data);
 router.get("/pegawai/list", pegawaiController.list);
+router.get("/pegawai/search", pegawaiController.search);
 /* Pegawai Route */
 
 /* User Route */

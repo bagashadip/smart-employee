@@ -24,6 +24,30 @@ const {
 const Op = Sequelize.Op;
 
 module.exports = {
+  // Search
+  search: async (req, res) => {
+
+    const mPegawai = await Pegawai.findAll({
+      limit: 30,
+      where: {
+        [Op.or]: [
+          {
+            kode_pegawai: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+          {
+            namalengkap_pegawai: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+        ],
+      },
+      attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+    });
+
+    res.json(mPegawai);
+  },
   // List
   list: async (req, res) => {
     if (!(await req.user.hasAccess(_module, "view"))) {
