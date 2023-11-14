@@ -98,7 +98,7 @@ module.exports = {
             }));
         }
     },
-    push: async function () {
+    send: async function () {
         const url = "https://onesignal.com/api/v1/notifications";
         const app_id = 'c91e6f62-6f33-4822-8a98-060ccf4b00e8';
         const _headers = {
