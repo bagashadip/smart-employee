@@ -11,9 +11,9 @@ const Op = Sequelize.Op;
 module.exports = {
   // search
   search: async (req, res) => {
-    if (!(await req.user.hasAccess(_module, "view"))) {
-      return error(res).permissionError();
-    }
+    // if (!(await req.user.hasAccess(_module, "view"))) {
+    //   return error(res).permissionError();
+    // }
     const mDivisi = await Divisi.findAll({
       limit: 10,
       where: {
