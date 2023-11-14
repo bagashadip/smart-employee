@@ -20,7 +20,7 @@ module.exports = {
       const mEvent = await Event.findAll({
         where: {
           status_event: {
-            [Op.ne]: "deleted",
+            [Op.ne]: "DELETED",
           },
         },
       });
@@ -123,7 +123,7 @@ module.exports = {
     }
     try {
       await Event.update(
-        { status_event: "deleted" },
+        { status_event: "DELETED" },
         { where: { id_event: req.query.id } }
       );
       res.send({ status: true });
