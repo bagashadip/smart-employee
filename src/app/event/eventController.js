@@ -22,12 +22,17 @@ module.exports = {
           status_event: {
             [Op.ne]: "deleted",
           },
-        },      
+        },
       });
       res.json(mEvent);
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });
     }
+  },
+  //
+  kategori: async (req, res) => {
+    const kategori = ['ALL', 'DIVISI', 'INDIVIDU'];
+    res.json(kategori);
   },
   // Datatable
   data: async (req, res) => {

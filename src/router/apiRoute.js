@@ -546,6 +546,7 @@ eventRoute.patch(eventController.validate("update"), eventController.update);
 eventRoute.delete(eventController.validate("delete"), eventController.delete);
 
 router.get("/event/list", eventController.list);
+router.get("/event/kategori", eventController.kategori);
 /* Event Route */
 
 module.exports = router;
