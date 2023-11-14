@@ -153,7 +153,7 @@ module.exports = {
         }
 
         const mNotifikasi = await Notifikasi.findAll({
-            limit: 50,
+            limit: 1,
             where: {
                 send_date_notifikasi: null,
                 is_read_notifikasi: false,
@@ -172,23 +172,24 @@ module.exports = {
                     },
                 }
 
-
                 const requets = await axios({
                     method: 'post',
                     url: url,
                     data: _body,
                     headers: _headers
-                }).catch((err) => {
-                    // console.log(err);
-
-                });
-
-                const update = await Notifikasi.update({
-                    send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
-                }, {
-                    where: {
-                        id_notifikasi: notif.id_notifikasi,
+                }).then(async (res) => {
+                    console.log(res.status);
+                    if (res.status == 200) {
+                        const update = await Notifikasi.update({
+                            send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        }, {
+                            where: {
+                                id_notifikasi: notif.id_notifikasi,
+                            }
+                        });
                     }
+                }).catch((err) => {
+                    console.log(err);
                 });
             }));
         }
