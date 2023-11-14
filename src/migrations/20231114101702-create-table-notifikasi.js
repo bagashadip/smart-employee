@@ -56,7 +56,7 @@ module.exports = {
       },
       onesignal_id_notifikasi: {
         type: Sequelize.STRING(255),
-        allowNull: false
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,
