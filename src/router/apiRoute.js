@@ -109,6 +109,7 @@ divisiRoute.delete(
 );
 router.post("/divisi/data", divisiController.data);
 router.get("/divisi/list", divisiController.list);
+router.get("/divisi/search", divisiController.search);
 /* Divisi Route */
 
 /* Ptkp Route */
