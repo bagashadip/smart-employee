@@ -22,7 +22,7 @@ module.exports = {
       },
       tanggal_event: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: false
       },
       jammulai_event: {
         type: Sequelize.TIME,
@@ -40,6 +40,14 @@ module.exports = {
         type: Sequelize.STRING(250),
         allowNull: true
       },
+      kategori_event: {
+        type: Sequelize.STRING(100),
+        allowNull: false
+      },
+      recipient_event: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
       pic_event: {
         type: Sequelize.STRING(150),
         allowNull: false
@@ -48,18 +56,18 @@ module.exports = {
         type: Sequelize.STRING(150),
         allowNull: false
       },
-      is_push_event:{
+      is_push_event: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false
-      },   
-	  push_date_event: {
+      },
+      push_date_event: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: false
       },
       status_event: {
         type: Sequelize.STRING(50),
-        allowNull: true
+        allowNull: false
       },
       createdAt: {
         type: Sequelize.DATE,
