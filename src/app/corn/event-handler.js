@@ -9,7 +9,7 @@ const { Event, Pegawai, Notifikasi } = require("../../models/model");
 
 module.exports = {
     generate: async function () {
-        // console.log("masuk dalam cron");
+        console.log("masuk dalam cron start " + moment().format("YYYY-MM-DD hh:mm:ss"));
 
         const mEvent = await Event.findAll({
             where: {
@@ -29,7 +29,10 @@ module.exports = {
 
             Promise.all(mEventIndividu.map(async (event) => {
                 const update = await Event.update(
-                    { is_push_event: false },
+                    {
+                        is_push_event: false,
+                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                    },
                     { where: { id_event: event.id_event } }
                 );
                 const listPegawai = event.recipient_event.split(",");
@@ -69,7 +72,10 @@ module.exports = {
             Promise.all(mEventDivisi.map(async (event) => {
 
                 const update = await Event.update(
-                    { is_push_event: false },
+                    {
+                        is_push_event: false,
+                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                    },
                     { where: { id_event: event.id_event } }
                 );
 
@@ -111,7 +117,10 @@ module.exports = {
             Promise.all(mEventAll.map(async (event) => {
 
                 const update = await Event.update(
-                    { is_push_event: false },
+                    {
+                        is_push_event: false,
+                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                    },
                     { where: { id_event: event.id_event } }
                 );
 
@@ -142,6 +151,8 @@ module.exports = {
 
         }
 
+
+        console.log("masuk dalam cron end " + moment().format("YYYY-MM-DD hh:mm:ss"));
     },
     send: async function () {
         const url = "https://onesignal.com/api/v1/notifications";
@@ -153,11 +164,15 @@ module.exports = {
         }
 
         const mNotifikasi = await Notifikasi.findAll({
-            limit: 1,
+            limit: 75,
             where: {
                 send_date_notifikasi: null,
                 is_read_notifikasi: false,
             },
+            order: [
+                ['updatedAt', 'DESC'],
+            ],
+            
         });
 
         if (mNotifikasi) {
@@ -182,6 +197,7 @@ module.exports = {
                     if (res.status == 200) {
                         const update = await Notifikasi.update({
                             send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
+                            updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
                         }, {
                             where: {
                                 id_notifikasi: notif.id_notifikasi,
@@ -190,6 +206,17 @@ module.exports = {
                     }
                 }).catch((err) => {
                     console.log(err);
+                }).finally(async () => {
+                    console.log("finally");
+
+                    const update = await Notifikasi.update({                       
+                        updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                    }, {
+                        where: {
+                            id_notifikasi: notif.id_notifikasi,
+                        }
+                    });
+
                 });
             }));
         }
