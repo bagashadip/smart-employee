@@ -170,7 +170,7 @@ module.exports = {
                 is_read_notifikasi: false,
             },
             order: [
-                ['updatedAt', 'DESC'],
+                ['updatedAt', 'ASC'],
             ],
 
         });
