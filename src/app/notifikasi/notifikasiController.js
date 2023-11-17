@@ -47,7 +47,7 @@ module.exports = {
 
       await Notifikasi.update(
         {
-          is_read_notifikasi: req.query.is_read_notifikasi,
+          is_read_notifikasi: req.body.is_read_notifikasi,
           updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
         },
         {
@@ -56,6 +56,8 @@ module.exports = {
           }
         }
       );
+
+      console.log('read notifikasi', req.query.id);
 
 
       res.send({ status: true });
