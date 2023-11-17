@@ -41,6 +41,28 @@ module.exports = {
       res.status(400).json({ status: false, message: err.message });
     }
   },
+  read: async (req, res) => {
+
+    try {
+
+      await Notifikasi.update(
+        {
+          is_read_notifikasi: req.query.is_read_notifikasi,
+          updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+        },
+        {
+          where: {
+            id_notifikasi: req.query.id
+          }
+        }
+      );
+
+
+      res.send({ status: true });
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  },
   // Get One Row require ID
   alert: async (req, res) => {
     // if (!(await req.user.hasAccess(_module, "view"))) {

@@ -561,5 +561,6 @@ const notifikasiRoute = router.route("/notifikasi");
 notifikasiRoute.get(notifikasiController.validate("get"), notifikasiController.get);  
 router.get("/notifikasi/alert", notifikasiController.alert);
 router.post("/notifikasi/data", notifikasiController.data);
+router.patch("/notifikasi/read", notifikasiController.read);
 
 module.exports = router;
