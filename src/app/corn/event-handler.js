@@ -172,15 +172,37 @@ module.exports = {
             order: [
                 ['updatedAt', 'DESC'],
             ],
-            
+
         });
 
         if (mNotifikasi) {
+
+            const listKodePegawai = mNotifikasi.map((notif) => {
+                return notif.data_user_notifikasi.kode_pegawai;
+            });
+
+            const listPegawai = await Pegawai.findAll({
+                where: {
+                    statusaktif_pegawai: "Aktif",
+                    kode_pegawai: {
+                        [Op.in]: listKodePegawai,
+                    },
+                },
+            });
+
             Promise.all(mNotifikasi.map(async (notif) => {
+
+                const mPegawai = listPegawai.find((pegawai) => {
+                    return pegawai.kode_pegawai == notif.data_user_notifikasi.kode_pegawai;
+                });
+
+                const onesignal_id = notif.onesignal_id_notifikasi ?? mPegawai.onesignal_id;
 
                 const _body = {
                     app_id: app_id,
-                    included_segments: ["Subscribed Users"],
+                    include_subscription_ids: [
+                        onesignal_id,
+                    ],
                     data: notif.data_notifikasi,
                     contents: {
                         en: notif.konten_notifikasi,
@@ -198,6 +220,7 @@ module.exports = {
                         const update = await Notifikasi.update({
                             send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
                             updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                            onesignal_id_notifikasi: onesignal_id,
                         }, {
                             where: {
                                 id_notifikasi: notif.id_notifikasi,
@@ -209,8 +232,9 @@ module.exports = {
                 }).finally(async () => {
                     console.log("finally");
 
-                    const update = await Notifikasi.update({                       
+                    const update = await Notifikasi.update({
                         updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        onesignal_id_notifikasi: onesignal_id,
                     }, {
                         where: {
                             id_notifikasi: notif.id_notifikasi,

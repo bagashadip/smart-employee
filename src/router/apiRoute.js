@@ -44,6 +44,9 @@ const timeController = require("../app/api/timeController");
 //Event
 const eventController = require("../app/event/eventController");
 
+//Notifikasi
+const notifikasiController = require("../app/notifikasi/notifikasiController");
+
 router.use(authMiddleware); // dont move it to another line
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -551,5 +554,12 @@ router.post("/event/data", eventController.data);
 router.get("/event/list", eventController.list);
 router.get("/event/kategori", eventController.kategori);
 /* Event Route */
+
+
+/* Notifikasi Route */
+const notifikasiRoute = router.route("/notifikasi");
+notifikasiRoute.get(notifikasiController.validate("get"), notifikasiController.get);  
+router.get("/notifikasi/alert", notifikasiController.alert);
+router.post("/notifikasi/data", notifikasiController.data);
 
 module.exports = router;

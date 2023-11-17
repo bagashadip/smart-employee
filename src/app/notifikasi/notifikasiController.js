@@ -11,7 +11,7 @@ const { Notifikasi } = require("../../models/model");
 
 
 module.exports = {
- 
+
   // Datatable
   data: async (req, res) => {
     // if (!(await req.user.hasAccess(_module, "view"))) {
@@ -34,16 +34,55 @@ module.exports = {
     //   return error(res).permissionError();
     // }
 
-    const validation = validationResult(req);
-    if (!validation.isEmpty()) {
-      return error(res).validationError(validation.array());
-    }
-
     try {
       const mNotifikasi = await Notifikasi.findByPk(req.query.id);
       res.json(mNotifikasi);
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });
+    }
+  },
+  // Get One Row require ID
+  alert: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "view"))) {
+    //   return error(res).permissionError();
+    // }
+
+    try {
+      const countNotRead = await Notifikasi.count({
+        where: {
+          data_user_notifikasi: {
+            kode_pegawai: req.user.kode_pegawai
+          },
+          is_read_notifikasi: false,
+        },
+      });
+      res.json({
+        total: countNotRead
+      });
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  },
+  validate: (type) => {
+
+    console.log(type);
+    // let mEvent = null;
+    const ruleId = query("id")
+      .trim()
+      .notEmpty();
+
+    switch (type) {
+
+      case "get":
+        {
+          return [ruleId];
+        }
+        break;
+      case "delete":
+        {
+          return [ruleId];
+        }
+        break;
     }
   },
 }
