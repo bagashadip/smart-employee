@@ -57,7 +57,7 @@ module.exports = {
         }
       );
 
-      console.log('read notifikasi', req.query.id);
+      // console.log('read notifikasi', req.query.id);
 
 
       res.send({ status: true });
