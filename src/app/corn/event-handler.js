@@ -160,14 +160,12 @@ module.exports = {
         const _headers = {
             'Authorization': 'Basic OWMyNzRmNWMtZDNhNi00YTM1LTgyYzItOTgxYmRiYmFlODU1',
             'Content-Type': 'application/json',
-            'Cookie': '__cf_bm=i12naEj7K4.YSGqnGS2RvjBSMAPewkGg.RGTR9XAKpw-1699959519-0-ARfQqawtuIjnNr0b0idqsfMT1kP7Fc6i2nzzIBQW7xOHBBwDnjPasa3elW1xdyG6wJSk1il8tU6S5ZAK4qRGP78='
         }
 
         const mNotifikasi = await Notifikasi.findAll({
-            limit: 75,
+            limit: 100,
             where: {
                 send_date_notifikasi: null,
-                is_read_notifikasi: false,
             },
             order: [
                 ['updatedAt', 'ASC'],
@@ -175,39 +173,27 @@ module.exports = {
 
         });
 
+        console.log(mNotifikasi)
+
         if (mNotifikasi) {
 
-            const listKodePegawai = mNotifikasi.map((notif) => {
-                return notif.data_user_notifikasi.kode_pegawai;
-            });
-
-            const listPegawai = await Pegawai.findAll({
-                where: {
-                    statusaktif_pegawai: "Aktif",
-                    kode_pegawai: {
-                        [Op.in]: listKodePegawai,
-                    },
-                },
-            });
-
             Promise.all(mNotifikasi.map(async (notif) => {
+                const onesignal_id = notif.onesignal_id_notifikasi;
 
-                const mPegawai = listPegawai.find((pegawai) => {
-                    return pegawai.kode_pegawai == notif.data_user_notifikasi.kode_pegawai;
-                });
+                var include_subscription_ids = [];
+                include_subscription_ids.push(onesignal_id);
 
-                const onesignal_id = notif.onesignal_id_notifikasi ?? mPegawai.onesignal_id;
 
                 const _body = {
                     app_id: app_id,
-                    include_subscription_ids: [
-                        onesignal_id,
-                    ],
+                    include_subscription_ids: include_subscription_ids,
                     data: notif.data_notifikasi,
                     contents: {
-                        en: notif.konten_notifikasi,
+                        en: "test hardcode",//notif.konten_notifikasi,
                     },
                 }
+
+                console.log(_body);
 
                 const requets = await axios({
                     method: 'post',
@@ -215,12 +201,11 @@ module.exports = {
                     data: _body,
                     headers: _headers
                 }).then(async (res) => {
-                    console.log(res.status);
+                    // console.log(res.status);
                     if (res.status == 200) {
                         const update = await Notifikasi.update({
                             send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
                             updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
-                            onesignal_id_notifikasi: onesignal_id,
                         }, {
                             where: {
                                 id_notifikasi: notif.id_notifikasi,
@@ -228,7 +213,8 @@ module.exports = {
                         });
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    // console.log(err);
+                    console.log('error ')
                 }).finally(async () => {
                     console.log("finally");
 
