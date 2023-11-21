@@ -12,7 +12,7 @@ module.exports = function buildMakeCronScheduler() {
     cron.schedule("*/5 * * * * *", function () {
         console.log("scheduler generate");
         event_handler.generate();
-        // console.log("scheduler send");
-        // event_handler.send();
+        console.log("scheduler send");
+        event_handler.send();
     });
 };
