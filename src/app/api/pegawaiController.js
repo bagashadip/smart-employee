@@ -23,12 +23,31 @@ const {
 
 const Op = Sequelize.Op;
 
-module.exports = {
+module.exports = { 
   // Search
   search: async (req, res) => {
 
+    const mAsn = await Asn.findAll({
+      limit: 10,
+      where: {
+        [Op.or]: [
+          {
+            nip_asn: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+          {
+            nama_asn: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+        ],
+      },
+      attributes: ["nip_asn", "nama_asn", "jabatan_asn"],
+    });
+
     const mPegawai = await Pegawai.findAll({
-      limit: 30,
+      limit: 10,
       where: {
         [Op.or]: [
           {
@@ -46,7 +65,24 @@ module.exports = {
       attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
     });
 
-    res.json(mPegawai);
+    var result = [];
+    mAsn.forEach((element) => {
+      result.push({
+        kode: element.nip_asn,
+        nama: element.nama_asn,
+        divisi_jabatan: "ASN",
+      });
+    });
+
+    mPegawai.forEach((element) => {
+      result.push({
+        kode: element.kode_pegawai,
+        nama: element.namalengkap_pegawai,
+        divisi_jabatan: element.kode_divisi,
+      });
+    });
+
+    res.json(result);
   },
   // List
   list: async (req, res) => {
