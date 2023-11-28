@@ -25,7 +25,6 @@ module.exports = {
           hasNext: false,
           next: next
         },
-        search_query: null,
         limit: limit,
         sort: {
           by: "updatedAt",
@@ -42,11 +41,11 @@ module.exports = {
           kode_pegawai: kode
         },
         updatedAt: {
-          [Op.lte]: next
+          [Op.lt]: next
         }
       };
 
-      const orderClause=[
+      const orderClause = [
         [meta.sort.by, meta.sort.order],
       ];
 
@@ -54,16 +53,22 @@ module.exports = {
         limit: limit,
         where: whereClause,
         order: orderClause,
+        attributes: ["id_notifikasi", "tipe_notifikasi", "data_notifikasi", "send_date_notifikasi", "is_read_notifikasi", "updatedAt"]
       });
-
 
       meta.cursor.next = mNotifikasi.length > 0 ? mNotifikasi[mNotifikasi.length - 1].updatedAt : null;
       meta.total = await Notifikasi.count({
         where: whereClause
-      });
-    
+      }) - mNotifikasi.length;
 
-      res.json(meta);
+      meta.cursor.hasNext = meta.total > 0 ? true : false;
+
+      const data = {
+        data: mNotifikasi,
+        meta: meta,
+      };
+
+      res.json(data);
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });
     }
