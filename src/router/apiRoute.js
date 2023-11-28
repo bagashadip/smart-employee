@@ -553,6 +553,7 @@ eventRoute.delete(eventController.validate("delete"), eventController.delete);
 router.post("/event/data", eventController.data);
 router.get("/event/list", eventController.list);
 router.get("/event/kategori", eventController.kategori);
+router.get("/event/calendar", eventController.calendar);
 /* Event Route */
 
 

@@ -6,11 +6,63 @@ const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
 const Op = Sequelize.Op;
-const { Event } = require("../../models/model");
+const { Event, Pegawai } = require("../../models/model");
 
 
 
 module.exports = {
+  // calendar
+  calendar: async (req, res) => {
+    try {
+      const start_date = moment(req.query.start_date, "YYYY-MM-DD");
+      const end_date = moment(req.query.end_date, "YYYY-MM-DD");
+      const kode_pegawai = req.user.kode_pegawai;
+
+
+
+      const mPegawai = await Pegawai.findOne({
+        where: {
+          kode_pegawai: kode_pegawai,
+        },
+      });
+
+      const mEvent = await Event.findAll({
+        where: {
+          status_event: "PUBLIC",
+          tanggal_event: {
+            [Op.gte]: start_date,
+            [Op.lte]: end_date,
+          },
+        },
+      });
+
+
+      var result = [];
+      console.log(kode_pegawai);
+      console.log(mPegawai.divisi_pegawai);
+
+      mEvent.map((item) => {
+
+        console.log(item.recipient_event);
+
+        if (item.kategori_event == "ALL" || item.recipient_event.includes(kode_pegawai) || item.recipient_event.includes(mPegawai.divisi_pegawai)) {
+          result.push({
+            id_event: item.id_event,
+            nama_event: item.judul_event,
+            tanggal_event: item.tanggal_event,
+            jammulai_event: item.jammulai_event,
+            jamselesai_event: item.jamselesai_event,
+            kategori_event: item.kategori_event,
+          });
+        }
+      });
+
+      res.json(result);
+
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  },
   // List
   list: async (req, res) => {
     // if (!(await req.user.hasAccess(_module, "view"))) {
