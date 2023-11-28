@@ -9,7 +9,6 @@ const { Event, Pegawai, Notifikasi } = require("../../models/model");
 
 module.exports = {
     generate: async function () {
-        console.log("masuk dalam cron start " + moment().format("YYYY-MM-DD hh:mm:ss"));
 
         const mEvent = await Event.findAll({
             where: {
@@ -46,13 +45,19 @@ module.exports = {
                     },
                 });
 
+                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const remider_date1 = event.push_date_event;
+                const remider_date2 = moment(tanggal_event);
+
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        judul_notifikasi: event.judul_event ?? '',
-                        konten_notifikasi: event.konten_event ?? '',
-                        ikon_notifikasi: event.ikon_event ?? '',
-                        gambar_notifikasi: event.gambar_event ?? '',
+                        reminder_title1_notifikasi: remider_notif1,
+                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_date1_notifikasi: remider_date1,
+                        reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,
@@ -61,6 +66,8 @@ module.exports = {
                         onesignal_id_notifikasi: pegawai.onesignal_id,
                     });
                 });
+
+
             }))
         }
 
@@ -90,13 +97,19 @@ module.exports = {
                     },
                 });
 
+                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const remider_date1 = event.push_date_event;
+                const remider_date2 = moment(tanggal_event);
+
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        judul_notifikasi: event.judul_event ?? '',
-                        konten_notifikasi: event.konten_event ?? '',
-                        ikon_notifikasi: event.ikon_event ?? '',
-                        gambar_notifikasi: event.gambar_event ?? '',
+                        reminder_title1_notifikasi: remider_notif1,
+                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_date1_notifikasi: remider_date1,
+                        reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,
@@ -131,13 +144,19 @@ module.exports = {
                     attributes: ["onesignal_id", "kode_pegawai", "namalengkap_pegawai"],
                 });
 
+                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const remider_date1 = event.push_date_event;
+                const remider_date2 = moment(tanggal_event);
+
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        judul_notifikasi: event.judul_event ?? '',
-                        konten_notifikasi: event.konten_event ?? '',
-                        ikon_notifikasi: event.ikon_event ?? '',
-                        gambar_notifikasi: event.gambar_event ?? '',
+                        reminder_title1_notifikasi: remider_notif1,
+                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_date1_notifikasi: remider_date1,
+                        reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,
@@ -148,11 +167,7 @@ module.exports = {
                 });
 
             }));
-
         }
-
-
-        console.log("masuk dalam cron end " + moment().format("YYYY-MM-DD hh:mm:ss"));
     },
     send: async function () {
         const url = "https://onesignal.com/api/v1/notifications";
@@ -165,7 +180,18 @@ module.exports = {
         const mNotifikasi = await Notifikasi.findAll({
             limit: 100,
             where: {
-                send_date_notifikasi: null,
+                [Op.or]: [
+                    {
+                        reminder_date1_notifikasi: {
+                            [Op.lte]: moment(),
+                        },
+                    },
+                    {
+                        reminder_date2_notifikasi: {
+                            [Op.lte]: moment(),
+                        },
+                    }
+                ],
             },
             order: [
                 ['updatedAt', 'ASC'],
@@ -188,7 +214,7 @@ module.exports = {
                     include_subscription_ids: include_subscription_ids,
                     data: notif.data_notifikasi,
                     contents: {
-                        en: "test hardcode",//notif.konten_notifikasi,
+                        en: notif.reminder_date1_notifikasi ? notif.reminder_title1_notifikasi : notif.reminder_title2_notifikasi,
                     },
                 }
 
@@ -202,14 +228,27 @@ module.exports = {
                 }).then(async (res) => {
                     // console.log(res.status);
                     if (res.status == 200) {
-                        const update = await Notifikasi.update({
-                            send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
-                            updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
-                        }, {
-                            where: {
-                                id_notifikasi: notif.id_notifikasi,
-                            }
-                        });
+
+                        if (notif.reminder_date1_notifikasi) {
+                            const update = await Notifikasi.update({
+                                send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
+                                reminder_date1_notifikasi: null,
+                                updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                            }, {
+                                where: {
+                                    id_notifikasi: notif.id_notifikasi,
+                                }
+                            });
+                        } else {
+                            const update = await Notifikasi.update({
+                                reminder_date2_notifikasi: null,
+                                updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                            }, {
+                                where: {
+                                    id_notifikasi: notif.id_notifikasi,
+                                }
+                            });
+                        }
                     }
                 }).catch((err) => {
                     // console.log(err);
