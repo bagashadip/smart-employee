@@ -11,7 +11,63 @@ const { Notifikasi } = require("../../models/model");
 
 
 module.exports = {
+  mobile: async (req, res) => {
 
+    try {
+
+      const next = req.query.next ?? moment();
+      const limit = req.query.limit ?? 10;
+      const kode = req.user.kode_pegawai;
+
+      var meta = {
+        total: 0,
+        cursor: {
+          hasNext: false,
+          next: next
+        },
+        search_query: null,
+        limit: limit,
+        sort: {
+          by: "updatedAt",
+          order: "DESC"
+        }
+      };
+
+
+      const whereClause = {
+        send_date_notifikasi: {
+          [Op.ne]: null
+        },
+        data_user_notifikasi: {
+          kode_pegawai: kode
+        },
+        updatedAt: {
+          [Op.lte]: next
+        }
+      };
+
+      const orderClause=[
+        [meta.sort.by, meta.sort.order],
+      ];
+
+      const mNotifikasi = await Notifikasi.findAll({
+        limit: limit,
+        where: whereClause,
+        order: orderClause,
+      });
+
+
+      meta.cursor.next = mNotifikasi.length > 0 ? mNotifikasi[mNotifikasi.length - 1].updatedAt : null;
+      meta.total = await Notifikasi.count({
+        where: whereClause
+      });
+    
+
+      res.json(meta);
+    } catch (err) {
+      res.status(400).json({ status: false, message: err.message });
+    }
+  },
   // Datatable
   data: async (req, res) => {
     // if (!(await req.user.hasAccess(_module, "view"))) {

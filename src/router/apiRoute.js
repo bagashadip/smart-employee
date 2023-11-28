@@ -563,5 +563,6 @@ notifikasiRoute.get(notifikasiController.validate("get"), notifikasiController.g
 router.get("/notifikasi/alert", notifikasiController.alert);
 router.post("/notifikasi/data", notifikasiController.data);
 router.patch("/notifikasi/read", notifikasiController.read);
+router.get("/notifikasi/mobile", notifikasiController.mobile);
 
 module.exports = router;
