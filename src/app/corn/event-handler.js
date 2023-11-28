@@ -45,9 +45,9 @@ module.exports = {
                     },
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
@@ -81,7 +81,7 @@ module.exports = {
                 const update = await Event.update(
                     {
                         is_push_event: false,
-                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        updated_at: moment(),
                     },
                     { where: { id_event: event.id_event } }
                 );
@@ -97,9 +97,9 @@ module.exports = {
                     },
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
@@ -132,7 +132,7 @@ module.exports = {
                 const update = await Event.update(
                     {
                         is_push_event: false,
-                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        updated_at: moment(),
                     },
                     { where: { id_event: event.id_event } }
                 );
@@ -144,9 +144,9 @@ module.exports = {
                     attributes: ["onesignal_id", "kode_pegawai", "namalengkap_pegawai"],
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY-MM-DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \n Yuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \n Jangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
+                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
+                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
@@ -231,9 +231,9 @@ module.exports = {
 
                         if (notif.reminder_date1_notifikasi) {
                             const update = await Notifikasi.update({
-                                send_date_notifikasi: moment().format("YYYY-MM-DD hh:mm:ss"),
+                                send_date_notifikasi: moment(),
                                 reminder_date1_notifikasi: null,
-                                updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                                updatedAt: moment(),
                             }, {
                                 where: {
                                     id_notifikasi: notif.id_notifikasi,
@@ -242,7 +242,7 @@ module.exports = {
                         } else {
                             const update = await Notifikasi.update({
                                 reminder_date2_notifikasi: null,
-                                updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                                updatedAt: moment(),
                             }, {
                                 where: {
                                     id_notifikasi: notif.id_notifikasi,
@@ -257,7 +257,7 @@ module.exports = {
                     console.log("finally");
 
                     const update = await Notifikasi.update({
-                        updatedAt: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        updatedAt: moment(),
                         onesignal_id_notifikasi: onesignal_id,
                     }, {
                         where: {
