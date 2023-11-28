@@ -16,7 +16,7 @@ module.exports = {
                 status_event: "PUBLIC",
                 is_push_event: true,
                 push_date_event: {
-                    [Op.lte]: moment().format("YYYY-MM-DD hh:mm:ss"),
+                    [Op.lte]: moment(),
                 },
             },
         });
@@ -31,7 +31,7 @@ module.exports = {
                 const update = await Event.update(
                     {
                         is_push_event: false,
-                        updated_at: moment().format("YYYY-MM-DD hh:mm:ss"),
+                        updated_at: moment(),
                     },
                     { where: { id_event: event.id_event } }
                 );
