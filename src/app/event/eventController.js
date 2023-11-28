@@ -37,14 +37,8 @@ module.exports = {
       });
 
 
-      var result = [];
-      console.log(kode_pegawai);
-      console.log(mPegawai.divisi_pegawai);
-
+      var result = [];      
       mEvent.map((item) => {
-
-        console.log(item.recipient_event);
-
         if (item.kategori_event == "ALL" || item.recipient_event.includes(kode_pegawai) || item.recipient_event.includes(mPegawai.divisi_pegawai)) {
           result.push({
             id_event: item.id_event,
