@@ -7,6 +7,7 @@ const datatable = require("../../util/datatable");
 const moment = require("moment");
 const Op = Sequelize.Op;
 const { Event, Pegawai } = require("../../models/model");
+const sequelize = require("../../util/database");
 
 
 
@@ -14,11 +15,10 @@ module.exports = {
   // calendar
   calendar: async (req, res) => {
     try {
-      const start_date = moment(req.query.start_date, "YYYY-MM-DD");
-      const end_date = moment(req.query.end_date, "YYYY-MM-DD");
+
+      const year = req.query.year;
+      const month = req.query.month;
       const kode_pegawai = req.user.kode_pegawai;
-
-
 
       const mPegawai = await Pegawai.findOne({
         where: {
@@ -30,24 +30,27 @@ module.exports = {
         where: {
           status_event: "PUBLIC",
           tanggal_event: {
-            [Op.gte]: start_date,
-            [Op.lte]: end_date,
+            [Op.and]: [
+              Sequelize.where(sequelize.fn("DATE_PART", "YEAR", sequelize.col("tanggal_event")), year),
+              Sequelize.where(sequelize.fn("DATE_PART", "MONTH", sequelize.col("tanggal_event")), month),
+            ],
           },
         },
       });
 
 
-      var result = [];      
+      var result = [];
       mEvent.map((item) => {
         if (item.kategori_event == "ALL" || item.recipient_event.includes(kode_pegawai) || item.recipient_event.includes(mPegawai.divisi_pegawai)) {
-          result.push({
-            id_event: item.id_event,
-            nama_event: item.judul_event,
-            tanggal_event: item.tanggal_event,
-            jammulai_event: item.jammulai_event,
-            jamselesai_event: item.jamselesai_event,
-            kategori_event: item.kategori_event,
-          });
+          const tanggal = moment(item.tanggal_event).format("YYYY-MM-DD");
+
+          if (!result.includes(tanggal) || result.length == 0) {
+            const events = mEvent.filter((event) => {
+              return moment(event.tanggal_event).format("YYYY-MM-DD") == tanggal;
+            });
+
+            result.push({ tanggal: tanggal, events: events });
+          }
         }
       });
 
