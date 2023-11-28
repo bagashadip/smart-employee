@@ -183,7 +183,6 @@ module.exports = {
                 var include_subscription_ids = [];
                 include_subscription_ids.push(onesignal_id);
 
-
                 const _body = {
                     app_id: app_id,
                     include_subscription_ids: include_subscription_ids,
