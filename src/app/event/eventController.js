@@ -36,6 +36,7 @@ module.exports = {
             ],
           },
         },
+        attributes: ["id_event", "nama_event", "tanggal_event", "jammulai_event", "jamselesai_event", "kategori_event", "recipient_event"],
       });
 
 
