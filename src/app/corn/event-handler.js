@@ -199,7 +199,7 @@ module.exports = {
 
         });
 
-        console.log(mNotifikasi)
+        // console.log(mNotifikasi)
 
         if (mNotifikasi) {
 
