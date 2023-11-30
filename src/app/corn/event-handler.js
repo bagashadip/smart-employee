@@ -20,6 +20,9 @@ module.exports = {
             },
         });
 
+        const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke [nama] pada [tanggal]. Tiada kesan tanpa kehadiranmu. ❤";
+        const remider_notif2 = " It's The Day! \nJangan lupa hadir ke [nama]. See you there!";
+
         const mEventIndividu = mEvent.filter((item) => {
             return item.kategori_event == "INDIVIDU";
         });
@@ -45,17 +48,15 @@ module.exports = {
                     },
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        reminder_title1_notifikasi: remider_notif1,
-                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_title1_notifikasi: remider_notif1.replace("[nama]", event.nama_event).replace("[tanggal]", tanggal_event),
+                        reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
@@ -97,17 +98,15 @@ module.exports = {
                     },
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        reminder_title1_notifikasi: remider_notif1,
-                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_title1_notifikasi: remider_notif1.replace("[nama]", event.nama_event).replace("[tanggal]", tanggal_event),
+                        reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
@@ -144,17 +143,15 @@ module.exports = {
                     attributes: ["onesignal_id", "kode_pegawai", "namalengkap_pegawai"],
                 });
 
-                const tanggal_event = moment(event.tanggal_event).format("YYYY MMM DD") + " " + event.jammulai_event;
-                const remider_notif1 = "Ada undangan buat kamu ✉ \nYuk datang ke " + event.nama_event + " pada " + tanggal_event + ". Tiada kesan tanpa kehadiranmu. ❤";
-                const remider_notif2 = " It's The Day! \nJangan lupa hadir ke " + event.nama_event + ". See you there!";
+                const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
-                        reminder_title1_notifikasi: remider_notif1,
-                        reminder_title2_notifikasi: remider_notif2,
+                        reminder_title1_notifikasi: remider_notif1.replace("[nama]", event.nama_event).replace("[tanggal]", tanggal_event),
+                        reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
