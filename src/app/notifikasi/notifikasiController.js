@@ -53,7 +53,7 @@ module.exports = {
         limit: limit,
         where: whereClause,
         order: orderClause,
-        attributes: ["id_notifikasi", "tipe_notifikasi", "data_notifikasi", "send_date_notifikasi", "is_read_notifikasi", "updatedAt"]
+        attributes: ["id_notifikasi", "main_title_notifikasi", "main_konten_notifikasi", "tipe_notifikasi", "data_notifikasi", "send_date_notifikasi", "is_read_notifikasi", "updatedAt"]
       });
 
       meta.cursor.next = mNotifikasi.length > 0 ? mNotifikasi[mNotifikasi.length - 1].updatedAt : null;

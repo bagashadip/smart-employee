@@ -59,12 +59,15 @@ module.exports = {
                         reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
+                        main_title_notifikasi: event.nama_event,
+                        main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
                         onesignal_id_notifikasi: pegawai.onesignal_id,
+                        
                     });
                 });
 
@@ -109,6 +112,8 @@ module.exports = {
                         reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
+                        main_title_notifikasi: event.nama_event,
+                        main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,
@@ -154,6 +159,8 @@ module.exports = {
                         reminder_title2_notifikasi: remider_notif2.replace("[nama]", event.nama_event),
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
+                        main_title_notifikasi: event.nama_event,
+                        main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: event ?? {},
                         send_date_notifikasi: null,

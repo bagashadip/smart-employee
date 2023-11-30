@@ -31,6 +31,14 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true
       },
+      main_title_notifikasi: {
+        type: Sequelize.STRING(500),
+        allowNull: false
+      },
+      main_konten_notifikasi: {
+        type: Sequelize.STRING(500),
+        allowNull: false
+      },
       tipe_notifikasi: {
         type: Sequelize.STRING(255),
         allowNull: false
