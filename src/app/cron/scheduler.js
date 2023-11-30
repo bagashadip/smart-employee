@@ -15,7 +15,7 @@ module.exports = function buildMakeCronScheduler() {
         console.log("scheduler generate");
         event_handler.generate();
         console.log("scheduler send");
-        // event_handler.send();
+        event_handler.send();
         console.log("masuk dalam cron end " + moment().format("YYYY-MM-DD HH:mm:ss"));
     });
     
