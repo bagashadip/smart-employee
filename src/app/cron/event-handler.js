@@ -50,15 +50,16 @@ module.exports = {
 
                 const mFile = await File.findOne({
                     where: {
-                        id: mEvent.gambar_event,
+                        id: event.gambar_event,
                     },
                     attributes: ["name", "path", "extension", "size"],
                 });
 
                 const result = {
-                    ...mEvent.dataValues,
+                    ...event.dataValues,
                     foto: mFile
                 }
+                console.log(result);
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
@@ -115,13 +116,13 @@ module.exports = {
 
                 const mFile = await File.findOne({
                     where: {
-                        id: mEvent.gambar_event,
+                        id: event.gambar_event,
                     },
                     attributes: ["name", "path", "extension", "size"],
                 });
 
                 const result = {
-                    ...mEvent.dataValues,
+                    ...event.dataValues,
                     foto: mFile
                 }
 
@@ -174,13 +175,13 @@ module.exports = {
 
                 const mFile = await File.findOne({
                     where: {
-                        id: mEvent.gambar_event,
+                        id: event.gambar_event,
                     },
                     attributes: ["name", "path", "extension", "size"],
                 });
 
                 const result = {
-                    ...mEvent.dataValues,
+                    ...event.dataValues,
                     foto: mFile
                 }
 
