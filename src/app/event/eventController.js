@@ -6,7 +6,7 @@ const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
 const Op = Sequelize.Op;
-const { Event, Pegawai } = require("../../models/model");
+const { Event, Pegawai, File } = require("../../models/model");
 const sequelize = require("../../util/database");
 
 
@@ -113,7 +113,18 @@ module.exports = {
 
     try {
       const mEvent = await Event.findByPk(req.query.id);
-      res.json(mEvent);
+      const mFile = await File.findOne({
+        where: {
+          id: mEvent.gambar_event,
+        },
+        attributes: [ "name", "path", "extension", "size"],
+      });
+
+      const result = {
+        ...mEvent.dataValues,
+        foto: mFile
+      }
+      res.json(result);
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });
     }

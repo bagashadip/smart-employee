@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const moment = require("moment");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
-const { Event, Pegawai, Notifikasi } = require("../../models/model");
+const { Event, Pegawai, Notifikasi, File } = require("../../models/model");
 
 
 module.exports = {
@@ -48,6 +48,18 @@ module.exports = {
                     },
                 });
 
+                const mFile = await File.findOne({
+                    where: {
+                        id: mEvent.gambar_event,
+                    },
+                    attributes: ["name", "path", "extension", "size"],
+                });
+
+                const result = {
+                    ...mEvent.dataValues,
+                    foto: mFile
+                }
+
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
@@ -62,12 +74,12 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: event ?? {},
+                        data_notifikasi: result ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
                         onesignal_id_notifikasi: pegawai.onesignal_id,
-                        
+
                     });
                 });
 
@@ -101,6 +113,18 @@ module.exports = {
                     },
                 });
 
+                const mFile = await File.findOne({
+                    where: {
+                        id: mEvent.gambar_event,
+                    },
+                    attributes: ["name", "path", "extension", "size"],
+                });
+
+                const result = {
+                    ...mEvent.dataValues,
+                    foto: mFile
+                }
+
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
@@ -115,7 +139,7 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: event ?? {},
+                        data_notifikasi: result ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
@@ -148,6 +172,18 @@ module.exports = {
                     attributes: ["onesignal_id", "kode_pegawai", "namalengkap_pegawai"],
                 });
 
+                const mFile = await File.findOne({
+                    where: {
+                        id: mEvent.gambar_event,
+                    },
+                    attributes: ["name", "path", "extension", "size"],
+                });
+
+                const result = {
+                    ...mEvent.dataValues,
+                    foto: mFile
+                }
+
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
                 const remider_date2 = moment(tanggal_event);
@@ -162,7 +198,7 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: event ?? {},
+                        data_notifikasi: result ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
