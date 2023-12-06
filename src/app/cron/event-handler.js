@@ -37,7 +37,7 @@ module.exports = {
                     },
                     { where: { id_event: event.id_event } }
                 );
-                const listPegawai = event.recipient_event.split(",");
+                const listPegawai = event.recipient_event;
 
                 const mPegawai = await Pegawai.findAll({
                     where: {
@@ -103,7 +103,7 @@ module.exports = {
                     { where: { id_event: event.id_event } }
                 );
 
-                const listDivisi = event.recipient_event.split(",");
+                const listDivisi = event.recipient_event;
 
                 const mPegawai = await Pegawai.findAll({
                     where: {
