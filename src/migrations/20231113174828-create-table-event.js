@@ -45,8 +45,9 @@ module.exports = {
         allowNull: false
       },
       recipient_event: {
-        type: Sequelize.TEXT,
-        allowNull: true
+        type: Sequelize.JSON,
+        allowNull: true,
+        defaultValue: null
       },
       pic_event: {
         type: Sequelize.STRING(150),

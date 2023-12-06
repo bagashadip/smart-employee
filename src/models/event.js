@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       keterangan_event: DataTypes.TEXT,
       gambar_event: DataTypes.STRING,
       kategori_event: DataTypes.STRING,
-      recipient_event: DataTypes.TEXT,
+      recipient_event: DataTypes.JSON,
       pic_event: DataTypes.STRING,
       divisi_event: DataTypes.STRING,
       is_push_event: DataTypes.BOOLEAN,
