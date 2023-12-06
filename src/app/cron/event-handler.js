@@ -63,7 +63,7 @@ module.exports = {
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
-                const remider_date2 = moment(tanggal_event);
+                const remider_date2 = moment(tanggal_event, "DD MMM YYYY HH:mm");
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
@@ -128,7 +128,7 @@ module.exports = {
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
-                const remider_date2 = moment(tanggal_event);
+                const remider_date2 = moment(tanggal_event, "DD MMM YYYY HH:mm");
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
@@ -187,7 +187,7 @@ module.exports = {
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
-                const remider_date2 = moment(tanggal_event);
+                const remider_date2 = moment(tanggal_event, "DD MMM YYYY HH:mm");
 
                 mPegawai.map(async (pegawai) => {
                     const mNotifikasi = await Notifikasi.create({
