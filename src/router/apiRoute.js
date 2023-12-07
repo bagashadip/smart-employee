@@ -38,6 +38,7 @@ const kegiatanController = require("../app/api/kegiatanController");
 const lapbulController = require("../app/lapbul/lapbulController");
 const lampiranController = require("../app/lapbul/lampiranController");
 const liburNasionalController = require("../app/api/liburNasionalController");
+const arsipLapbulController = require("../app/lapbul/arsipLapbulController");
 
 const timeController = require("../app/api/timeController");
 
@@ -533,5 +534,15 @@ router.post("/user-role/data", userRoleController.data);
 router.get("/user-role/permission", userRoleController.permission);
 router.get("/user-role/list", userRoleController.list);
 /* User Role */
+
+/* Arsip Lapbul Route */
+const arsipLapbulRoute = router.route("/arsip-lapbul");
+arsipLapbulRoute.get(arsipLapbulController.validate("get"), arsipLapbulController.get);
+arsipLapbulRoute.post(arsipLapbulController.validate("create"), arsipLapbulController.create);
+arsipLapbulRoute.patch(arsipLapbulController.validate("update"), arsipLapbulController.update);
+arsipLapbulRoute.delete(arsipLapbulController.validate("delete"), arsipLapbulController.delete);
+router.post("/arsip-lapbul/data", arsipLapbulController.data);
+router.get("/arsip-lapbul/list", arsipLapbulController.list);
+/* Arsip Lapbul */
 
 module.exports = router;
