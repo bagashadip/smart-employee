@@ -6,7 +6,7 @@ const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
 const Op = Sequelize.Op;
-const { Event, Pegawai, File } = require("../../models/model");
+const { Event, Pegawai, File, Divisi, Asn } = require("../../models/model");
 const sequelize = require("../../util/database");
 
 
@@ -117,12 +117,114 @@ module.exports = {
         where: {
           id: mEvent.gambar_event,
         },
-        attributes: [ "name", "path", "extension", "size"],
+        attributes: ["name", "path", "extension", "size"],
       });
+
+      var pic_object = null;
+      var divisi_object = null;
+      var recipient_object = [];
+
+      if (mEvent.pic_event) {
+        const mPegawai = await Pegawai.findOne({
+          where: {
+            kode_pegawai: mEvent.pic_event,
+          },
+          attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+        });
+
+        const mAsn = await Asn.findOne({
+          where: {
+            nip_asn: mEvent.pic_event,
+          },
+          attributes: ["nip_asn", "nama_asn"],
+        });
+
+        if (mPegawai) {
+          pic_object = {
+            kode: mPegawai.kode_pegawai,
+            nama: mPegawai.namalengkap_pegawai,
+            divisi_jabatan: mPegawai.kode_divisi,
+          }
+
+        } else if (mAsn) {
+          pic_object = {
+            kode: mAsn.nip_asn,
+            nama: mAsn.nama_asn,
+            divisi_jabatan: "ASN",
+          }
+        }
+      }
+
+      if (mEvent.divisi_event) {
+        divisi_object = await Divisi.findOne({
+          where: {
+            kode_divisi: mEvent.divisi_event,
+          },
+          attributes: ["kode_divisi", "nama_divisi"],
+        });
+      }
+
+      if (mEvent.recipient_event && mEvent.kategori_event == "INDIVIDU") {
+        const pegawais = await Pegawai.findAll({
+          where: {
+            kode_pegawai: {
+              [Op.in]: mEvent.recipient_event,
+            },
+          },
+          attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+        });
+
+        pegawais.map((item) => {
+          recipient_object.push({
+            kode: item.kode_pegawai,
+            nama: item.namalengkap_pegawai,
+            divisi_jabatan: item.kode_divisi,
+          });
+        });
+
+        const asns = await Asn.findAll({
+          where: {
+            nip_asn: {
+              [Op.in]: mEvent.recipient_event,
+            },
+          },
+          attributes: ["nip_asn", "nama_asn"],
+        });
+
+        asns.map((item) => {
+          recipient_object.push({
+            kode: item.nip_asn,
+            nama: item.nama_asn,
+            divisi_jabatan: "ASN",
+          });
+        });
+      }
+
+      if (mEvent.recipient_event && mEvent.kategori_event == "DIVISI") {
+        var divisis = await Divisi.findAll({
+          where: {
+            kode_divisi: {
+              [Op.in]: mEvent.recipient_event,
+            },
+          },
+          attributes: ["kode_divisi", "nama_divisi"],
+        });
+
+        divisis.map((item) => {
+          recipient_object.push({
+            kode: item.kode_divisi,
+            nama: item.nama_divisi
+          });
+        });
+
+      }
 
       const result = {
         ...mEvent.dataValues,
-        foto: mFile
+        foto: mFile,
+        pic_object: pic_object,
+        divisi_object: divisi_object,
+        recipient_object: recipient_object,
       }
       res.json(result);
     } catch (err) {
