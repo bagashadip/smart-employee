@@ -39,6 +39,7 @@ const lapbulController = require("../app/lapbul/lapbulController");
 const lampiranController = require("../app/lapbul/lampiranController");
 const liburNasionalController = require("../app/api/liburNasionalController");
 const arsipLapbulController = require("../app/lapbul/arsipLapbulController");
+const arsipLapbulLogController = require("../app/lapbul/arsipLapbulControllerLog");
 
 const timeController = require("../app/api/timeController");
 
@@ -544,5 +545,15 @@ arsipLapbulRoute.delete(arsipLapbulController.validate("delete"), arsipLapbulCon
 router.post("/arsip-lapbul/data", arsipLapbulController.data);
 router.get("/arsip-lapbul/list", arsipLapbulController.list);
 /* Arsip Lapbul */
+
+/* Arsip Lapbul Log Route */
+const arsipLapbulLogRoute = router.route("/arsip-lapbul-log");
+arsipLapbulLogRoute.get(arsipLapbulLogController.validate("get"), arsipLapbulLogController.get);
+arsipLapbulLogRoute.post(arsipLapbulLogController.validate("create"), arsipLapbulLogController.create);
+arsipLapbulLogRoute.patch(arsipLapbulLogController.validate("update"), arsipLapbulLogController.update);
+arsipLapbulLogRoute.delete(arsipLapbulLogController.validate("delete"), arsipLapbulLogController.delete);
+router.post("/arsip-lapbul-log/data", arsipLapbulLogController.data);
+router.get("/arsip-lapbul-log/list", arsipLapbulLogController.list);
+/* Arsip Lapbul Log */
 
 module.exports = router;

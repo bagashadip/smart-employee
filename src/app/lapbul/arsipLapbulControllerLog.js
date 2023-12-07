@@ -1,10 +1,10 @@
-const _module = "arsip-lapbul";
+const _module = "arsip-lapbul-log";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { ArsipLapbul, Pegawai, ArsipLapbulLog } = require("../../models/model");
+const { ArsipLapbulLog, Pegawai, ArsipLapbul } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -14,10 +14,10 @@ module.exports = {
     if (!(await req.user.hasAccess(_module, "view"))) {
       return error(res).permissionError();
     }
-    const mArsipLapbul = await ArsipLapbul.findAll({
-      attributes: ["id", "kode_pegawai", "name","period", "file", "status", "createdBy", "updatedBy", "createdAt", "updatedAt"],
+    const mArsipLapbulLog = await ArsipLapbulLog.findAll({
+      attributes: ["id", "arsip_lapbul_id", "note", "status", "createdAt", "updatedAt", "createdBy", "updatedBy"],
     });
-    res.json(mArsipLapbul);
+    res.json(mArsipLapbulLog);
   },
   // Datatable
   data: async (req, res) => {
@@ -26,8 +26,8 @@ module.exports = {
     }
 
     var dataTableObj = await datatable(req.body);
-    var count = await ArsipLapbul.count();
-    var modules = await ArsipLapbul.findAndCountAll(dataTableObj);
+    var count = await ArsipLapbulLog.count();
+    var modules = await ArsipLapbulLog.findAndCountAll(dataTableObj);
 
     res.json({
       recordsFiltered: modules.count,
@@ -45,13 +45,13 @@ module.exports = {
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
     }
-
-    const mArsipLapbul = await ArsipLapbul.findOne({
+    
+    const mArsipLapbulLog = await ArsipLapbulLog.findOne({
       where: {
         id: req.query.id,
       },
     });
-    res.json(mArsipLapbul);
+    res.json(mArsipLapbulLog);
   },
   // Create
   create: async (req, res) => {
@@ -64,7 +64,7 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const arsipLapbul = await new ArsipLapbul({
+    const arsipLapbulLog = await new ArsipLapbulLog({
       ...req.body,
     }).save();
 
@@ -85,18 +85,10 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const update = await ArsipLapbul.update(
+    await ArsipLapbulLog.update(
       { ...req.body },
       { where: { id: req.query.id } }
     );
-
-    if (update) {
-        await new ArsipLapbulLog({
-            arsip_lapbul_id: req.query.id,
-            note: req.body.note,
-            status: req.body.status
-        }).save();
-    }
 
     res.json({
       status: true,
@@ -115,7 +107,7 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await ArsipLapbul.destroy({
+    await ArsipLapbulLog.destroy({
       where: {
         id: req.query.id,
       },
@@ -127,8 +119,23 @@ module.exports = {
   },
   // Validation
   validate: (type) => {
-    let mArsipLapbul = null;
-    const ruleIdArsip = query("id")
+    let mArsipLapbulLog = null;
+    const ruleIdArsipLog = query("id")
+      .notEmpty()
+      .custom(async (value) => {
+        mArsipLapbulLog = await ArsipLapbulLog.findOne({
+          where: {
+            id: {
+              [Op.eq]: value,
+            },
+          },
+        });
+        if (!mArsipLapbulLog) {
+          return Promise.reject("Data not found!");
+        }
+      });
+    const ruleArsipLapbul = body("arsip_lapbul_id")
+      .trim()
       .notEmpty()
       .custom(async (value) => {
         mArsipLapbul = await ArsipLapbul.findOne({
@@ -139,48 +146,29 @@ module.exports = {
           },
         });
         if (!mArsipLapbul) {
-          return Promise.reject("Data not found!");
+          return Promise.reject("Arsip Lapbul doesn't exist!");
         }
       });
-    const ruleKodePegawai = body("kode_pegawai")
-      .trim()
-      .notEmpty()
-      .custom(async (value) => {
-        mArsipLapbul = await Pegawai.findOne({
-          where: {
-            kode_pegawai: {
-              [Op.iLike]: value,
-            },
-          },
-        });
-        if (!mArsipLapbul) {
-          return Promise.reject("Pegawai doesn't exist!");
-        }
-      });
-    const ruleName = body("name").trim().notEmpty();
-    const rulePeriod = body("period").notEmpty();
-    const ruleFile = body("file").notEmpty();
-    const ruleStatus = body("status").notEmpty();
 
     switch (type) {
       case "create":
         {
-          return [ruleKodePegawai, ruleName, rulePeriod, ruleFile, ruleStatus];
+          return [ruleArsipLapbul];
         }
         break;
       case "update":
         {
-          return [ruleIdArsip, ruleName.optional(), rulePeriod.optional(), ruleFile.optional(), ruleStatus.optional()];
+          return [ruleIdArsipLog];
         }
         break;
       case "get":
         {
-          return [ruleIdArsip];
+          return [ruleIdArsipLog];
         }
         break;
       case "delete":
         {
-          return [ruleIdArsip];
+          return [ruleIdArsipLog];
         }
         break;
     }
