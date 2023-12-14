@@ -31,6 +31,8 @@ const mLapbul = require("./lapbul");
 const mLiburNasional = require("./liburnasional");
 const mArsipLapbul = require("./arsipLapbul");
 const mArsipLapbulLog = require("./arsipLapbulLog");
+const mEvent = require("./event");
+const mNotifikasi = require("./notifikasi");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -62,6 +64,8 @@ const Lapbul = mLapbul(sequelize, Sequelize);
 const LiburNasional = mLiburNasional(sequelize, Sequelize);
 const ArsipLapbul = mArsipLapbul(sequelize, Sequelize);
 const ArsipLapbulLog = mArsipLapbulLog(sequelize, Sequelize);
+const Event = mEvent(sequelize, Sequelize);
+const Notifikasi = mNotifikasi(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -307,5 +311,7 @@ module.exports = {
   UserRole,
   LiburNasional,
   ArsipLapbul,
-  ArsipLapbulLog
+  ArsipLapbulLog,
+  Event,
+  Notifikasi
 };

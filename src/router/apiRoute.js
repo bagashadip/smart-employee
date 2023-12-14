@@ -43,6 +43,12 @@ const arsipLapbulLogController = require("../app/lapbul/arsipLapbulControllerLog
 
 const timeController = require("../app/api/timeController");
 
+//Event
+const eventController = require("../app/event/eventController");
+
+//Notifikasi
+const notifikasiController = require("../app/notifikasi/notifikasiController");
+
 router.use(authMiddleware); // dont move it to another line
 // upload route
 router.post("/file/upload/:fileCategory?", uploadController.upload);
@@ -108,6 +114,7 @@ divisiRoute.delete(
 );
 router.post("/divisi/data", divisiController.data);
 router.get("/divisi/list", divisiController.list);
+router.get("/divisi/search", divisiController.search);
 /* Divisi Route */
 
 /* Ptkp Route */
@@ -277,6 +284,7 @@ pegawaiRoute.delete(
 );
 router.post("/pegawai/data", pegawaiController.data);
 router.get("/pegawai/list", pegawaiController.list);
+router.get("/pegawai/search", pegawaiController.search);
 /* Pegawai Route */
 
 /* User Route */
@@ -463,10 +471,10 @@ lapulRoute.get(lapbulController.list);
 lapulRoute.post(lapbulController.create);
 lapulRoute.patch(lapbulController.update);
 lapulRoute.delete(lapbulController.delete);
-router.post("/lapbul/generate",lapbulController.generate);
-router.post("/lapbul/poc",lapbulController.poc);
-router.get("/lapbul/:id_lapbul",lapbulController.get_by_id);
-router.post("/lapbul/data",lapbulController.data);
+router.post("/lapbul/generate", lapbulController.generate);
+router.post("/lapbul/poc", lapbulController.poc);
+router.get("/lapbul/:id_lapbul", lapbulController.get_by_id);
+router.post("/lapbul/data", lapbulController.data);
 /* Lapbul Route */
 
 /* Libur Nasional Route */
@@ -476,7 +484,7 @@ liburNasionalRoute.post(liburNasionalController.create);
 liburNasionalRoute.patch(liburNasionalController.update);
 liburNasionalRoute.delete(liburNasionalController.delete);
 router.get("/liburnasional/list", liburNasionalController.list);
-router.post("/liburnasional/data",liburNasionalController.data);
+router.post("/liburnasional/data", liburNasionalController.data);
 /* Libur Nasional Route */
 
 /* Lampiran Route */
@@ -555,5 +563,28 @@ arsipLapbulLogRoute.delete(arsipLapbulLogController.validate("delete"), arsipLap
 router.post("/arsip-lapbul-log/data", arsipLapbulLogController.data);
 router.get("/arsip-lapbul-log/list", arsipLapbulLogController.list);
 /* Arsip Lapbul Log */
+
+/* Event Route */
+const eventRoute = router.route("/event");
+eventRoute.get(eventController.validate("get"), eventController.get);
+eventRoute.post(eventController.validate("create"), eventController.create);
+eventRoute.patch(eventController.validate("update"), eventController.update);
+eventRoute.delete(eventController.validate("delete"), eventController.delete);
+
+router.post("/event/data", eventController.data);
+router.get("/event/list", eventController.list);
+router.get("/event/kategori", eventController.kategori);
+router.get("/event/calendar", eventController.calendar);
+/* Event Route */
+
+
+/* Notifikasi Route */
+const notifikasiRoute = router.route("/notifikasi");
+notifikasiRoute.get(notifikasiController.validate("get"), notifikasiController.get);  
+router.get("/notifikasi/alert", notifikasiController.alert);
+router.post("/notifikasi/data", notifikasiController.data);
+router.patch("/notifikasi/read", notifikasiController.read);
+router.get("/notifikasi/mobile", notifikasiController.mobile);
+
 
 module.exports = router;

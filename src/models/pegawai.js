@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       statusaktif_pegawai: DataTypes.STRING,
       persetujuan_kontak: DataTypes.BOOLEAN,
       kode_jamkerja: DataTypes.STRING,
+      onesignal_id: DataTypes.STRING,
     },
     {
       freezeTableName: true,
