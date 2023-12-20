@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       period: DataTypes.DATEONLY,
       file: DataTypes.UUID,
       status: DataTypes.STRING,
+      note: DataTypes.STRING,
     },
     {
       freezeTableName: true,
