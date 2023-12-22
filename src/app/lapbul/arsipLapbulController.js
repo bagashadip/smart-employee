@@ -16,6 +16,13 @@ module.exports = {
     }
     const mArsipLapbul = await ArsipLapbul.findAll({
       attributes: ["id", "kode_pegawai", "name","period", "file", "status", "createdBy", "updatedBy", "createdAt", "updatedAt"],
+      include: [
+        {
+          model: File,
+          as: "lapbul_file",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ]
     });
     res.json(mArsipLapbul);
   },
@@ -27,7 +34,16 @@ module.exports = {
 
     var dataTableObj = await datatable(req.body);
     var count = await ArsipLapbul.count();
-    var modules = await ArsipLapbul.findAndCountAll(dataTableObj);
+    var modules = await ArsipLapbul.findAndCountAll({
+      ...dataTableObj,
+      include: [
+        {
+          model: File,
+          as: "lapbul_file",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ]
+    });
 
     res.json({
       recordsFiltered: modules.count,
