@@ -26,7 +26,7 @@ module.exports = {
         },
       });
 
-      const mEvent = await Event.findAll({
+      var mEvent = await Event.findAll({
         where: {
           status_event: "PUBLIC",
           tanggal_event: {
@@ -41,19 +41,42 @@ module.exports = {
 
 
       var result = [];
-      mEvent.map((item) => {
+      await Promise.all(mEvent.map(async (item) => {
         if (item.kategori_event == "ALL" || item.recipient_event.includes(kode_pegawai) || item.recipient_event.includes(mPegawai.divisi_pegawai)) {
           const tanggal = moment(item.tanggal_event).format("YYYY-MM-DD");
 
           if (!result.includes(tanggal) || result.length == 0) {
-            const events = mEvent.filter((event) => {
+            var events = mEvent.filter((event) => {
               return moment(event.tanggal_event).format("YYYY-MM-DD") == tanggal;
             });
 
-            result.push({ tanggal: tanggal, events: events });
+            var listevents = await Promise.all(events.map(async (event) => {
+
+              const recipient_object = await Pegawai.findAll({
+                where: {
+                  kode_pegawai: {
+                    [Op.in]: event.recipient_event,
+                  },
+                },
+                attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+              });
+
+              return {
+                id_event: event.id_event,
+                nama_event: event.nama_event,
+                tanggal_event: event.tanggal_event,
+                jammulai_event: event.jammulai_event,
+                jamselesai_event: event.jamselesai_event,
+                kategori_event: event.kategori_event,
+                recipient_event: event.recipient_event,
+                recipient_object: recipient_object,
+              }
+            }));
+
+            result.push({ tanggal: tanggal, events: listevents });
           }
         }
-      });
+      }));
 
       res.json(result);
 
