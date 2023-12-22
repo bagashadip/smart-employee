@@ -607,7 +607,6 @@ module.exports = {
     });
     const roleOneSignalId = body("onesignal_id")
     .custom(async (value) => {
-      console.log("update pegawai");
       if (value) {
        const existingPegawai = await Pegawai.findOne({
           where: {
@@ -616,7 +615,6 @@ module.exports = {
             },
           },
         });
-        console.log(existingPegawai);
         if (existingPegawai) {
           return Promise.reject("Onesignal Id sudah terdaftar!");
         }
