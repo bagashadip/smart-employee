@@ -605,6 +605,21 @@ module.exports = {
         }
       }
     });
+    const roleOneSignalId = body("onesignal_id")
+    .custom(async (value) => {
+      if (value) {
+        mPegawai = await Pegawai.findOne({
+          where: {
+            onesignal_id: {
+              [Op.iLike]: value,
+            },
+          },
+        });
+        if (!mPegawai) {
+          return Promise.reject("Onesignal Id sudah terdaftar!");
+        }
+      }
+    });
 
     switch (type) {
       case "create":
@@ -639,6 +654,7 @@ module.exports = {
             rulePosisi,
             ruleDpa,
             ruleKodeJamKerja,
+            roleOneSignalId,
           ];
         }
         break;
@@ -673,6 +689,7 @@ module.exports = {
             rulePosisi.optional(),
             ruleDpa.optional(),
             ruleKodeJamKerja.optional(),
+            roleOneSignalId.optional(),
           ];
         }
         break;
