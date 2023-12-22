@@ -271,6 +271,12 @@ Lapbul.belongsTo(Divisi, {
   targetKey: "kode_divisi",
 });
 
+ArsipLapbul.belongsTo(File, {
+  as: "lapbul_file",
+  foreignKey: "file",
+  targetKey: "id",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();

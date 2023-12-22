@@ -4,7 +4,7 @@ const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { ArsipLapbul, Pegawai, ArsipLapbulLog } = require("../../models/model");
+const { ArsipLapbul, Pegawai, ArsipLapbulLog, File } = require("../../models/model");
 
 const Op = Sequelize.Op;
 
@@ -50,6 +50,13 @@ module.exports = {
       where: {
         id: req.query.id,
       },
+      include: [
+        {
+          model: File,
+          as: "lapbul_file",
+          attributes: ["name", "path", "extension", "size"],
+        },
+      ]
     });
     res.json(mArsipLapbul);
   },
