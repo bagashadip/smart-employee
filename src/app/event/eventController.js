@@ -60,6 +60,46 @@ module.exports = {
                 attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
               });
 
+              const mFile = await File.findOne({
+                where: {
+                  id: event.gambar_event,
+                },
+                attributes: ["name", "path", "extension", "size"],
+              });
+
+              var pic_object = {};
+
+              if (event.pic_event) {
+                const mPegawai = await Pegawai.findOne({
+                  where: {
+                    kode_pegawai: event.pic_event,
+                  },
+                  attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+                });
+
+                const mAsn = await Asn.findOne({
+                  where: {
+                    nip_asn: event.pic_event,
+                  },
+                  attributes: ["nip_asn", "nama_asn"],
+                });
+
+                if (mPegawai) {
+                  pic_object = {
+                    kode: mPegawai.kode_pegawai,
+                    nama: mPegawai.namalengkap_pegawai,
+                    divisi_jabatan: mPegawai.kode_divisi,
+                  }
+
+                } else if (mAsn) {
+                  pic_object = {
+                    kode: mAsn.nip_asn,
+                    nama: mAsn.nama_asn,
+                    divisi_jabatan: "ASN",
+                  }
+                }
+              }
+
               return {
                 id_event: event.id_event,
                 nama_event: event.nama_event,
@@ -68,6 +108,13 @@ module.exports = {
                 jamselesai_event: event.jamselesai_event,
                 kategori_event: event.kategori_event,
                 recipient_event: event.recipient_event,
+                keterangan_event: event.keterangan_event,
+                gambar_event: event.gambar_event,
+                pic_event: event.pic_event,
+                divisi_event: event.divisi_event,
+                push_date_event: event.push_date_event,
+                pic_object: pic_object,
+                foto: mFile,
                 recipient_object: recipient_object,
               }
             }));
