@@ -8,6 +8,7 @@ const moment = require("moment");
 const Op = Sequelize.Op;
 const { Event, Pegawai, File, Divisi, Asn } = require("../../models/model");
 const sequelize = require("../../util/database");
+const event = require("../../models/event");
 
 
 
@@ -26,7 +27,7 @@ module.exports = {
         },
       });
 
-      var mEvent = await Event.findAll({
+      var mEvents = await Event.findAll({
         where: {
           status_event: "PUBLIC",
           tanggal_event: {
@@ -36,95 +37,99 @@ module.exports = {
             ],
           },
         },
+        order: [
+          [Sequelize.col("tanggal_event"), "DESC"]
+        ],
       });
 
+      var events = []
+      await Promise.all(mEvents.map(async (event) => {
 
-      var result = [];
-      await Promise.all(mEvent.map(async (item) => {
-        if (item.kategori_event == "ALL" || item.recipient_event.includes(kode_pegawai) || item.recipient_event.includes(mPegawai.divisi_pegawai)) {
-          const tanggal = moment(item.tanggal_event).format("YYYY-MM-DD");
+        var data = null;
+        if (event.kategori_event == "ALL") {
+          data = event;
+        } else if (event.kategori_event == "DIVISI" && event.recipient_event.includes(mPegawai.kode_divisi)) {
+          data = event;
+        } else if (event.kategori_event == "INDIVIDU" && event.recipient_event.includes(kode_pegawai)) {
+          data = event;
+        }
+        if (data) {
 
-          if (!result.includes(tanggal) || result.length == 0) {
-            var events = mEvent.filter((event) => {
-              return moment(event.tanggal_event).format("YYYY-MM-DD") == tanggal;
+          data.dataValues.recipient_object = await Pegawai.findAll({
+            where: {
+              kode_pegawai: {
+                [Op.in]: event.recipient_event,
+              },
+            },
+            attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
+          });
+
+          data.dataValues.foto = await File.findOne({
+            where: {
+              id: event.gambar_event,
+            },
+            attributes: ["name", "path", "extension", "size"],
+          });
+
+
+          var pic_object = {};
+
+          if (event.pic_event) {
+            const mPegawaiEach = await Pegawai.findOne({
+              where: {
+                kode_pegawai: event.pic_event,
+              },
+              attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
             });
 
-            var listevents = await Promise.all(events.map(async (event) => {
+            const mAsn = await Asn.findOne({
+              where: {
+                nip_asn: event.pic_event,
+              },
+              attributes: ["nip_asn", "nama_asn"],
+            });
 
-              const recipient_object = await Pegawai.findAll({
-                where: {
-                  kode_pegawai: {
-                    [Op.in]: event.recipient_event,
-                  },
-                },
-                attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
-              });
-
-              const mFile = await File.findOne({
-                where: {
-                  id: event.gambar_event,
-                },
-                attributes: ["name", "path", "extension", "size"],
-              });
-
-              var pic_object = {};
-
-              if (event.pic_event) {
-                const mPegawai = await Pegawai.findOne({
-                  where: {
-                    kode_pegawai: event.pic_event,
-                  },
-                  attributes: ["kode_pegawai", "namalengkap_pegawai", "kode_divisi"],
-                });
-
-                const mAsn = await Asn.findOne({
-                  where: {
-                    nip_asn: event.pic_event,
-                  },
-                  attributes: ["nip_asn", "nama_asn"],
-                });
-
-                if (mPegawai) {
-                  pic_object = {
-                    kode: mPegawai.kode_pegawai,
-                    nama: mPegawai.namalengkap_pegawai,
-                    divisi_jabatan: mPegawai.kode_divisi,
-                  }
-
-                } else if (mAsn) {
-                  pic_object = {
-                    kode: mAsn.nip_asn,
-                    nama: mAsn.nama_asn,
-                    divisi_jabatan: "ASN",
-                  }
-                }
+            if (mPegawaiEach) {
+              pic_object = {
+                kode: mPegawaiEach.kode_pegawai,
+                nama: mPegawaiEach.namalengkap_pegawai,
+                divisi_jabatan: mPegawaiEach.kode_divisi,
               }
 
-              return {
-                id_event: event.id_event,
-                nama_event: event.nama_event,
-                tanggal_event: event.tanggal_event,
-                jammulai_event: event.jammulai_event,
-                jamselesai_event: event.jamselesai_event,
-                kategori_event: event.kategori_event,
-                recipient_event: event.recipient_event,
-                keterangan_event: event.keterangan_event,
-                gambar_event: event.gambar_event,
-                pic_event: event.pic_event,
-                divisi_event: event.divisi_event,
-                push_date_event: event.push_date_event,
-                pic_object: pic_object,
-                foto: mFile,
-                recipient_object: recipient_object,
+            } else if (mAsn) {
+              pic_object = {
+                kode: mAsn.nip_asn,
+                nama: mAsn.nama_asn,
+                divisi_jabatan: "ASN",
               }
-            }));
-
-            result.push({ tanggal: tanggal, events: listevents });
+            }
           }
+
+          data.dataValues.pic_object = pic_object;
+          events.push(data);
         }
       }));
 
-      res.json(result);
+      var result = [];
+
+      events.map((item) => {
+        const tanggal = moment(item.tanggal_event).format("YYYY-MM-DD");
+        const found = result.some(el => el.tanggal === tanggal);
+        if (!found) {
+
+          var eventsEach = events.filter((event) => {
+            return moment(event.tanggal_event).format("YYYY-MM-DD") == tanggal;
+          });
+
+
+          result.push({ tanggal: tanggal, events: eventsEach });
+        }
+      });
+
+      var sortedObjs = _.sortBy(result, 'tanggal', 'desc')
+
+
+      res.json(sortedObjs);
 
     } catch (err) {
       res.status(400).json({ status: false, message: err.message });
