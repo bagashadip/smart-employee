@@ -89,13 +89,15 @@ module.exports = {
 
     const arsipLapbul = await new ArsipLapbul({
       ...req.body,
+      createdBy: req.user.id_user,
     }).save();
 
     if (arsipLapbul) {
       await new ArsipLapbulLog({
         arsip_lapbul_id: arsipLapbul.id,
         note: req.body.note,
-        status: req.body.status ?? 'diajukan'
+        status: req.body.status,
+        createdBy: req.user.id_user,
     }).save();
     }
 
@@ -117,7 +119,7 @@ module.exports = {
     }
 
     const update = await ArsipLapbul.update(
-      { ...req.body },
+      { ...req.body, updatedBy: req.user.id_user, },
       { where: { id: req.query.id } }
     );
 
@@ -125,7 +127,8 @@ module.exports = {
         await new ArsipLapbulLog({
             arsip_lapbul_id: req.query.id,
             note: req.body.note,
-            status: req.body.status
+            status: req.body.status,
+            updatedBy: req.user.id_user,
         }).save();
     }
 

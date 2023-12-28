@@ -15,6 +15,8 @@ module.exports = (sequelize, DataTypes) => {
       file: DataTypes.UUID,
       status: DataTypes.STRING,
       note: DataTypes.STRING,
+      createdBy: DataTypes.INTEGER,
+      updatedBy: DataTypes.INTEGER,
     },
     {
       freezeTableName: true,
