@@ -91,6 +91,14 @@ module.exports = {
       ...req.body,
     }).save();
 
+    if (arsipLapbul) {
+      await new ArsipLapbulLog({
+        arsip_lapbul_id: arsipLapbul.id,
+        note: req.body.note,
+        status: req.body.status ?? 'diajukan'
+    }).save();
+    }
+
     res.json({
       status: true,
       statusCode: 200,
