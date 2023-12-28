@@ -27,7 +27,7 @@ module.exports = {
         },
         limit: limit,
         sort: {
-          by: "updatedAt",
+          by: "send_date_notifikasi",
           order: "DESC"
         }
       };
@@ -40,7 +40,7 @@ module.exports = {
         data_user_notifikasi: {
           kode_pegawai: kode
         },
-        updatedAt: {
+        send_date_notifikasi: {
           [Op.lt]: next
         }
       };
