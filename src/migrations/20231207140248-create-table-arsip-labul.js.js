@@ -43,10 +43,10 @@ module.exports = {
         allowNull: true,
       },
       createdBy: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
       },
       updatedBy: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,

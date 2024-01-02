@@ -11,7 +11,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       arsip_lapbul_id: DataTypes.UUID,
       note: DataTypes.TEXT,
-      status: DataTypes.STRING
+      status: DataTypes.STRING,
+      createdBy: DataTypes.INTEGER,
+      updatedBy: DataTypes.INTEGER,
     },
     {
       freezeTableName: true,
