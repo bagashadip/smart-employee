@@ -80,6 +80,7 @@ module.exports = {
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
                         onesignal_id_notifikasi: pegawai.onesignal_id,
+                        count_send: 0,
 
                     });
                 });
@@ -222,7 +223,7 @@ module.exports = {
             limit: 100,
             where: {
                 count_send: {
-                    [Op.lte]: 5,
+                    [Op.lt]: 5,
                 },
                 [Op.or]: [
                     {
