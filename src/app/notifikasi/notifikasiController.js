@@ -7,6 +7,7 @@ const datatable = require("../../util/datatable");
 const moment = require("moment");
 const Op = Sequelize.Op;
 const { Notifikasi } = require("../../models/model");
+const { htmlToText } = require('html-to-text');
 
 
 
@@ -62,6 +63,10 @@ module.exports = {
       }) - mNotifikasi.length;
 
       meta.cursor.hasNext = meta.total > 0 ? true : false;
+
+      Object.values(mNotifikasi).forEach(val => {
+        val.main_konten_notifikasi = htmlToText(val.dataValues.main_konten_notifikasi, { wordwrap: 100 }).trim().replace(/(\r\n|\n|\r)/gm, "");
+      });
 
       const data = {
         data: mNotifikasi,
