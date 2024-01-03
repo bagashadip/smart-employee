@@ -28,6 +28,7 @@
     "express-validator": "^6.5.0",
     "generate-password": "^1.7.0",
     "html-pdf-node": "^1.0.8",
+    "html-to-text": "^9.0.5",
     "https-proxy-agent": "^5.0.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",

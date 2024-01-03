@@ -5,6 +5,7 @@ const moment = require("moment");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 const { Event, Pegawai, Notifikasi, File } = require("../../models/model");
+const { htmlToText } = require('html-to-text');
 
 
 module.exports = {
@@ -191,6 +192,11 @@ module.exports = {
                 const remider_date2 = moment(tanggal_event, "DD MMM YYYY HH:mm");
 
                 mPegawai.map(async (pegawai) => {
+
+                    const main_konten_notifikasi = htmlToText(event.keterangan_event, {
+                        wordwrap: 100
+                    }).trim().replace(/(\r\n|\n|\r)/gm, "").substring(0, 100) + "...";
+
                     const mNotifikasi = await Notifikasi.create({
                         id_notifikasi: uuidv4(),
                         reminder_title1_notifikasi: remider_notif1.replace("[nama]", event.nama_event).replace("[tanggal]", tanggal_event),
@@ -198,7 +204,7 @@ module.exports = {
                         reminder_date1_notifikasi: remider_date1,
                         reminder_date2_notifikasi: remider_date2,
                         main_title_notifikasi: event.nama_event,
-                        main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
+                        main_konten_notifikasi: main_konten_notifikasi,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
                         data_notifikasi: result ?? {},
                         send_date_notifikasi: null,

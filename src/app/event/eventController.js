@@ -9,6 +9,7 @@ const Op = Sequelize.Op;
 const { Event, Pegawai, File, Divisi, Asn } = require("../../models/model");
 const sequelize = require("../../util/database");
 const event = require("../../models/event");
+const { htmlToText } = require('html-to-text');
 
 
 
@@ -198,6 +199,8 @@ module.exports = {
       var divisi_object = null;
       var recipient_object = [];
 
+      
+
       if (mEvent.pic_event) {
         const mPegawai = await Pegawai.findOne({
           where: {
@@ -293,12 +296,14 @@ module.exports = {
 
       }
 
+      var plainText = htmlToText(mEvent.keterangan_event, { wordwrap: 100 }).trim().replace(/(\r\n|\n|\r)/gm, "").substring(0, 100) + "...";
       const result = {
         ...mEvent.dataValues,
         foto: mFile,
         pic_object: pic_object,
         divisi_object: divisi_object,
         recipient_object: recipient_object,
+        plainText: plainText,
       }
       res.json(result);
     } catch (err) {
