@@ -221,6 +221,9 @@ module.exports = {
         const mNotifikasi = await Notifikasi.findAll({
             limit: 100,
             where: {
+                count_send: {
+                    [Op.lte]: 5,
+                },
                 [Op.or]: [
                     {
                         reminder_date1_notifikasi: {
@@ -260,6 +263,7 @@ module.exports = {
                 }
 
                 console.log(_body);
+                console.log("send data")
 
                 const requets = await axios({
                     method: 'post',
@@ -270,11 +274,14 @@ module.exports = {
                     // console.log(res.status);
                     if (res.status == 200) {
 
+                        console.log("update data")
+
                         if (notif.reminder_date1_notifikasi) {
                             const update = await Notifikasi.update({
                                 send_date_notifikasi: moment(),
                                 reminder_date1_notifikasi: null,
                                 updatedAt: moment(),
+                                count_send: notif.count_send + 1,
                             }, {
                                 where: {
                                     id_notifikasi: notif.id_notifikasi,
@@ -284,6 +291,7 @@ module.exports = {
                             const update = await Notifikasi.update({
                                 reminder_date2_notifikasi: null,
                                 updatedAt: moment(),
+                                count_send: notif.count_send + 1,
                             }, {
                                 where: {
                                     id_notifikasi: notif.id_notifikasi,
@@ -300,6 +308,7 @@ module.exports = {
                     const update = await Notifikasi.update({
                         updatedAt: moment(),
                         onesignal_id_notifikasi: onesignal_id,
+                        count_send: notif.count_send + 1,
                     }, {
                         where: {
                             id_notifikasi: notif.id_notifikasi,

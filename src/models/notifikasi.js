@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       is_read_notifikasi: DataTypes.BOOLEAN,
       data_user_notifikasi: DataTypes.JSON,
       onesignal_id_notifikasi: DataTypes.STRING,
+      count_send: DataTypes.INTEGER,
       
     },
     {
