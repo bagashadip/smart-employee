@@ -221,10 +221,10 @@ module.exports = {
         const url = "https://onesignal.com/api/v1/notifications";
 
         console.log("send notif");
-        console.log(process.env.ONESIGNAL_APPI_ID);
+        console.log(process.env.ONESIGNAL_APP_ID);
         console.log(process.env.ONESIGNAL_REST_API_KEY);
         
-        const app_id = process.env.ONESIGNAL_APPI_ID;//'c91e6f62-6f33-4822-8a98-060ccf4b00e8';
+        const app_id = process.env.ONESIGNAL_APP_ID;//'c91e6f62-6f33-4822-8a98-060ccf4b00e8';
 
         //'Basic OWMyNzRmNWMtZDNhNi00YTM1LTgyYzItOTgxYmRiYmFlODU1',
         const _headers = {
