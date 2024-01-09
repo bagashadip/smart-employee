@@ -103,6 +103,7 @@ migrate:production:
     - (echo "$PROD_SWARM_ENV") > deploy/swarm_env
     - (echo "$DOCKER_ENV") > deploy/docker_env
   script:
+    - cd deploy
     - docker run --rm -i
         -v `pwd`:/app
         --env-file app_env
