@@ -49,18 +49,18 @@ module.exports = {
                     },
                 });
 
-                const mFile = await File.findOne({
-                    where: {
-                        id: event.gambar_event,
-                    },
-                    attributes: ["name", "path", "extension", "size"],
-                });
+                // const mFile = await File.findOne({
+                //     where: {
+                //         id: event.gambar_event,
+                //     },
+                //     attributes: ["name", "path", "extension", "size"],
+                // });
 
-                const result = {
-                    ...event.dataValues,
-                    foto: mFile
-                }
-                console.log(result);
+                // const result = {
+                //     ...event.dataValues,
+                //     // foto: mFile
+                // }
+                // console.log(result);
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
@@ -76,7 +76,7 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: result ?? {},
+                        data_notifikasi: event.id_event ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
@@ -116,17 +116,17 @@ module.exports = {
                     },
                 });
 
-                const mFile = await File.findOne({
-                    where: {
-                        id: event.gambar_event,
-                    },
-                    attributes: ["name", "path", "extension", "size"],
-                });
+                // const mFile = await File.findOne({
+                //     where: {
+                //         id: event.gambar_event,
+                //     },
+                //     attributes: ["name", "path", "extension", "size"],
+                // });
 
-                const result = {
-                    ...event.dataValues,
-                    foto: mFile
-                }
+                // const result = {
+                //     ...event.dataValues,
+                //     foto: mFile
+                // }
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
@@ -142,7 +142,7 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: event.keterangan_event.substring(0, 100) + "..." ?? "",
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: result ?? {},
+                        data_notifikasi: event.id_event ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
@@ -175,17 +175,17 @@ module.exports = {
                     attributes: ["onesignal_id", "kode_pegawai", "namalengkap_pegawai"],
                 });
 
-                const mFile = await File.findOne({
-                    where: {
-                        id: event.gambar_event,
-                    },
-                    attributes: ["name", "path", "extension", "size"],
-                });
+                // const mFile = await File.findOne({
+                //     where: {
+                //         id: event.gambar_event,
+                //     },
+                //     attributes: ["name", "path", "extension", "size"],
+                // });
 
-                const result = {
-                    ...event.dataValues,
-                    foto: mFile
-                }
+                // const result = {
+                //     ...event.dataValues,
+                //     foto: mFile
+                // }
 
                 const tanggal_event = moment(event.tanggal_event).format("DD MMM YYYY") + " " + event.jammulai_event.toString().substring(0, 5);
                 const remider_date1 = event.push_date_event;
@@ -206,7 +206,7 @@ module.exports = {
                         main_title_notifikasi: event.nama_event,
                         main_konten_notifikasi: main_konten_notifikasi,
                         tipe_notifikasi: "EVENT-" + event.kategori_event,
-                        data_notifikasi: result ?? {},
+                        data_notifikasi: event.id_event ?? {},
                         send_date_notifikasi: null,
                         is_read_notifikasi: false,
                         data_user_notifikasi: pegawai,
