@@ -1,10 +1,12 @@
-const _module = "action";
+const _module = "arsip-lapbul-log";
 const _ = require("lodash");
 const { body, query, validationResult } = require("express-validator");
 const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
-const { Action } = require("../../models/model");
+const { ArsipLapbulLog, Pegawai, ArsipLapbul } = require("../../models/model");
+
+const Op = Sequelize.Op;
 
 module.exports = {
   // List
@@ -12,11 +14,10 @@ module.exports = {
     if (!(await req.user.hasAccess(_module, "view"))) {
       return error(res).permissionError();
     }
-    // console.log("TEST");
-    const mAction = await Action.findAll({
-      attributes: ["id", "slug", "name"],
+    const mArsipLapbulLog = await ArsipLapbulLog.findAll({
+      attributes: ["id", "arsip_lapbul_id", "note", "status", "createdAt", "updatedAt", "createdBy", "updatedBy"],
     });
-    res.json(mAction);
+    res.json(mArsipLapbulLog);
   },
   // Datatable
   data: async (req, res) => {
@@ -25,13 +26,13 @@ module.exports = {
     }
 
     var dataTableObj = await datatable(req.body);
-    var count = await Action.count();
-    var actions = await Action.findAndCountAll(dataTableObj);
+    var count = await ArsipLapbulLog.count();
+    var modules = await ArsipLapbulLog.findAndCountAll(dataTableObj);
 
     res.json({
-      recordsFiltered: actions.count,
+      recordsFiltered: modules.count,
       recordsTotal: count,
-      items: actions.rows,
+      items: modules.rows,
     });
   },
   // Get One Row require ID
@@ -44,9 +45,13 @@ module.exports = {
     if (!validation.isEmpty()) {
       return error(res).validationError(validation.array());
     }
-
-    const mAction = await Action.findByPk(req.query.id);
-    res.json(mAction);
+    
+    const mArsipLapbulLog = await ArsipLapbulLog.findOne({
+      where: {
+        id: req.query.id,
+      },
+    });
+    res.json(mArsipLapbulLog);
   },
   // Create
   create: async (req, res) => {
@@ -59,12 +64,15 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    const action = await new Action({
+    const arsipLapbulLog = await new ArsipLapbulLog({
       ...req.body,
-      createdBy: req.user.id,
     }).save();
 
-    res.json({ status: true, id: action.id });
+    res.json({
+      status: true,
+      statusCode: 200,
+      message: "Data berhasil ditambah.",
+    });
   },
   // Update
   update: async (req, res) => {
@@ -77,12 +85,16 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Action.update(
-      { ...req.body, updatedBy: req.user.id },
+    await ArsipLapbulLog.update(
+      { ...req.body },
       { where: { id: req.query.id } }
     );
 
-    res.send({ status: true });
+    res.json({
+      status: true,
+      statusCode: 200,
+      message: "Data berhasil diubah.",
+    });
   },
   // Delete
   delete: async (req, res) => {
@@ -95,81 +107,68 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
-    await Action.destroy({
+    await ArsipLapbulLog.destroy({
       where: {
         id: req.query.id,
       },
     });
-    res.send({ status: true });
+    res.send({
+      status: true,
+      message: req.query.id + " berhasil dihapus.",
+    });
   },
   // Validation
   validate: (type) => {
-    let mAction = null;
-    const ruleId = query("id")
-      .trim()
+    let mArsipLapbulLog = null;
+    const ruleIdArsipLog = query("id")
       .notEmpty()
-      .isUUID()
       .custom(async (value) => {
-        mAction = await Action.findByPk(value);
-        if (!mAction) {
+        mArsipLapbulLog = await ArsipLapbulLog.findOne({
+          where: {
+            id: {
+              [Op.eq]: value,
+            },
+          },
+        });
+        if (!mArsipLapbulLog) {
           return Promise.reject("Data not found!");
         }
       });
-    const ruleName = body("name").trim().notEmpty();
-    const ruleSlug = body("slug").trim().notEmpty().isSlug();
+    const ruleArsipLapbul = body("arsip_lapbul_id")
+      .trim()
+      .notEmpty()
+      .custom(async (value) => {
+        mArsipLapbul = await ArsipLapbul.findOne({
+          where: {
+            id: {
+              [Op.eq]: value,
+            },
+          },
+        });
+        if (!mArsipLapbul) {
+          return Promise.reject("Arsip Lapbul doesn't exist!");
+        }
+      });
 
     switch (type) {
       case "create":
         {
-          return [
-            ruleSlug.custom((value) => {
-              return Action.findOne({
-                where: {
-                  slug: {
-                    [Sequelize.Op.iLike]: value,
-                  },
-                },
-              }).then((res) => {
-                if (res) {
-                  return Promise.reject("Slug already exists!");
-                }
-              });
-            }),
-            ruleName,
-          ];
+          return [ruleArsipLapbul];
         }
         break;
       case "update":
         {
-          return [
-            ruleId,
-            ruleSlug.optional().custom(async (value) => {
-              const slugExists = await Action.findOne({
-                where: {
-                  slug: {
-                    [Sequelize.Op.iLike]: value,
-                  },
-                  id: {
-                    [Sequelize.Op.ne]: mAction.id,
-                  },
-                },
-              });
-              if (slugExists) {
-                return Promise.reject("Slug already exists!");
-              }
-            }),
-            ruleName.optional(),
-          ];
+          return [ruleIdArsipLog];
         }
         break;
       case "get":
         {
-          return [ruleId];
+          return [ruleIdArsipLog];
         }
         break;
       case "delete":
         {
-          return [ruleId];
+          return [ruleIdArsipLog];
         }
         break;
     }

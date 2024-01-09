@@ -29,6 +29,10 @@ const mJamKerjaDetail = require("./jamkerjaDetail");
 const mKegiatan = require("./kegiatan");
 const mLapbul = require("./lapbul");
 const mLiburNasional = require("./liburnasional");
+const mArsipLapbul = require("./arsipLapbul");
+const mArsipLapbulLog = require("./arsipLapbulLog");
+const mEvent = require("./event");
+const mNotifikasi = require("./notifikasi");
 
 const FileCategory = mFileCategory(sequelize, Sequelize);
 const File = mFile(sequelize, Sequelize);
@@ -58,6 +62,10 @@ const JamKerjaDetail = mJamKerjaDetail(sequelize, Sequelize);
 const Kegiatan = mKegiatan(sequelize, Sequelize);
 const Lapbul = mLapbul(sequelize, Sequelize);
 const LiburNasional = mLiburNasional(sequelize, Sequelize);
+const ArsipLapbul = mArsipLapbul(sequelize, Sequelize);
+const ArsipLapbulLog = mArsipLapbulLog(sequelize, Sequelize);
+const Event = mEvent(sequelize, Sequelize);
+const Notifikasi = mNotifikasi(sequelize, Sequelize);
 
 FileCategory.hasMany(File);
 File.belongsTo(FileCategory, { foreignKey: "fileCategoryId" });
@@ -263,6 +271,12 @@ Lapbul.belongsTo(Divisi, {
   targetKey: "kode_divisi",
 });
 
+ArsipLapbul.belongsTo(File, {
+  as: "lapbul_file",
+  foreignKey: "file",
+  targetKey: "id",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
@@ -302,4 +316,8 @@ module.exports = {
   Status,
   UserRole,
   LiburNasional,
+  ArsipLapbul,
+  ArsipLapbulLog,
+  Event,
+  Notifikasi
 };

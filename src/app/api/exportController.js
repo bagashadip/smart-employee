@@ -51,7 +51,7 @@ module.exports = {
       }
     }
 
-    console.log(whereAbsensi)
+    // console.log(whereAbsensi)
 
     const mAbsensi = await Absensi.findAll({
       include: [

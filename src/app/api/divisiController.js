@@ -9,6 +9,32 @@ const { Divisi, UnitKerja, Pegawai, Asn, Posisi, Dpa, File } = require("../../mo
 const Op = Sequelize.Op;
 
 module.exports = {
+  // search
+  search: async (req, res) => {
+    // if (!(await req.user.hasAccess(_module, "view"))) {
+    //   return error(res).permissionError();
+    // }
+    const mDivisi = await Divisi.findAll({
+      limit: 10,
+      where: {
+        [Op.or]: [
+          {
+            kode_divisi: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+          {
+            nama_divisi: {
+              [Op.iLike]: "%" + req.query.key + "%",
+            },
+          },
+        ],
+      },
+      attributes: ["kode_divisi", "nama_divisi"],
+    });
+
+    res.json(mDivisi);
+  },
   // List
   list: async (req, res) => {
     if (!(await req.user.hasAccess(_module, "view"))) {

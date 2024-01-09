@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 
 require("dotenv").config();
+require("./app/cron/index.js");
 
 const app = express();
 
@@ -24,7 +25,7 @@ var corsOptionsDelegate = function (req, callback) {
     }
   
     const corsOptions = {
-      origin: origin,
+      origin: '*',
       credentials: true,
       methods: ["GET", "PUT", "PATCH", "POST", "DELETE"],
       optionsSuccessStatus: 200,

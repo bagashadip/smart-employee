@@ -72,3 +72,6 @@
 
           WEBCORP_USER: "{{ lookup('env', 'WEBCORP_USER') | mandatory }}"
           WEBCORP_PASS: "{{ lookup('env', 'WEBCORP_PASS') | mandatory }}"
+
+          ONESIGNAL_APP_ID: "{{ lookup('env', 'ONESIGNAL_APP_ID') | mandatory }}"
+          ONESIGNAL_REST_API_KEY: "{{ lookup('env', 'ONESIGNAL_REST_API_KEY') | mandatory }}"
