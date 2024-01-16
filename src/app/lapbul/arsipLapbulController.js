@@ -32,9 +32,25 @@ module.exports = {
       return error(res).permissionError();
     }
 
+    var { filter } = req.body;
+    let filterKodeDivisi = null;
+    if (filter && filter.length > 0) {
+      filter.forEach((f) => {
+        if (f.column === "kode_divisi") {
+          filterKodeDivisi = f.value;
+        }
+      });
+    }
+
+    // remove filter containing kode_divisi
+    const payload = req.body;
+    const filterIndex = payload.filter.findIndex((f) => f.column === "kode_divisi");
+    if (filterIndex !== -1) {
+      payload.filter.splice(filterIndex, 1);
+    }
+
     var dataTableObj = await datatable(req.body);
-    var count = await ArsipLapbul.count();
-    var modules = await ArsipLapbul.findAndCountAll({
+    var queryFilter = {
       ...dataTableObj,
       include: [
         {
@@ -42,8 +58,33 @@ module.exports = {
           as: "lapbul_file",
           attributes: ["name", "path", "extension", "size"],
         },
-      ]
-    });
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["kode_divisi"]
+        },
+      ],
+      attributes: {
+        include: [
+          [Sequelize.literal('"pegawai"."kode_divisi"'), "kode_divisi"],
+        ],
+      },
+    };
+
+    if (filterKodeDivisi) {
+      if (queryFilter.where && queryFilter.where[Op.and]) {
+        Array.isArray(filterKodeDivisi) 
+        ? queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')) 
+        : queryFilter.where[Op.and].push(Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'"));
+      } else {
+        let queryDivisi = Array.isArray(filterKodeDivisi)
+        ? {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" IN (' + filterKodeDivisi.map(kode => `'${kode}'`).join(', ') + ')')]}
+        : {[Op.and]: [Sequelize.literal('"pegawai"."kode_divisi" = \'' + filterKodeDivisi + "'")]};
+        queryFilter.where = queryDivisi;
+      }
+    }
+    var count = await ArsipLapbul.count();
+    var modules = await ArsipLapbul.findAndCountAll(queryFilter);
 
     res.json({
       recordsFiltered: modules.count,

@@ -277,6 +277,12 @@ ArsipLapbul.belongsTo(File, {
   targetKey: "id",
 });
 
+ArsipLapbul.belongsTo(Pegawai, {
+  as: "pegawai",
+  foreignKey: "kode_pegawai",
+  targetKey: "kode_pegawai",
+});
+
 async function authenticate() {
   try {
     await sequelize.authenticate();
