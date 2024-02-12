@@ -200,7 +200,6 @@ module.exports = {
         }
       }
       
-      res.send(req.body);
       const absensi = await new Absensi({
         ...req.body,
       }).save();
