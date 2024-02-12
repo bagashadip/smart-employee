@@ -167,6 +167,21 @@ module.exports = {
         msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
       });
     } else {
+      const divisi = await Pegawai.findOne({
+        where: {
+          kode_pegawai: req.user.kode_pegawai
+        },
+        attributes: ['kode_divisi']
+      });
+
+      if (divisi.kode_divisi.toLowerCase() !== "opl") {
+        let timeLimit = new Date(req.body.timestamp_absensi);
+        req.body.time_limit_datang = ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
+        timeLimit.setHours(timeLimit.getHours() + 8);
+        timeLimit.setMinutes(timeLimit.getMinutes() + 30);
+        req.body.time_limit_pulang = ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
+      }
+      
       const absensi = await new Absensi({
         ...req.body,
       }).save();
