@@ -175,13 +175,32 @@ module.exports = {
       });
 
       if (divisi.kode_divisi.toLowerCase() !== "opl") {
+        const timeFormat = (timeLimit, type) => {
+          if (type === 'pulang') {
+            timeLimit.setHours(timeLimit.getHours() + 8);
+            timeLimit.setMinutes(timeLimit.getMinutes() + 30);
+          }
+          return ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
+        };
+
+        const validateTime = (timeString) => {
+          var time = new Date('1970-01-01T' + timeString);
+          var referenceTime = new Date('1970-01-01T' + '18:00:00');
+          return time > referenceTime;
+        };
+
         let timeLimit = new Date(req.body.timestamp_absensi);
-        req.body.time_limit_datang = ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
-        timeLimit.setHours(timeLimit.getHours() + 8);
-        timeLimit.setMinutes(timeLimit.getMinutes() + 30);
-        req.body.time_limit_pulang = ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
+        let timeLimitDatang = timeFormat(timeLimit, 'datang');
+        let timeLimitPulang = timeFormat(timeLimit, 'pulang');
+
+        req.body.time_limit_datang = timeLimitDatang;
+        req.body.time_limit_pulang = timeLimitPulang;
+        if (validateTime(timeLimitPulang)) {
+          req.body.time_limit_pulang = '18:00:00';
+        }
       }
       
+      res.send(req.body);
       const absensi = await new Absensi({
         ...req.body,
       }).save();
