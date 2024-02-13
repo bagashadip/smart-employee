@@ -147,6 +147,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
+    const timestampAbsensi = new Date(req.body.timestamp_absensi);
+    var year = timestampAbsensi.getFullYear();
+    var month = ('0' + (timestampAbsensi.getMonth() + 1)).slice(-2);
+    var day = ('0' + timestampAbsensi.getDate()).slice(-2);
+    let formatedTimestamp = year + '-' + month + '-' + day;
+
     const absensiValidate = await Absensi.count({
       where: {
         tipe_absensi: req.body.tipe_absensi,
@@ -155,7 +161,7 @@ module.exports = {
           Sequelize.where(
             Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
             "=",
-            moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
+            formatedTimestamp
           ),
         ],
       },
@@ -193,11 +199,46 @@ module.exports = {
         let timeLimitDatang = timeFormat(timeLimit, 'datang');
         let timeLimitPulang = timeFormat(timeLimit, 'pulang');
 
-        req.body.time_limit_datang = timeLimitDatang;
-        req.body.time_limit_pulang = timeLimitPulang;
-        if (validateTime(timeLimitPulang)) {
-          req.body.time_limit_pulang = '18:00:00';
+        if (req.body.tipe_absensi.toLowerCase() === 'datang') {
+          req.body.time_limit_datang = timeLimitDatang;
+          req.body.time_limit_pulang = timeLimitPulang;
+          if (validateTime(timeLimitPulang)) {
+            req.body.time_limit_pulang = '18:00:00';
+          }
+        } else {
+          const newDate = new Date(req.body.timestamp_absensi);
+          var year = newDate.getFullYear();
+          var month = ('0' + (newDate.getMonth() + 1)).slice(-2);
+          var day = ('0' + newDate.getDate()).slice(-2);
+
+          const formatedDate = year + '-' + month + '-' + day;
+
+          const getAbsenDatang = await Absensi.findOne({
+            where: {
+              tipe_absensi: 'Datang',
+              kode_pegawai: req.body.kode_pegawai,
+              [Op.and]: [
+                Sequelize.where(
+                  Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+                  "=",
+                  formatedDate
+                ),
+              ],
+            },
+          });
+
+          if (!getAbsenDatang) {
+            res.json({
+              status: false,
+              statusCode: 422,
+              msg: "Belum melakukan absen datang!",
+            });
+          }
+
+          req.body.time_limit_datang = getAbsenDatang.time_limit_datang;
+          req.body.time_limit_pulang = getAbsenDatang.time_limit_pulang;
         }
+        
       }
       
       const absensi = await new Absensi({
