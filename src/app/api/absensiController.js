@@ -167,7 +167,7 @@ module.exports = {
       },
     });
     if (absensiValidate > 0) {
-      res.json({
+      res.status(422).json({
         status: false,
         statusCode: 422,
         msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
@@ -272,11 +272,24 @@ module.exports = {
           });
 
           if (!getAbsenDatang) {
-            res.json({
+            res.status(422).json({
               status: false,
               statusCode: 422,
               msg: "Belum melakukan absen datang!",
             });
+          }
+
+          /* Pengecekan sudah bisa absen pulang atau belum */
+          const timestampAbsen = moment(req.body.timestamp_absensi, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+          let limitPulang = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+          limitPulang = moment(limitPulang + ' ' + getAbsenDatang.time_limit_pulang).format('YYYY-MM-DD HH:mm:ss');
+          if (timestampAbsen < limitPulang) {
+            res.status(422).json({
+              status: false,
+              statusCode: 422,
+              msg: "Kamu baru bisa absen pulang di jam " + getAbsenDatang.time_limit_pulang,
+            });
+            return;
           }
 
           req.body.time_limit_datang = getAbsenDatang.time_limit_datang;
