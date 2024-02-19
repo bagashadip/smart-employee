@@ -217,7 +217,7 @@ module.exports = {
 
         const validateTimePulang = (timeString) => {
           const time = timeString;
-          let referenceTime = moment(timeString).format('YYYY-MM-DD');
+          let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
           referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
 
           return time > referenceTime;
