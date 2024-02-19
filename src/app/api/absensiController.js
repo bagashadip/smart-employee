@@ -5,7 +5,7 @@ const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
-const { Absensi, File, Pegawai } = require("../../models/model");
+const { Absensi, File, Pegawai, JamKerja, JamKerjaDetail } = require("../../models/model");
 const Op = Sequelize.Op;
 
 module.exports = {
@@ -177,33 +177,68 @@ module.exports = {
         where: {
           kode_pegawai: req.user.kode_pegawai
         },
-        attributes: ['kode_divisi']
+        attributes: ['kode_divisi', 'kode_jamkerja'],
+        include: [
+          {
+            model: JamKerja,
+            as: "jamkerja",
+            attributes: ["kode_jamkerja"],
+            include: [
+              {
+                model: JamKerjaDetail,
+                as: "jamkerjaDetail",
+                attributes: ["kode_jamkerja", "durasi_kerja", "jam_datang", "jam_pulang", "jam_pulang_max"]
+              }
+            ]
+          },
+        ]
       });
 
       if (divisi.kode_divisi.toLowerCase() !== "opl") {
         const timeFormat = (timeLimit, type) => {
+          let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
+          const timeSplit = durasiKerja.split(":");
+          const hour = parseInt(timeSplit[0]);
+          const minute = parseInt(timeSplit[1]);
+
           if (type === 'pulang') {
-            timeLimit.setHours(timeLimit.getHours() + 8);
-            timeLimit.setMinutes(timeLimit.getMinutes() + 30);
+            timeLimit.setHours(timeLimit.getHours() + hour);
+            timeLimit.setMinutes(timeLimit.getMinutes() + minute);
           }
           return ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
         };
 
-        const validateTime = (timeString) => {
-          var time = new Date('1970-01-01T' + timeString);
-          var referenceTime = new Date('1970-01-01T' + '18:00:00');
+        const validateTimePulang = (timeString) => {
+          const time = new Date('1970-01-01T' + timeString);
+          const jamPulangMax = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
+          const referenceTime = new Date('1970-01-01T' + jamPulangMax);
           return time > referenceTime;
+        };
+
+        const validateTimeDatang = (timeString) => {
+          const time = new Date('1970-01-01T' + timeString);
+          const jamDatang = divisi.jamkerja.jamkerjaDetail[0].jam_datang;
+          const referenceTime = new Date('1970-01-01T' + jamDatang);
+          return time < referenceTime;
         };
 
         let timeLimit = new Date(req.body.timestamp_absensi);
         let timeLimitDatang = timeFormat(timeLimit, 'datang');
         let timeLimitPulang = timeFormat(timeLimit, 'pulang');
 
+        /* Validasi absen datang */
         if (req.body.tipe_absensi.toLowerCase() === 'datang') {
           req.body.time_limit_datang = timeLimitDatang;
           req.body.time_limit_pulang = timeLimitPulang;
-          if (validateTime(timeLimitPulang)) {
-            req.body.time_limit_pulang = '18:00:00';
+
+          /* Jika datang lebih pagi, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang reguler */
+          if (validateTimeDatang(timeLimitDatang)) {
+            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
+          }
+
+          /* Jika datang terlambat, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang maksimal reguler */
+          if (validateTimePulang(timeLimitPulang)) {
+            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
           }
         } else {
           const newDate = new Date(req.body.timestamp_absensi);
@@ -302,10 +337,12 @@ module.exports = {
       });
     const ruleTimeStamp = body("timestamp_absensi").trim().notEmpty();
     const ruleTimeLimitDatang = body("time_limit_datang")
+      .optional()
       .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
       .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
     const ruleTimeLimitPulang = body("time_limit_pulang")
+      .optional()
       .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
       .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
