@@ -196,29 +196,38 @@ module.exports = {
 
       if (divisi.kode_divisi.toLowerCase() !== "opl") {
         const timeFormat = (timeLimit, type) => {
-          let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
-          const timeSplit = durasiKerja.split(":");
-          const hour = parseInt(timeSplit[0]);
-          const minute = parseInt(timeSplit[1]);
-
           if (type === 'pulang') {
-            timeLimit.setHours(timeLimit.getHours() + hour);
-            timeLimit.setMinutes(timeLimit.getMinutes() + minute);
+            let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
+            const timeSplit = durasiKerja.split(":");
+            const hour = parseInt(timeSplit[0]);
+            const minute = parseInt(timeSplit[1]);
+            let jamPulang = timeLimit;
+            jamPulang.setHours(jamPulang.getHours() + hour);
+            jamPulang.setMinutes(jamPulang.getMinutes() + minute);
+            let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
+            jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+            jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+
+            if (jamPulang > jamPulangMax) {
+              return jamPulangMax;
+            }
           }
-          return ("0" + timeLimit.getHours()).slice(-2) + ":" + ("0" + timeLimit.getMinutes()).slice(-2) + ":" + ("0" + timeLimit.getSeconds()).slice(-2);
+          return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
         };
 
         const validateTimePulang = (timeString) => {
-          const time = new Date('1970-01-01T' + timeString);
-          const jamPulangMax = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
-          const referenceTime = new Date('1970-01-01T' + jamPulangMax);
+          const time = timeString;
+          let referenceTime = moment(timeString).format('YYYY-MM-DD');
+          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
+
           return time > referenceTime;
         };
 
         const validateTimeDatang = (timeString) => {
-          const time = new Date('1970-01-01T' + timeString);
-          const jamDatang = divisi.jamkerja.jamkerjaDetail[0].jam_datang;
-          const referenceTime = new Date('1970-01-01T' + jamDatang);
+          const time = timeString;
+          let referenceTime = moment(timeString).format('YYYY-MM-DD');
+          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
+
           return time < referenceTime;
         };
 
@@ -228,8 +237,8 @@ module.exports = {
 
         /* Validasi absen datang */
         if (req.body.tipe_absensi.toLowerCase() === 'datang') {
-          req.body.time_limit_datang = timeLimitDatang;
-          req.body.time_limit_pulang = timeLimitPulang;
+          req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
+          req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
 
           /* Jika datang lebih pagi, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang reguler */
           if (validateTimeDatang(timeLimitDatang)) {
