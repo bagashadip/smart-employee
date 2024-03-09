@@ -5,7 +5,7 @@ const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
-const { Absensi, File, Pegawai } = require("../../models/model");
+const { Absensi, File, Pegawai, JamKerja, JamKerjaDetail } = require("../../models/model");
 const Op = Sequelize.Op;
 
 module.exports = {
@@ -147,6 +147,12 @@ module.exports = {
       return error(res).validationError(validation.array());
     }
 
+    const timestampAbsensi = new Date(req.body.timestamp_absensi);
+    var year = timestampAbsensi.getFullYear();
+    var month = ('0' + (timestampAbsensi.getMonth() + 1)).slice(-2);
+    var day = ('0' + timestampAbsensi.getDate()).slice(-2);
+    let formatedTimestamp = year + '-' + month + '-' + day;
+
     const absensiValidate = await Absensi.count({
       where: {
         tipe_absensi: req.body.tipe_absensi,
@@ -155,18 +161,143 @@ module.exports = {
           Sequelize.where(
             Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
             "=",
-            moment(new Date(), "YYYY-MM-DD").format("YYYY-MM-DD")
+            formatedTimestamp
           ),
         ],
       },
     });
     if (absensiValidate > 0) {
-      res.json({
+      res.status(422).json({
         status: false,
         statusCode: 422,
         msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
       });
     } else {
+      const divisi = await Pegawai.findOne({
+        where: {
+          kode_pegawai: req.user.kode_pegawai
+        },
+        attributes: ['kode_divisi', 'kode_jamkerja'],
+        include: [
+          {
+            model: JamKerja,
+            as: "jamkerja",
+            attributes: ["kode_jamkerja"],
+            include: [
+              {
+                model: JamKerjaDetail,
+                as: "jamkerjaDetail",
+                attributes: ["kode_jamkerja", "durasi_kerja", "jam_datang", "jam_pulang", "jam_pulang_max"]
+              }
+            ]
+          },
+        ]
+      });
+
+      if (divisi.kode_divisi.toLowerCase() !== "opl") {
+        const timeFormat = (timeLimit, type) => {
+          if (type === 'pulang') {
+            let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
+            const timeSplit = durasiKerja.split(":");
+            const hour = parseInt(timeSplit[0]);
+            const minute = parseInt(timeSplit[1]);
+            let jamPulang = timeLimit;
+            jamPulang.setHours(jamPulang.getHours() + hour);
+            jamPulang.setMinutes(jamPulang.getMinutes() + minute);
+            let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
+            jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+            jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+
+            if (jamPulang > jamPulangMax) {
+              return jamPulangMax;
+            }
+          }
+          return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        };
+
+        const validateTimePulang = (timeString) => {
+          const time = timeString;
+          let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
+
+          return time > referenceTime;
+        };
+
+        const validateTimeDatang = (timeString) => {
+          const time = timeString;
+          let referenceTime = moment(timeString).format('YYYY-MM-DD');
+          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
+
+          return time < referenceTime;
+        };
+
+        let timeLimit = new Date(req.body.timestamp_absensi);
+        let timeLimitDatang = timeFormat(timeLimit, 'datang');
+        let timeLimitPulang = timeFormat(timeLimit, 'pulang');
+
+        /* Validasi absen datang */
+        if (req.body.tipe_absensi.toLowerCase() === 'datang') {
+          req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
+          req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
+
+          /* Jika datang lebih pagi, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang reguler */
+          if (validateTimeDatang(timeLimitDatang)) {
+            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
+          }
+
+          /* Jika datang terlambat, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang maksimal reguler */
+          if (validateTimePulang(timeLimitPulang)) {
+            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
+          }
+        } else {
+          const newDate = new Date(req.body.timestamp_absensi);
+          var year = newDate.getFullYear();
+          var month = ('0' + (newDate.getMonth() + 1)).slice(-2);
+          var day = ('0' + newDate.getDate()).slice(-2);
+
+          const formatedDate = year + '-' + month + '-' + day;
+
+          const getAbsenDatang = await Absensi.findOne({
+            where: {
+              tipe_absensi: 'Datang',
+              kode_pegawai: req.body.kode_pegawai,
+              [Op.and]: [
+                Sequelize.where(
+                  Sequelize.fn("date", Sequelize.col("timestamp_absensi")),
+                  "=",
+                  formatedDate
+                ),
+              ],
+            },
+          });
+
+          if (!getAbsenDatang) {
+            res.status(422).json({
+              status: false,
+              statusCode: 422,
+              msg: "Belum melakukan absen datang!",
+            });
+          }
+
+          /* Pengecekan sudah bisa absen pulang atau belum */
+          const timestampAbsen = moment(req.body.timestamp_absensi, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+          let limitPulang = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+          limitPulang = moment(limitPulang + ' ' + getAbsenDatang.time_limit_pulang).format('YYYY-MM-DD HH:mm:ss');
+          if (timestampAbsen < limitPulang) {
+            res.status(422).json({
+              status: false,
+              statusCode: 422,
+              msg: "Kamu baru bisa absen pulang di jam " + getAbsenDatang.time_limit_pulang,
+            });
+            return;
+          }
+
+          req.body.time_limit_datang = getAbsenDatang.time_limit_datang;
+          req.body.time_limit_pulang = getAbsenDatang.time_limit_pulang;
+        }
+        
+      }
+      
       const absensi = await new Absensi({
         ...req.body,
       }).save();
@@ -228,10 +359,12 @@ module.exports = {
       });
     const ruleTimeStamp = body("timestamp_absensi").trim().notEmpty();
     const ruleTimeLimitDatang = body("time_limit_datang")
+      .optional()
       .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
       .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
     const ruleTimeLimitPulang = body("time_limit_pulang")
+      .optional()
       .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
       .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
