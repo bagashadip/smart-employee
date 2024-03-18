@@ -194,7 +194,7 @@ module.exports = {
         ]
       });
 
-      if (divisi.kode_divisi.toLowerCase() !== "opl") {
+      if (divisi.kode_divisi.toLowerCase() !== "opl" && divisi.kode_divisi.toLowerCase() !== "rop") {
         const timeFormat = (timeLimit, type) => {
           if (type === 'pulang') {
             let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
