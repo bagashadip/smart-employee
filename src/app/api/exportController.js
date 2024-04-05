@@ -35,7 +35,7 @@ module.exports = {
     }
     
     let whereAbsensi = {
-      createdAt: {
+      timestamp_absensi: {
         [Op.and]: [
           { [Op.gte]: req.body.startDate },
           { [Op.lte]: req.body.endDate },
@@ -75,6 +75,7 @@ module.exports = {
         [Sequelize.col("pegawai.kode_divisi"), "divisi"],
         [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
         [Sequelize.literal("timestamp_absensi::time"), "jam_absen"],
+        [Sequelize.literal("timestamp_absensi::date"), "timestamp_absensi"],
         "label_absensi",
         "catatan_absensi",
         "tipe_absensi",
@@ -99,11 +100,139 @@ module.exports = {
       ],
       where: whereAbsensi,
       order: [
+        ["timestamp_absensi", "ASC"],
         [Sequelize.col("pegawai.kode_divisi"), "ASC"],
         [Sequelize.col("pegawai.namalengkap_pegawai"), "ASC"],
-        ["timestamp_absensi", "ASC"],
       ],
     });
-    res.json(mAbsensi);
+     
+    const jamKerja = await JamKerjaDetail.findOne({
+      where: {
+        kode_jamkerja: "REGULER"
+      }
+    });
+    const dataArray = mAbsensi.map(item => item.toJSON());
+    const combinedAbsensi = combineRows(dataArray, jamKerja);
+    res.json(combinedAbsensi);
   },
 };
+
+function combineRows(records, jamKerja) {
+  const combinedRecords = [];
+  const groupedRecords = groupBy(records, record => `${record.kode_pegawai}_${record.timestamp_absensi}}`);
+
+  for (const key in groupedRecords) {
+      if (groupedRecords.hasOwnProperty(key)) {
+          const group = groupedRecords[key];
+          const divisi = group[0].divisi;
+          let jamAbsen = [];
+          group.map(record => {
+            jamAbsen.push(record.jam_absen)
+          });
+          const jamDatang = divisi.toLowerCase() != 'opl' && divisi.toLowerCase != 'rop' ? jamKerja.jam_datang : group[0].time_limit;
+          const jamPulang = divisi.toLowerCase() != 'opl' && divisi.toLowerCase != 'rop' ? jamKerja.jam_pulang : group[0].time_limit;
+          
+          const combinedRecord = {
+              kode_pegawai: group[0].kode_pegawai,
+              nama_pegawai: group[0].nama_pegawai,
+              divisi: divisi,
+              lokasi: group.map(record => record.label_absensi).join(" ; "),
+              tanggal_presensi: group[0].tanggal_absen,
+              jam_datang: jamAbsen[0],
+              jam_pulang: jamAbsen[1],
+              durasi_kerja: durasiKerja(jamAbsen[0], jamAbsen[1]),
+              waktu_terlambat: getTimeLate(jamAbsen[0], jamDatang),
+              waktu_pulang_cepat: getTimeEarly(jamAbsen[1], jamPulang),
+              catatan_absensi: group.map(record => record.catatan_absensi).join(" ; "),
+              status: absenStatus(jamAbsen, jamDatang)
+              // Add other fields as needed
+          };
+          combinedRecords.push(combinedRecord);
+      }
+  }
+
+  return combinedRecords;
+}
+
+// Helper function to group records by a specific key
+function groupBy(arr, keyFn) {
+  return arr.reduce((acc, curr) => {
+      const key = keyFn(curr);
+      (acc[key] = acc[key] || []).push(curr);
+      return acc;
+  }, {});
+}
+
+function durasiKerja(startTimeStr, endTimeStr) {
+  if (!endTimeStr) {
+    return "";
+  }
+  // Create Date objects for the times
+  const startTime = new Date(`2000-01-01T${startTimeStr}`);
+  const endTime = new Date(`2000-01-01T${endTimeStr}`);
+
+  // Calculate the time difference in milliseconds
+  const timeDiffMs = endTime.getTime() - startTime.getTime();
+
+  // Convert the time difference to hours, minutes, and seconds
+  const hoursDiff = Math.floor(timeDiffMs / (1000 * 60 * 60));
+  const minutesDiff = Math.floor((timeDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const secondsDiff = Math.floor((timeDiffMs % (1000 * 60)) / 1000);
+  const formattedDiff = `${String(hoursDiff).padStart(2, '0')}:${String(minutesDiff).padStart(2, '0')}:${String(secondsDiff).padStart(2, '0')}`;
+  return formattedDiff;
+
+}
+
+function getTimeLate(jamAbsen, jamDatang) {
+  const startTime = new Date(`2000-01-01T${jamAbsen}`);
+  const endTime = new Date(`2000-01-01T${jamDatang}`);
+
+  if (startTime.getTime() <= endTime.getTime()) {
+    return "00:00:00";
+  }
+
+  const timeDiffMs = startTime.getTime() - endTime.getTime();
+  const hoursDiff = Math.floor(timeDiffMs / (1000 * 60 * 60));
+  const minutesDiff = Math.floor((timeDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const secondsDiff = Math.floor((timeDiffMs % (1000 * 60)) / 1000);
+  const formattedDiff = `${String(hoursDiff).padStart(2, '0')}:${String(minutesDiff).padStart(2, '0')}:${String(secondsDiff).padStart(2, '0')}`;
+  return formattedDiff;
+}
+
+function getTimeEarly(jamAbsen, jamPulang, divisi) {
+  if (!jamAbsen) {
+    return "";
+  }
+    
+  const startTime = new Date(`2000-01-01T${jamAbsen}`);
+  const endTime = new Date(`2000-01-01T${jamPulang}`);
+
+  if (endTime.getTime() <= startTime.getTime()) {
+    return "00:00:00";
+  }
+
+  const timeDiffMs = endTime.getTime() - startTime.getTime();
+  const hoursDiff = Math.floor(timeDiffMs / (1000 * 60 * 60));
+  const minutesDiff = Math.floor((timeDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const secondsDiff = Math.floor((timeDiffMs % (1000 * 60)) / 1000);
+  const formattedDiff = `${String(hoursDiff).padStart(2, '0')}:${String(minutesDiff).padStart(2, '0')}:${String(secondsDiff).padStart(2, '0')}`;
+  return formattedDiff;
+}
+
+function absenStatus (jamAbsen, jamDatang) {
+  let status = "";
+  const startTime = new Date(`2000-01-01T${jamAbsen[0]}`);
+  const endTime = new Date(`2000-01-01T${jamDatang}`);
+
+  if (startTime.getTime() <= endTime.getTime()) {
+    status += "DATANG TEPAT WAKTU/DALAM RENTANG WAKTU ; ";
+  } else {
+    status += "TERLAMBAT MELEBIHI BATAS WAKTU ; ";
+  }
+
+  if (!jamAbsen[1]) {
+    status += "TIDAK PRESENSI PULANG ; ";
+  }
+
+  return status;
+}
