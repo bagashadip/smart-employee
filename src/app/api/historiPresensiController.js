@@ -61,13 +61,13 @@ module.exports = {
         const getMonthName = monthName[parseInt(splitDate[1]) - 1];
         splitDate[1] = getMonthName;
         listAbsensi.push({
-          timestamp_absensi: splitDate.join(" "),
-          tipe_absensi: item.tipe_absensi,
-          label_absensi: item.label_absensi,
-          time_limit_datang: item.time_limit_datang,
-          time_limit_pulang: item.time_limit_pulang,
+          timestampAbsensi: splitDate.join(" "),
+          tipeAbsensi: item.tipe_absensi,
+          labelAbsensi: item.label_absensi,
+          timeLimitDatang: item.time_limit_datang,
+          timeLimitPulang: item.time_limit_pulang,
           divisi: item.pegawai.kode_divisi,
-          catatan_absensi:
+          catatanAbsensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."
               : item.catatan_absensi,
@@ -136,13 +136,13 @@ module.exports = {
         const getMonthName = monthName[parseInt(splitDate[1]) - 1];
         splitDate[1] = getMonthName;
         listAbsensi.push({
-          timestamp_absensi: splitDate.join(" "),
-          tipe_absensi: item.tipe_absensi,
-          label_absensi: item.label_absensi,
-          time_limit_datang: item.time_limit_datang,
-          time_limit_pulang: item.time_limit_pulang,
+          timestampAbsensi: splitDate.join(" "),
+          tipeAbsensi: item.tipe_absensi,
+          labelAbsensi: item.label_absensi,
+          timeLimitDatang: item.time_limit_datang,
+          timeLimitPulang: item.time_limit_pulang,
           divisi: item.pegawai.kode_divisi,
-          catatan_absensi:
+          catatanAbsensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."
               : item.catatan_absensi,
@@ -277,13 +277,13 @@ module.exports = {
           const getMonthName = monthName[parseInt(splitDate[1]) - 1];
           splitDate[1] = getMonthName;
           listAbsensi.push({
-            timestamp_absensi: splitDate.join(" "),
-            tipe_absensi: item.tipe_absensi,
-            label_absensi: item.label_absensi,
-            time_limit_datang: item.time_limit_datang,
-            time_limit_pulang: item.time_limit_pulang,
+            timestampAbsensi: splitDate.join(" "),
+            tipeAbsensi: item.tipe_absensi,
+            labelAbsensi: item.label_absensi,
+            timeLimitDatang: item.time_limit_datang,
+            timeLimitPulang: item.time_limit_pulang,
             divisi: item.pegawai.kode_divisi,
-            catatan_absensi:
+            catatanAbsensi:
               item.catatan_absensi.length > 30
                 ? item.catatan_absensi.substring(0, 30) + "..."
                 : item.catatan_absensi,

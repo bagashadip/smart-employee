@@ -27,7 +27,11 @@ module.exports = {
       });
     }
 
-    let filterDivisi = "";
+    let filterDivisi = {
+      kode_divisi: {
+        [Op.notIn]: ["OPL", "ROP"]
+      }
+    };
     if(checkDivisi){
       filterDivisi = {
         kode_divisi: req.body.divisi
@@ -52,68 +56,123 @@ module.exports = {
     }
 
     // console.log(whereAbsensi)
-
-    const mAbsensi = await Absensi.findAll({
-      include: [
-        {
-          model: Pegawai,
-          as: "pegawai",
-          attributes: [],
-          include: [
-            {
-              model: Divisi,
-              as: "divisi",
-              attributes: [],
-            },
+    if (req.body.divisi == 'OPL' || req.body.divisi == 'ROP') {
+      const mAbsensi = await Absensi.findAll({
+        include: [
+          {
+            model: Pegawai,
+            as: "pegawai",
+            attributes: [],
+            include: [
+              {
+                model: Divisi,
+                as: "divisi",
+                attributes: [],
+              },
+            ],
+            where: filterDivisi
+          },
+        ],
+        attributes: [
+          [Sequelize.col("pegawai.kode_pegawai"), "kode_pegawai"],
+          [Sequelize.col("pegawai.namalengkap_pegawai"), "nama_pegawai"],
+          [Sequelize.col("pegawai.kode_divisi"), "divisi"],
+          [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
+          [Sequelize.literal("timestamp_absensi::time"), "jam_absen"],
+          "label_absensi",
+          "catatan_absensi",
+          "tipe_absensi",
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then time_limit_datang else time_limit_pulang end"
+            ),
+            "time_limit",
           ],
-          where: filterDivisi
-        },
-      ],
-      attributes: [
-        [Sequelize.col("pegawai.kode_pegawai"), "kode_pegawai"],
-        [Sequelize.col("pegawai.namalengkap_pegawai"), "nama_pegawai"],
-        [Sequelize.col("pegawai.kode_divisi"), "divisi"],
-        [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
-        [Sequelize.literal("timestamp_absensi::time"), "jam_absen"],
-        [Sequelize.literal("timestamp_absensi::date"), "timestamp_absensi"],
-        "label_absensi",
-        "catatan_absensi",
-        "tipe_absensi",
-        [
-          Sequelize.literal(
-            "case when tipe_absensi = 'Datang' then time_limit_datang else time_limit_pulang end"
-          ),
-          "time_limit",
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then cast((timestamp_absensi::time - time_limit_datang) as text) else cast((timestamp_absensi::time - time_limit_pulang) as text) end"
+            ),
+            "selisih",
+          ],
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then case when timestamp_absensi::time < time_limit_datang then 'Datang lebih awal' when timestamp_absensi::time between timestamp_absensi::time and (time_limit_datang + interval '30 minutes') then 'Datang tepat waktu' when timestamp_absensi::time > (time_limit_datang + interval '30 minutes') then 'Datang terlambat' end else case when timestamp_absensi::time < time_limit_pulang then 'Pulang lebih awal' when timestamp_absensi::time > time_limit_pulang then 'Pulang lebih akhir' when timestamp_absensi::time = time_limit_pulang then 'Pulang tepat waktu' end end"
+            ),
+            "keterangan",
+          ],
         ],
-        [
-          Sequelize.literal(
-            "case when tipe_absensi = 'Datang' then cast((timestamp_absensi::time - time_limit_datang) as text) else cast((timestamp_absensi::time - time_limit_pulang) as text) end"
-          ),
-          "selisih",
+        where: whereAbsensi,
+        order: [
+          [Sequelize.col("pegawai.kode_divisi"), "ASC"],
+          [Sequelize.col("pegawai.namalengkap_pegawai"), "ASC"],
+          ["timestamp_absensi", "ASC"],
         ],
-        [
-          Sequelize.literal(
-            "case when tipe_absensi = 'Datang' then case when timestamp_absensi::time < time_limit_datang then 'Datang lebih awal' when timestamp_absensi::time between timestamp_absensi::time and (time_limit_datang + interval '30 minutes') then 'Datang tepat waktu' when timestamp_absensi::time > (time_limit_datang + interval '30 minutes') then 'Datang terlambat' end else case when timestamp_absensi::time < time_limit_pulang then 'Pulang lebih awal' when timestamp_absensi::time > time_limit_pulang then 'Pulang lebih akhir' when timestamp_absensi::time = time_limit_pulang then 'Pulang tepat waktu' end end"
-          ),
-          "keterangan",
+      });
+      res.json(mAbsensi);
+  
+    } else {
+      const mAbsensi = await Absensi.findAll({
+        include: [
+          {
+            model: Pegawai,
+            as: "pegawai",
+            attributes: [],
+            include: [
+              {
+                model: Divisi,
+                as: "divisi",
+                attributes: [],
+              },
+            ],
+            where: filterDivisi
+          },
         ],
-      ],
-      where: whereAbsensi,
-      order: [
-        ["timestamp_absensi", "ASC"],
-        [Sequelize.col("pegawai.kode_divisi"), "ASC"],
-        [Sequelize.col("pegawai.namalengkap_pegawai"), "ASC"],
-      ],
-    });
-     
-    const jamKerja = await JamKerjaDetail.findOne({
-      where: {
-        kode_jamkerja: "REGULER"
-      }
-    });
-    const dataArray = mAbsensi.map(item => item.toJSON());
-    const combinedAbsensi = combineRows(dataArray, jamKerja);
-    res.json(combinedAbsensi);
+        attributes: [
+          [Sequelize.col("pegawai.kode_pegawai"), "kode_pegawai"],
+          [Sequelize.col("pegawai.namalengkap_pegawai"), "nama_pegawai"],
+          [Sequelize.col("pegawai.kode_divisi"), "divisi"],
+          [Sequelize.literal('date("timestamp_absensi")'), "tanggal_absen"],
+          [Sequelize.literal("timestamp_absensi::time"), "jam_absen"],
+          [Sequelize.literal("timestamp_absensi::date"), "timestamp_absensi"],
+          "label_absensi",
+          "catatan_absensi",
+          "tipe_absensi",
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then time_limit_datang else time_limit_pulang end"
+            ),
+            "time_limit",
+          ],
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then cast((timestamp_absensi::time - time_limit_datang) as text) else cast((timestamp_absensi::time - time_limit_pulang) as text) end"
+            ),
+            "selisih",
+          ],
+          [
+            Sequelize.literal(
+              "case when tipe_absensi = 'Datang' then case when timestamp_absensi::time < time_limit_datang then 'Datang lebih awal' when timestamp_absensi::time between timestamp_absensi::time and (time_limit_datang + interval '30 minutes') then 'Datang tepat waktu' when timestamp_absensi::time > (time_limit_datang + interval '30 minutes') then 'Datang terlambat' end else case when timestamp_absensi::time < time_limit_pulang then 'Pulang lebih awal' when timestamp_absensi::time > time_limit_pulang then 'Pulang lebih akhir' when timestamp_absensi::time = time_limit_pulang then 'Pulang tepat waktu' end end"
+            ),
+            "keterangan",
+          ],
+        ],
+        where: whereAbsensi,
+        order: [
+          ["timestamp_absensi", "ASC"],
+          [Sequelize.col("pegawai.kode_divisi"), "ASC"],
+          [Sequelize.col("pegawai.namalengkap_pegawai"), "ASC"],
+        ],
+      });
+       
+      const jamKerja = await JamKerjaDetail.findOne({
+        where: {
+          kode_jamkerja: "REGULER"
+        }
+      });
+      const dataArray = mAbsensi.map(item => item.toJSON());
+      const combinedAbsensi = combineRows(dataArray, jamKerja);
+      res.json(combinedAbsensi);
+    }
   },
 };
 
