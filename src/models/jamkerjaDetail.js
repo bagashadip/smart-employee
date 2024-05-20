@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       kode_jamkerja: DataTypes.STRING,
       durasi_kerja: DataTypes.TIME,
       jam_pulang_max: DataTypes.TIME,
+      jam_datang_max: DataTypes.TIME,
     },
     {
       freezeTableName: true,

@@ -20,6 +20,7 @@ module.exports = {
         "nama_jamkerjadetail",
         "jam_datang",
         "jam_pulang",
+        "jam_datang_max",
         "jam_pulang_max",
         "durasi_kerja",
         "kode_jamkerja",
@@ -188,6 +189,10 @@ module.exports = {
       .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
       .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
 
+    const ruleJamDatangMax = body("jam_datang_max")
+      .matches(/(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/)
+      .withMessage("time format should be HH:MM:SS (ex: 07:00:00)");
+
     const kodeJamKerja = body("kode_jamkerja").custom(async (value) => {
       const mJamKerja = await JamKerja.findOne({
         where: {
@@ -203,7 +208,7 @@ module.exports = {
     switch (type) {
       case "create":
         {
-          return [ruleJamDatang, ruleJamPulang, kodeJamKerja, ruleDurasiKerja, ruleJamPulangMax];
+          return [ruleJamDatang, ruleJamPulang, kodeJamKerja, ruleDurasiKerja, ruleJamDatangMax, ruleJamPulangMax];
         }
         break;
       case "update":
@@ -214,7 +219,8 @@ module.exports = {
             ruleJamPulang.optional(),
             kodeJamKerja.optional(),
             ruleDurasiKerja.optional(),
-            ruleJamPulangMax.optional()
+            ruleJamPulangMax.optional(),
+            ruleJamDatangMax.optional()
           ];
         }
         break;
