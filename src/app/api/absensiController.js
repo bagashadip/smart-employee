@@ -196,45 +196,45 @@ module.exports = {
       });
 
       if (divisi.kode_divisi.toLowerCase() !== "opl" && divisi.kode_divisi.toLowerCase() !== "rop") {
-        const timeFormat = (timeLimit, type) => {
-          if (type === 'pulang') {
-            let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
-            const timeSplit = durasiKerja.split(":");
-            const hour = parseInt(timeSplit[0]);
-            const minute = parseInt(timeSplit[1]);
-            let jamPulang = timeLimit;
-            jamPulang.setHours(jamPulang.getHours() + hour);
-            jamPulang.setMinutes(jamPulang.getMinutes() + minute);
-            let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
-            jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-            jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        // const timeFormat = (timeLimit, type) => {
+        //   if (type === 'pulang') {
+        //     let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
+        //     const timeSplit = durasiKerja.split(":");
+        //     const hour = parseInt(timeSplit[0]);
+        //     const minute = parseInt(timeSplit[1]);
+        //     let jamPulang = timeLimit;
+        //     jamPulang.setHours(jamPulang.getHours() + hour);
+        //     jamPulang.setMinutes(jamPulang.getMinutes() + minute);
+        //     let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        //     jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        //     jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-            if (jamPulang > jamPulangMax) {
-              return jamPulangMax;
-            }
-          }
-          return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-        };
+        //     if (jamPulang > jamPulangMax) {
+        //       return jamPulangMax;
+        //     }
+        //   }
+        //   return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        // };
 
-        const validateTimePulang = (timeString) => {
-          const time = timeString;
-          let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
-          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
+        // const validateTimePulang = (timeString) => {
+        //   const time = timeString;
+        //   let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+        //   referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
 
-          return time > referenceTime;
-        };
+        //   return time > referenceTime;
+        // };
 
-        const validateTimeDatang = (timeString) => {
-          const time = timeString;
-          let referenceTime = moment(timeString).format('YYYY-MM-DD');
-          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
+        // const validateTimeDatang = (timeString) => {
+        //   const time = timeString;
+        //   let referenceTime = moment(timeString).format('YYYY-MM-DD');
+        //   referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
 
-          return time < referenceTime;
-        };
+        //   return time < referenceTime;
+        // };
 
-        let timeLimit = new Date(req.body.timestamp_absensi);
-        let timeLimitDatang = timeFormat(timeLimit, 'datang');
-        let timeLimitPulang = timeFormat(timeLimit, 'pulang');
+        // let timeLimit = new Date(req.body.timestamp_absensi);
+        // let timeLimitDatang = timeFormat(timeLimit, 'datang');
+        // let timeLimitPulang = timeFormat(timeLimit, 'pulang');
 
         /* Validasi absen datang */
         if (req.body.tipe_absensi.toLowerCase() === 'datang') {
@@ -264,18 +264,21 @@ module.exports = {
             }
           }
 
-          req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
-          req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
+          // req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
+          // req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
+
+          req.body.time_limit_datang = divisi.jamkerja.jamkerjaDetail[0].jam_datang;
+          req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
 
           /* Jika datang lebih pagi, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang reguler */
-          if (validateTimeDatang(timeLimitDatang)) {
-            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
-          }
+          // if (validateTimeDatang(timeLimitDatang)) {
+          //   req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
+          // }
 
           /* Jika datang terlambat, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang maksimal reguler */
-          if (validateTimePulang(timeLimitPulang)) {
-            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
-          }
+          // if (validateTimePulang(timeLimitPulang)) {
+          //   req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
+          // }
         } else {
           const newDate = new Date(req.body.timestamp_absensi);
           var year = newDate.getFullYear();
