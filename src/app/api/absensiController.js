@@ -323,6 +323,35 @@ module.exports = {
           req.body.time_limit_pulang = getAbsenDatang.time_limit_pulang;
         }
         
+      } else {
+        /* Validasi absen datang */
+        if (req.body.tipe_absensi.toLowerCase() === 'datang') {
+          const absenBalkot = {
+            latAbs: req.body.latitude_absensi,
+            lonAbs: req.body.longitude_absensi,
+            latUk: -6.181578,
+            lonUk: 106.828768,
+            rad: 150
+          }
+          const validateDistance = distanceValidation(absenBalkot);
+          if (validateDistance.status == "WFH") {
+            const absenFch = {
+              latAbs: req.body.latitude_absensi,
+              lonAbs: req.body.longitude_absensi,
+              latUk: -6.1825923085334145,
+              lonUk: 106.824068600014,
+              rad: 150
+            }
+            const validateDistance = distanceValidation(absenFch);
+            if (validateDistance.status == "WFH") {
+              return res.status(422).json({
+                status: false,
+                statusCode: 422,
+                msg: "Lokasi absen hanya bisa di area Balai Kota atau JB Tower.",
+              });
+            }
+          }
+        }
       }
       
       const absensi = await new Absensi({
