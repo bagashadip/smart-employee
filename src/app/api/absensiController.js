@@ -7,6 +7,7 @@ const datatable = require("../../util/datatable");
 const moment = require("moment");
 const { Absensi, File, Pegawai, JamKerja, JamKerjaDetail } = require("../../models/model");
 const Op = Sequelize.Op;
+const { distanceValidation } = require('./../../helper/distanceValidation');
 
 module.exports = {
   // List
@@ -167,7 +168,7 @@ module.exports = {
       },
     });
     if (absensiValidate > 0) {
-      res.status(422).json({
+      return res.status(422).json({
         status: false,
         statusCode: 422,
         msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
@@ -195,60 +196,89 @@ module.exports = {
       });
 
       if (divisi.kode_divisi.toLowerCase() !== "opl" && divisi.kode_divisi.toLowerCase() !== "rop") {
-        const timeFormat = (timeLimit, type) => {
-          if (type === 'pulang') {
-            let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
-            const timeSplit = durasiKerja.split(":");
-            const hour = parseInt(timeSplit[0]);
-            const minute = parseInt(timeSplit[1]);
-            let jamPulang = timeLimit;
-            jamPulang.setHours(jamPulang.getHours() + hour);
-            jamPulang.setMinutes(jamPulang.getMinutes() + minute);
-            let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
-            jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-            jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        // const timeFormat = (timeLimit, type) => {
+        //   if (type === 'pulang') {
+        //     let durasiKerja = divisi.jamkerja.jamkerjaDetail[0].durasi_kerja;
+        //     const timeSplit = durasiKerja.split(":");
+        //     const hour = parseInt(timeSplit[0]);
+        //     const minute = parseInt(timeSplit[1]);
+        //     let jamPulang = timeLimit;
+        //     jamPulang.setHours(jamPulang.getHours() + hour);
+        //     jamPulang.setMinutes(jamPulang.getMinutes() + minute);
+        //     let jamPulangMax = moment(timeLimit, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        //     jamPulangMax = moment(jamPulangMax + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        //     jamPulang = moment(jamPulang, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
 
-            if (jamPulang > jamPulangMax) {
-              return jamPulangMax;
-            }
-          }
-          return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-        };
+        //     if (jamPulang > jamPulangMax) {
+        //       return jamPulangMax;
+        //     }
+        //   }
+        //   return moment(timeLimit, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+        // };
 
-        const validateTimePulang = (timeString) => {
-          const time = timeString;
-          let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
-          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
+        // const validateTimePulang = (timeString) => {
+        //   const time = timeString;
+        //   let referenceTime = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+        //   referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max).format('YYYY-MM-DD HH:mm:ss');
 
-          return time > referenceTime;
-        };
+        //   return time > referenceTime;
+        // };
 
-        const validateTimeDatang = (timeString) => {
-          const time = timeString;
-          let referenceTime = moment(timeString).format('YYYY-MM-DD');
-          referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
+        // const validateTimeDatang = (timeString) => {
+        //   const time = timeString;
+        //   let referenceTime = moment(timeString).format('YYYY-MM-DD');
+        //   referenceTime = moment(referenceTime + ' ' + divisi.jamkerja.jamkerjaDetail[0].jam_datang).format('YYYY-MM-DD HH:mm:ss');
 
-          return time < referenceTime;
-        };
+        //   return time < referenceTime;
+        // };
 
-        let timeLimit = new Date(req.body.timestamp_absensi);
-        let timeLimitDatang = timeFormat(timeLimit, 'datang');
-        let timeLimitPulang = timeFormat(timeLimit, 'pulang');
+        // let timeLimit = new Date(req.body.timestamp_absensi);
+        // let timeLimitDatang = timeFormat(timeLimit, 'datang');
+        // let timeLimitPulang = timeFormat(timeLimit, 'pulang');
 
         /* Validasi absen datang */
         if (req.body.tipe_absensi.toLowerCase() === 'datang') {
-          req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
-          req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
+          const absenBalkot = {
+            latAbs: req.body.latitude_absensi,
+            lonAbs: req.body.longitude_absensi,
+            latUk: -6.181578,
+            lonUk: 106.828768,
+            rad: 150
+          }
+          const validateDistance = distanceValidation(absenBalkot);
+          if (validateDistance.status == "WFH") {
+            const absenFch = {
+              latAbs: req.body.latitude_absensi,
+              lonAbs: req.body.longitude_absensi,
+              latUk: -6.1825923085334145,
+              lonUk: 106.824068600014,
+              rad: 150
+            }
+            const validateDistance = distanceValidation(absenFch);
+            if (validateDistance.status == "WFH") {
+              return res.status(422).json({
+                status: false,
+                statusCode: 422,
+                msg: "Lokasi absen hanya bisa di area Balai Kota atau JB Tower.",
+              });
+            }
+          }
+
+          // req.body.time_limit_datang = moment(timeLimitDatang).format('HH:mm:ss');
+          // req.body.time_limit_pulang = moment(timeLimitPulang).format('HH:mm:ss');
+
+          req.body.time_limit_datang = divisi.jamkerja.jamkerjaDetail[0].jam_datang;
+          req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
 
           /* Jika datang lebih pagi, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang reguler */
-          if (validateTimeDatang(timeLimitDatang)) {
-            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
-          }
+          // if (validateTimeDatang(timeLimitDatang)) {
+          //   req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang;
+          // }
 
           /* Jika datang terlambat, time limit atau waktu pulang disesuaikan dengan ketentuan jam pulang maksimal reguler */
-          if (validateTimePulang(timeLimitPulang)) {
-            req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
-          }
+          // if (validateTimePulang(timeLimitPulang)) {
+          //   req.body.time_limit_pulang = divisi.jamkerja.jamkerjaDetail[0].jam_pulang_max;
+          // }
         } else {
           const newDate = new Date(req.body.timestamp_absensi);
           var year = newDate.getFullYear();
@@ -272,7 +302,7 @@ module.exports = {
           });
 
           if (!getAbsenDatang) {
-            res.status(422).json({
+            return res.status(422).json({
               status: false,
               statusCode: 422,
               msg: "Belum melakukan absen datang!",
@@ -280,22 +310,51 @@ module.exports = {
           }
 
           /* Pengecekan sudah bisa absen pulang atau belum */
-          const timestampAbsen = moment(req.body.timestamp_absensi, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
-          let limitPulang = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
-          limitPulang = moment(limitPulang + ' ' + getAbsenDatang.time_limit_pulang).format('YYYY-MM-DD HH:mm:ss');
-          if (timestampAbsen < limitPulang) {
-            res.status(422).json({
-              status: false,
-              statusCode: 422,
-              msg: "Kamu baru bisa absen pulang di jam " + getAbsenDatang.time_limit_pulang,
-            });
-            return;
-          }
+          // const timestampAbsen = moment(req.body.timestamp_absensi, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
+          // let limitPulang = moment(req.body.timestamp_absensi).format('YYYY-MM-DD');
+          // limitPulang = moment(limitPulang + ' ' + getAbsenDatang.time_limit_pulang).format('YYYY-MM-DD HH:mm:ss');
+          // if (timestampAbsen < limitPulang) {
+          //   res.status(422).json({
+          //     status: false,
+          //     statusCode: 422,
+          //     msg: "Kamu baru bisa absen pulang di jam " + getAbsenDatang.time_limit_pulang,
+          //   });
+          //   return;
+          // }
 
           req.body.time_limit_datang = getAbsenDatang.time_limit_datang;
           req.body.time_limit_pulang = getAbsenDatang.time_limit_pulang;
         }
         
+      } else {
+        /* Validasi absen datang */
+        if (req.body.tipe_absensi.toLowerCase() === 'datang') {
+          const absenBalkot = {
+            latAbs: req.body.latitude_absensi,
+            lonAbs: req.body.longitude_absensi,
+            latUk: -6.181578,
+            lonUk: 106.828768,
+            rad: 150
+          }
+          const validateDistance = distanceValidation(absenBalkot);
+          if (validateDistance.status == "WFH") {
+            const absenFch = {
+              latAbs: req.body.latitude_absensi,
+              lonAbs: req.body.longitude_absensi,
+              latUk: -6.1825923085334145,
+              lonUk: 106.824068600014,
+              rad: 150
+            }
+            const validateDistance = distanceValidation(absenFch);
+            if (validateDistance.status == "WFH") {
+              return res.status(422).json({
+                status: false,
+                statusCode: 422,
+                msg: "Lokasi absen hanya bisa di area Balai Kota atau JB Tower.",
+              });
+            }
+          }
+        }
       }
       
       const absensi = await new Absensi({

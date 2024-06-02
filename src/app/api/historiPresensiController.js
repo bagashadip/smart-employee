@@ -3,7 +3,7 @@ const _ = require("lodash");
 const { query, validationResult } = require("express-validator");
 const error = require("../../util/errors");
 const Sequelize = require("sequelize");
-const { Absensi } = require("../../models/model");
+const { Absensi, Pegawai } = require("../../models/model");
 const date = require("date-and-time");
 const Op = Sequelize.Op;
 const moment = require("moment");
@@ -20,6 +20,13 @@ module.exports = {
     }
 
     const mAbsensi = await Absensi.findAll({
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["kode_divisi"]
+        },
+      ],
       where: {
         kode_pegawai: req.query.kode_pegawai,
         [Op.and]: [
@@ -59,6 +66,7 @@ module.exports = {
           label_absensi: item.label_absensi,
           time_limit_datang: item.time_limit_datang,
           time_limit_pulang: item.time_limit_pulang,
+          divisi: item.pegawai.kode_divisi,
           catatan_absensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."
@@ -79,6 +87,13 @@ module.exports = {
     }
 
     const mAbsensi = await Absensi.findAll({
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["kode_divisi"]
+        },
+      ],
       where: {
         kode_pegawai: req.query.kode_pegawai,
         [Op.and]: [
@@ -126,6 +141,7 @@ module.exports = {
           label_absensi: item.label_absensi,
           time_limit_datang: item.time_limit_datang,
           time_limit_pulang: item.time_limit_pulang,
+          divisi: item.pegawai.kode_divisi,
           catatan_absensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."
@@ -149,6 +165,13 @@ module.exports = {
 
     //Absensi yesterday
     mAbsensi = await Absensi.findAll({
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["kode_divisi"]
+        },
+      ],
       where: {
         kode_pegawai: req.query.kode_pegawai,
         [Op.and]: [
@@ -172,6 +195,13 @@ module.exports = {
 
     //Get today's absensi
     mAbsensiToday = await Absensi.findAll({
+      include: [
+        {
+          model: Pegawai,
+          as: "pegawai",
+          attributes: ["kode_divisi"]
+        },
+      ],
       where: {
         kode_pegawai: req.query.kode_pegawai,
         [Op.and]: [
@@ -220,6 +250,13 @@ module.exports = {
 
       //Get last 12 hours of today's absensi
       const mAbsensiLast12Hours = await Absensi.findAll({
+        include: [
+          {
+            model: Pegawai,
+            as: "pegawai",
+            attributes: ["kode_divisi"]
+          },
+        ],
         where: {
           kode_pegawai: req.query.kode_pegawai,
           [Op.and]: [
@@ -245,6 +282,7 @@ module.exports = {
             label_absensi: item.label_absensi,
             time_limit_datang: item.time_limit_datang,
             time_limit_pulang: item.time_limit_pulang,
+            divisi: item.pegawai.kode_divisi,
             catatan_absensi:
               item.catatan_absensi.length > 30
                 ? item.catatan_absensi.substring(0, 30) + "..."
@@ -267,6 +305,7 @@ module.exports = {
           label_absensi: item.label_absensi,
           time_limit_datang: item.time_limit_datang,
           time_limit_pulang: item.time_limit_pulang,
+          divisi: item.pegawai.kode_divisi,
           catatan_absensi:
             item.catatan_absensi.length > 30
               ? item.catatan_absensi.substring(0, 30) + "..."

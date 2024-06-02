@@ -284,7 +284,7 @@ module.exports = {
           include: {
             model: JamKerjaDetail,
             as: "jamkerjaDetail",
-            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang"],
+            attributes: ["nama_jamkerjadetail", "jam_datang", "jam_pulang", "jam_datang_max", "jam_pulang_max"],
           },
         },
       ],

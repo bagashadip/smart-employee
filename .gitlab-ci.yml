@@ -25,12 +25,15 @@ stages:
 build:development:
   stage: build
   tags:
-    - employee
-  before_script:
-    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+    - image-builder
+  image:
+    name: "$CI_REGISTRY/infrastructure/docker/kaniko-executor:v1.22.0-debug"
+    entrypoint: [""]
   script:
-    - docker build --rm --tag $APP_IMAGE:$CI_COMMIT_REF_NAME .
-    - docker push $APP_IMAGE:$CI_COMMIT_REF_NAME
+    - /kaniko/executor
+        --context "${CI_PROJECT_DIR}"
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+        --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
 
 migrate:development:
   stage: migrate
