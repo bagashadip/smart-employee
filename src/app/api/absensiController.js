@@ -173,33 +173,7 @@ module.exports = {
         statusCode: 422,
         msg: "Sudah melakukan absen " + req.body.tipe_absensi + "!",
       });
-    } else {
-      const absenBalkot = {
-        latAbs: req.body.latitude_absensi,
-        lonAbs: req.body.longitude_absensi,
-        latUk: -6.181578,
-        lonUk: 106.828768,
-        rad: 500
-      }
-      const validateDistance = distanceValidation(absenBalkot);
-      if (validateDistance.status == "WFH") {
-        const absenFch = {
-          latAbs: req.body.latitude_absensi,
-          lonAbs: req.body.longitude_absensi,
-          latUk: -6.1825923085334145,
-          lonUk: 106.824068600014,
-          rad: 500
-        }
-        const validateDistance = distanceValidation(absenFch);
-        if (validateDistance.status == "WFH") {
-          return res.status(422).json({
-            status: false,
-            statusCode: 422,
-            msg: "Lokasi absen hanya bisa di area Balai Kota atau JB Tower.",
-          });
-        }
-      }
-      
+    } else {  
       const divisi = await Pegawai.findOne({
         where: {
           kode_pegawai: req.user.kode_pegawai
@@ -218,8 +192,50 @@ module.exports = {
               }
             ]
           },
+          {
+            model: Divisi,
+            as: "divisi",
+            attributes: ["kode_divisi"],
+            include: [
+              {
+                model: UnitKerja,
+                as: "unitkerja",
+                attributes: [
+                  "latitude_unitkerja",
+                  "longitude_unitkerja",
+                  "radiuslokasi_unitkerja",
+                ],
+              },
+            ],
+          },
         ]
       });
+
+      const absenBalkot = {
+        latAbs: req.body.latitude_absensi,
+        lonAbs: req.body.longitude_absensi,
+        latUk: divisi.divisi.unitkerja.latitude_unitkerja,
+        lonUk: divisi.divisi.unitkerja.longitude_unitkerja,
+        rad: divisi.divisi.unitkerja.radiuslokasi_unitkerja
+      }
+      const validateDistance = distanceValidation(absenBalkot);
+      if (validateDistance.status == "WFH") {
+        const absenFch = {
+          latAbs: req.body.latitude_absensi,
+          lonAbs: req.body.longitude_absensi,
+          latUk: -6.1825923085334145,
+          lonUk: 106.824068600014,
+          rad: divisi.divisi.unitkerja.radiuslokasi_unitkerja
+        }
+        const validateDistance = distanceValidation(absenFch);
+        if (validateDistance.status == "WFH") {
+          return res.status(422).json({
+            status: false,
+            statusCode: 422,
+            msg: "Lokasi absen hanya bisa di area Balai Kota atau JB Tower.",
+          });
+        }
+      }
 
       if (divisi.kode_divisi.toLowerCase() !== "opl" && divisi.kode_divisi.toLowerCase() !== "rop") {
         const timeFormat = (timeLimit, type) => {
@@ -332,9 +348,9 @@ module.exports = {
           const absenBalkot = {
             latAbs: req.body.latitude_absensi,
             lonAbs: req.body.longitude_absensi,
-            latUk: -6.181578,
-            lonUk: 106.828768,
-            rad: 150
+            latUk: divisi.divisi.unitkerja.latitude_unitkerja,
+            lonUk: divisi.divisi.unitkerja.longitude_unitkerja,
+            rad: divisi.divisi.unitkerja.radiuslokasi_unitkerja
           }
           const validateDistance = distanceValidation(absenBalkot);
           if (validateDistance.status == "WFH") {
@@ -343,7 +359,7 @@ module.exports = {
               lonAbs: req.body.longitude_absensi,
               latUk: -6.1825923085334145,
               lonUk: 106.824068600014,
-              rad: 150
+              rad: divisi.divisi.unitkerja.radiuslokasi_unitkerja
             }
             const validateDistance = distanceValidation(absenFch);
             if (validateDistance.status == "WFH") {
