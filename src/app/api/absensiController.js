@@ -5,7 +5,7 @@ const Sequelize = require("sequelize");
 const error = require("../../util/errors");
 const datatable = require("../../util/datatable");
 const moment = require("moment");
-const { Absensi, File, Pegawai, JamKerja, JamKerjaDetail, Divisi } = require("../../models/model");
+const { Absensi, File, Pegawai, JamKerja, JamKerjaDetail, Divisi, UnitKerja } = require("../../models/model");
 const Op = Sequelize.Op;
 const { distanceValidation } = require('./../../helper/distanceValidation');
 
