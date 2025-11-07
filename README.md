@@ -142,8 +142,3 @@ brew install pkg-config libvips
 - Add simple API documentation (OpenAPI/Swagger) or a route list in this README.
 
 ---
-
-If you'd like, I can:
-- Add `start`/`dev` scripts to `package.json` and update README accordingly.
-- Generate a basic OpenAPI spec from route files and include it here.
-
